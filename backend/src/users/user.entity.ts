@@ -22,7 +22,10 @@ export class User {
   @Column({ type: 'varchar', unique: true, length: 255 })
   email: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  avatarUrl?: string;
+
+  @Column({ type: 'varchar', length: 100 })
   @Exclude()
   password: string;
 

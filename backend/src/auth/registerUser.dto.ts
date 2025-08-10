@@ -20,7 +20,7 @@ export class RegisterUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(6, { message: 'Password must contain at least 6 letters!' })
-  @MaxLength(50, { message: 'Password must contain no more than 50 letters!' })
+  @MaxLength(100, { message: 'Password must contain no more than 100 letters!' })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   password: string;
 
