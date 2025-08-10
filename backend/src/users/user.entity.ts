@@ -1,7 +1,9 @@
 import { Exclude } from 'class-transformer';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, OneToMany } from 'typeorm';
 import { UserRoles } from './userRoles.enum';
 import * as bcrypt from 'bcrypt';
+import { Inventory } from 'src/inventories/inventory.entity';
+import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 
 @Entity('users')
 export class User {
@@ -23,6 +25,12 @@ export class User {
   @Column({ type: 'varchar', length: 50 })
   @Exclude()
   password: string;
+
+  @OneToMany(() => Inventory, (inventory) => inventory.creator)
+  inventories: Inventory[];
+
+  @OneToMany(() => InventoryUser, (inventoryUser) => inventoryUser.user)
+  inventoryUsers: InventoryUser[];
 
   @Column({ type: 'enum', enum: UserRoles, default: UserRoles.USER })
   role: UserRoles;
