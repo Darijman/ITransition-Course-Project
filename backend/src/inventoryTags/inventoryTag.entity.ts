@@ -1,5 +1,5 @@
 import { Inventory } from 'src/inventories/inventory.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToMany } from 'typeorm';
 
 @Entity('inventory_tags')
 export class InventoryTag {
@@ -9,10 +9,10 @@ export class InventoryTag {
   @Column({ type: 'varchar', length: 100 })
   title: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   description?: string;
 
-  @OneToMany(() => Inventory, (inventory) => inventory.tag)
+  @ManyToMany(() => Inventory, (inventory) => inventory.tags)
   inventories: Inventory[];
 
   @CreateDateColumn()

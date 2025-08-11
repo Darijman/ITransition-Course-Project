@@ -1,7 +1,8 @@
 import { Inventory } from 'src/inventories/inventory.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { InventoryUserRoles } from './inventoryUserRoles.enum';
 import { User } from 'src/users/user.entity';
+import { InventoryComment } from 'src/inventoryComments/inventoryComment.entity';
 
 @Entity('inventory_users')
 export class InventoryUser {
@@ -18,12 +19,15 @@ export class InventoryUser {
   @Column()
   userId: number;
 
-  @ManyToOne(() => Inventory, (inventory) => inventory.inventoryUsers)
+  @ManyToOne(() => Inventory, (inventory) => inventory.inventoryUsers, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'inventoryId' })
   inventory: Inventory;
 
   @Column()
   inventoryId: number;
+
+  @OneToMany(() => InventoryComment, (comment) => comment.author)
+  comments: InventoryComment[];
 
   @Column({ type: 'enum', enum: InventoryUserRoles, default: InventoryUserRoles.VIEWER })
   role: InventoryUserRoles;

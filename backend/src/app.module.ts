@@ -10,6 +10,8 @@ import { InventoryItem } from './inventoryItems/inventoryItem.entity';
 import { InventoryCategory } from './inventoryCategories/inventoryCategory.entity';
 import { InventoryTag } from './inventoryTags/inventoryTag.entity';
 import { InventoryUser } from './inventoryUsers/inventoryUser.entity';
+import { InventoryComment } from './inventoryComments/inventoryComment.entity';
+import { InventoriesModule } from './inventories/inventories.module';
 
 @Module({
   imports: [
@@ -24,14 +26,15 @@ import { InventoryUser } from './inventoryUsers/inventoryUser.entity';
         username: config.get('DATABASE_USER'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
-        entities: [User, Inventory, InventoryItem, InventoryCategory, InventoryTag, InventoryUser],
+        entities: [User, Inventory, InventoryItem, InventoryCategory, InventoryTag, InventoryUser, InventoryComment],
         synchronize: false,
         timezone: 'Z',
       }),
     }),
     UsersModule,
-    AuthModule,
     CloudinaryModule,
+    InventoriesModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

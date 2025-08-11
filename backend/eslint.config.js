@@ -18,6 +18,9 @@ export default [
       globals: {
         console: true,
       },
+      env: {
+        node: true,
+      }
     },
     plugins: {
       '@typescript-eslint': pluginTs,

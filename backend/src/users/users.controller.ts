@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req, ForbiddenException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
@@ -7,6 +7,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Express } from 'express';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { Admin } from 'src/auth/auth.decorators';
+import { UserRoles } from './userRoles.enum';
+import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -30,23 +32,43 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get(':userId')
-  async getUserById(@Param('userId') userId: number): Promise<User> {
+  async getUserById(@Param('userId', new CustomParseIntPipe('User ID')) userId: number): Promise<User> {
     return await this.usersService.getUserById(userId);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':userId')
-  async deleteUserById(@Param('userId') userId: number): Promise<{ success: boolean }> {
+  async deleteUserById(@Param('userId', new CustomParseIntPipe('User ID')) userId: number): Promise<{ success: boolean }> {
     return await this.usersService.deleteUserById(userId);
   }
 
   @UseGuards(AuthGuard)
-  @Post('upload-avatar')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
-    const uploadResult = await this.cloudinaryService.uploadImage(file);
-    const userId: number = req.user.id;
-    await this.usersService.updateUserAvatar(userId, uploadResult.secure_url);
-    return { avatarUrl: uploadResult.secure_url };
+  @UseInterceptors(FileInterceptor('avatar'))
+  @Post(':userId/upload-avatar')
+  async uploadAvatar(
+    @Param('userId', new CustomParseIntPipe('User ID')) userId: number,
+    @UploadedFile() avatar: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (req.user.role !== UserRoles.ADMIN && req.user.id !== userId) {
+      throw new ForbiddenException({ error: 'You can only update your own avatar!' });
+    }
+
+    let uploadResult: { secure_url: string; public_id: string } | null = null;
+
+    try {
+      uploadResult = await this.cloudinaryService.uploadImage(avatar);
+      await this.usersService.updateUserAvatar(userId, uploadResult.secure_url);
+      return { avatarUrl: uploadResult.secure_url };
+    } catch (error) {
+      if (uploadResult?.public_id) {
+        try {
+          await this.cloudinaryService.deleteImage(uploadResult.public_id);
+        } catch (cleanupError) {
+          console.error('Failed to clean up Cloudinary image:', cleanupError);
+        }
+      }
+      throw error;
+    }
   }
 }

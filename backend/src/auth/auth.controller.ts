@@ -5,7 +5,7 @@ import { RegisterUserDto } from './registerUser.dto';
 import { Public } from './auth.decorators';
 import { LoginUserDto } from './loginUser.dto';
 import { Response, Request } from 'express';
-import { UserDuplicateEmailFilter } from 'src/filters/user-duplicate-email.filter';
+import { UserDuplicateEmailFilter } from 'src/common/filters/user-duplicate-email.filter';
 
 @UseFilters(UserDuplicateEmailFilter)
 @Controller('auth')

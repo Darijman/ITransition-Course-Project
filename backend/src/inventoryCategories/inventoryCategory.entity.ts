@@ -12,7 +12,7 @@ export class InventoryCategory {
   @Column({ type: 'varchar', nullable: true, length: 255 })
   description?: string;
 
-  @OneToMany(() => Inventory, (inventory) => inventory.inventoryCategory)
+  @OneToMany(() => Inventory, (inventory) => inventory.category)
   inventories: Inventory[];
 
   @CreateDateColumn()
