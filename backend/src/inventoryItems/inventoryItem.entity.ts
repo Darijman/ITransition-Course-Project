@@ -1,5 +1,6 @@
 import { Inventory } from 'src/inventories/inventory.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { InventoryItemLike } from 'src/inventoryItemLikes/inventoryItemLike.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity('inventory_items')
 export class InventoryItem {
@@ -9,7 +10,7 @@ export class InventoryItem {
   @Column({ type: 'varchar', length: 100 })
   title: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   description?: string;
 
   @Column()
@@ -18,6 +19,9 @@ export class InventoryItem {
   @ManyToOne(() => Inventory, (inventory) => inventory.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'inventoryId' })
   inventory: Inventory;
+
+  @OneToMany(() => InventoryItemLike, (like) => like.item)
+  likes: InventoryItemLike[];
 
   @CreateDateColumn()
   createdAt: Date;

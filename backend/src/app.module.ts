@@ -12,6 +12,13 @@ import { InventoryTag } from './inventoryTags/inventoryTag.entity';
 import { InventoryUser } from './inventoryUsers/inventoryUser.entity';
 import { InventoryComment } from './inventoryComments/inventoryComment.entity';
 import { InventoriesModule } from './inventories/inventories.module';
+import { InventoryCategoriesModule } from './inventoryCategories/inventoryCategories.module';
+import { InventoryTagsModule } from './inventoryTags/inventoryTags.module';
+import { InventoryItemsModule } from './inventoryItems/inventoryItems.module';
+import { InventoryUsersModule } from './inventoryUsers/inventoryUsers.module';
+import { InventoryCommentsModule } from './inventoryComments/inventoryComments.module';
+import { InventoryItemLikesModule } from './inventoryItemLikes/inventoryItemLikes.module';
+import { InventoryItemLike } from './inventoryItemLikes/inventoryItemLike.entity';
 
 @Module({
   imports: [
@@ -26,7 +33,7 @@ import { InventoriesModule } from './inventories/inventories.module';
         username: config.get('DATABASE_USER'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
-        entities: [User, Inventory, InventoryItem, InventoryCategory, InventoryTag, InventoryUser, InventoryComment],
+        entities: [User, Inventory, InventoryItem, InventoryCategory, InventoryTag, InventoryUser, InventoryComment, InventoryItemLike],
         synchronize: false,
         timezone: 'Z',
       }),
@@ -35,6 +42,12 @@ import { InventoriesModule } from './inventories/inventories.module';
     CloudinaryModule,
     InventoriesModule,
     AuthModule,
+    InventoryCategoriesModule,
+    InventoryTagsModule,
+    InventoryItemsModule,
+    InventoryUsersModule,
+    InventoryCommentsModule,
+    InventoryItemLikesModule,
   ],
 })
 export class AppModule {}

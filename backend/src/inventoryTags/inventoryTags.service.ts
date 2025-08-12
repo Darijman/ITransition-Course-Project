@@ -21,7 +21,7 @@ export class InventoryTagsService {
   }
 
   async getTagByID(tagId: number): Promise<InventoryTag> {
-    if (isNaN(tagId)) {
+    if (!tagId || isNaN(tagId)) {
       throw new BadRequestException({ error: 'Invalid tag ID!' });
     }
 
@@ -33,6 +33,10 @@ export class InventoryTagsService {
   }
 
   async deleteTagById(tagId: number): Promise<{ success: boolean }> {
+    if (!tagId || isNaN(tagId)) {
+      throw new BadRequestException({ error: 'Invalid tag ID!' });
+    }
+
     const inventoryTag = await this.inventoryTagsRepository.findOne({ where: { id: tagId } });
     if (!inventoryTag) {
       throw new NotFoundException({ error: 'Tag not found!' });

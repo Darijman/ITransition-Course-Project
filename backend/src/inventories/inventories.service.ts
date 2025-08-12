@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Inventory } from './inventory.entity';
@@ -32,6 +32,10 @@ export class InventoriesService {
   }
 
   async getInventoryById(inventoryId: number): Promise<Inventory> {
+    if (!inventoryId || isNaN(inventoryId)) {
+      throw new BadRequestException({ error: 'Invalid Inventory ID!' });
+    }
+
     const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
@@ -40,6 +44,10 @@ export class InventoriesService {
   }
 
   async deleteInventoryById(inventoryId: number): Promise<{ success: boolean }> {
+    if (!inventoryId || isNaN(inventoryId)) {
+      throw new BadRequestException({ error: 'Invalid Inventory ID!' });
+    }
+
     const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });

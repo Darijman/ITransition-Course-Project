@@ -29,7 +29,7 @@ export class UsersService {
   }
 
   async getUserById(userId: number): Promise<User> {
-    if (isNaN(userId)) {
+    if (!userId || isNaN(userId)) {
       throw new BadRequestException({ error: 'Invalid user ID!' });
     }
 
@@ -41,6 +41,10 @@ export class UsersService {
   }
 
   async deleteUserById(userId: number): Promise<{ success: boolean }> {
+    if (!userId || isNaN(userId)) {
+      throw new BadRequestException({ error: 'Invalid user ID!' });
+    }
+
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException({ error: 'User not found!' });
@@ -58,6 +62,10 @@ export class UsersService {
   }
 
   async updateUserAvatar(userId: number, avatarUrl: string): Promise<void> {
+    if (!userId || isNaN(userId)) {
+      throw new BadRequestException({ error: 'Invalid user ID!' });
+    }
+
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException({ error: 'User not found!' });

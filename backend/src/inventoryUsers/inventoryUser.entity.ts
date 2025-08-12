@@ -10,7 +10,7 @@ export class InventoryUser {
   id: number;
 
   @Column({ type: 'varchar', length: 100 })
-  title: string;
+  name: string;
 
   @ManyToOne(() => User, (user) => user.inventoryUsers, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })

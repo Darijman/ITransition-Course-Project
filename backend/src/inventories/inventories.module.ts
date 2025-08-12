@@ -12,5 +12,6 @@ import { InventoryTag } from 'src/inventoryTags/inventoryTag.entity';
   imports: [TypeOrmModule.forFeature([Inventory, InventoryTag]), CloudinaryModule, UsersModule],
   controllers: [InventoriesController],
   providers: [InventoriesService, CloudinaryProvider],
+  exports: [InventoriesService],
 })
 export class InventoriesModule {}
