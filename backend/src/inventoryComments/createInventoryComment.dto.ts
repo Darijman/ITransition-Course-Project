@@ -14,9 +14,4 @@ export class CreateInventoryCommentDto {
   @IsInt({ message: 'Inventory ID must be an integer' })
   @Min(1, { message: 'Inventory ID must be positive' })
   inventoryId: number;
-
-  @Transform(({ value }) => parseInt(value, 10))
-  @IsInt({ message: 'Author ID must be an integer' })
-  @Min(1, { message: 'Author ID must be positive' })
-  authorId: number;
 }

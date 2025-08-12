@@ -39,7 +39,7 @@ export class InventoriesController {
       creatorId: req.user.id,
       imageUrl: uploadResult.secure_url,
     };
-    return await this.inventoriesService.createNewInventory(newInventoryData);
+    return await this.inventoriesService.createNewInventory(newInventoryData, req.user);
   }
 
   @UseGuards(AuthGuard, InventoryOwnerOrAdminGuard)

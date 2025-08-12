@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseInterceptors, Delete, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors, Delete, Post, Body, UseGuards, UseFilters } from '@nestjs/common';
 import { InventoryUser } from './inventoryUser.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
@@ -6,9 +6,11 @@ import { Admin } from 'src/auth/auth.decorators';
 import { CreateInventoryUserDto } from './createInventoryUser.dto';
 import { InventoryUsersService } from './inventoryUsers.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { InventoryUserDuplicateFilter } from 'src/common/filters/inventoryUser-duplicate.filter';
 
-@Controller('inventory_users')
+@UseFilters(InventoryUserDuplicateFilter)
 @UseInterceptors(ClassSerializerInterceptor)
+@Controller('inventory_users')
 export class InventoryUsersController {
   constructor(private readonly inventoryUsersService: InventoryUsersService) {}
 

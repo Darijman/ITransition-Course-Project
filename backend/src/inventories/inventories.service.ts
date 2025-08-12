@@ -6,6 +6,9 @@ import { CreateInventoryDto } from './createInventory.dto';
 import { extractPublicIdFromUrl } from 'src/common/cloudinary/cloudinary.helpers';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { InventoryTag } from 'src/inventoryTags/inventoryTag.entity';
+import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
+import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
+import { UserRoles } from 'src/users/userRoles.enum';
 
 @Injectable()
 export class InventoriesService {
@@ -16,19 +19,36 @@ export class InventoriesService {
 
     @InjectRepository(InventoryTag)
     private readonly tagsRepository: Repository<InventoryTag>,
+
+    @InjectRepository(InventoryUser)
+    private readonly inventoryUsersRepository: Repository<InventoryUser>,
   ) {}
 
   async getAllInventories(): Promise<Inventory[]> {
     return await this.inventoriesRepository.find();
   }
 
-  async createNewInventory(createInventoryDto: CreateInventoryDto): Promise<Inventory> {
+  async createNewInventory(createInventoryDto: CreateInventoryDto, user: { id: number; name: string; role: UserRoles }): Promise<Inventory> {
     const tags = await this.tagsRepository.findBy({ id: In(createInventoryDto.tagIds) });
-    const inventory = this.inventoriesRepository.create({
-      ...createInventoryDto,
-      tags,
+    const inventory = this.inventoriesRepository.create({ ...createInventoryDto, tags });
+    const savedInventory = await this.inventoriesRepository.save(inventory);
+
+    const inventoryUserExists = await this.inventoryUsersRepository.findOneBy({
+      inventoryId: savedInventory.id,
+      userId: user.id,
     });
-    return await this.inventoriesRepository.save(inventory);
+
+    if (!inventoryUserExists) {
+      const inventoryUser = this.inventoryUsersRepository.create({
+        inventoryId: savedInventory.id,
+        userId: user.id,
+        role: InventoryUserRoles.CREATOR,
+        name: user.name,
+      });
+
+      await this.inventoryUsersRepository.save(inventoryUser);
+    }
+    return savedInventory;
   }
 
   async getInventoryById(inventoryId: number): Promise<Inventory> {
@@ -36,7 +56,10 @@ export class InventoriesService {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
 
-    const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
+    const inventory = await this.inventoriesRepository.findOne({
+      where: { id: inventoryId },
+      relations: ['tags', 'inventoryUsers', 'inventoryUsers.user', 'comments', 'comments.author', 'items', 'category', 'creator'],
+    });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
     }

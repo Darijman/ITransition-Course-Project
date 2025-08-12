@@ -4,9 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { InventoryItemsController } from './inventoryItems.controller';
 import { InventoryItemsService } from './inventoryItems.service';
 import { UsersModule } from 'src/users/users.module';
+import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
+import { Inventory } from 'src/inventories/inventory.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InventoryItem]), UsersModule],
+  imports: [TypeOrmModule.forFeature([InventoryItem, InventoryUser, Inventory]), UsersModule],
   controllers: [InventoryItemsController],
   providers: [InventoryItemsService],
 })

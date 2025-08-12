@@ -7,9 +7,10 @@ import { CloudinaryProvider } from 'src/common/cloudinary/cloudinary.provider';
 import { Inventory } from './inventory.entity';
 import { UsersModule } from 'src/users/users.module';
 import { InventoryTag } from 'src/inventoryTags/inventoryTag.entity';
+import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Inventory, InventoryTag]), CloudinaryModule, UsersModule],
+  imports: [TypeOrmModule.forFeature([Inventory, InventoryTag, InventoryUser]), CloudinaryModule, UsersModule],
   controllers: [InventoriesController],
   providers: [InventoriesService, CloudinaryProvider],
   exports: [InventoriesService],
