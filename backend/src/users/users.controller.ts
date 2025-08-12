@@ -57,7 +57,7 @@ export class UsersController {
     let uploadResult: { secure_url: string; public_id: string } | null = null;
 
     try {
-      uploadResult = await this.cloudinaryService.uploadImage(avatar);
+      uploadResult = await this.cloudinaryService.uploadImage(avatar, 'avatars');
       await this.usersService.updateUserAvatar(userId, uploadResult.secure_url);
       return { avatarUrl: uploadResult.secure_url };
     } catch (error) {

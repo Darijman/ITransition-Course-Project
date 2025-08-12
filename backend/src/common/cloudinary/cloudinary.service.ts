@@ -7,9 +7,9 @@ import { Express } from 'express';
 export class CloudinaryService {
   constructor(@Inject('CLOUDINARY') private readonly cloudinaryClient: typeof cloudinary) {}
 
-  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+  async uploadImage(file: Express.Multer.File, folder: string): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream({ folder: 'avatars' }, (error, result) => {
+      const uploadStream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
         if (error) return reject(error);
         if (!result) return reject(new Error('No result returned from Cloudinary upload'));
         resolve(result);
