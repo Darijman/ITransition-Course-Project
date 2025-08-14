@@ -20,11 +20,12 @@ export class InventoryCommentsController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('/inventory/inventoryId')
+  @Get('/inventory/:inventoryId')
   async getAllCommentsByInventoryId(
     @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Req() req: Request,
   ): Promise<InventoryComment[]> {
-    return await this.inventoryCommentsService.getAllCommentsByInventoryId(inventoryId);
+    return await this.inventoryCommentsService.getAllCommentsByInventoryId(inventoryId, req.user);
   }
 
   @Admin()
@@ -48,7 +49,8 @@ export class InventoryCommentsController {
   @Delete(':commentId')
   async deleteInventoryCommentById(
     @Param('commentId', new CustomParseIntPipe('Inventory Comment ID')) commentId: number,
+    @Req() req: Request,
   ): Promise<{ success: boolean }> {
-    return await this.inventoryCommentsService.deleteInventoryCommentById(commentId);
+    return await this.inventoryCommentsService.deleteInventoryCommentById(commentId, req.user);
   }
 }

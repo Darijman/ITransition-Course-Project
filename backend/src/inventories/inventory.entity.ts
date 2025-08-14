@@ -28,7 +28,7 @@ export class Inventory {
   @Column({ type: 'varchar', length: 1000, nullable: true })
   description?: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 500 })
   imageUrl: string;
 
   @ManyToOne(() => InventoryCategory, (category) => category.inventories, { onDelete: 'CASCADE' })

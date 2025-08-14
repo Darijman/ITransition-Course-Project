@@ -52,7 +52,8 @@ export class InventoriesController {
   @Delete(':inventoryId')
   async deleteInventoryById(
     @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Req() req: Request,
   ): Promise<{ success: boolean }> {
-    return await this.inventoriesService.deleteInventoryById(inventoryId);
+    return await this.inventoriesService.deleteInventoryById(inventoryId, req.user);
   }
 }

@@ -1,9 +1,9 @@
 import { Exclude } from 'class-transformer';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, OneToMany } from 'typeorm';
 import { UserRoles } from './userRoles.enum';
-import * as bcrypt from 'bcrypt';
 import { Inventory } from 'src/inventories/inventory.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
+import * as bcrypt from 'bcrypt';
 
 @Entity('users')
 export class User {

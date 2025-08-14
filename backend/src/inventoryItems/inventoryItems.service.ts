@@ -7,6 +7,7 @@ import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 import { UserRoles } from 'src/users/userRoles.enum';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { Inventory } from 'src/inventories/inventory.entity';
+import { ReqUser } from 'src/interfaces/ReqUser';
 
 @Injectable()
 export class InventoryItemsService {
@@ -38,7 +39,7 @@ export class InventoryItemsService {
       .getMany();
   }
 
-  async createNewItem(createInventoryItemDto: CreateInventoryItemDto, userId: number): Promise<InventoryItem> {
+  async createNewItem(createInventoryItemDto: CreateInventoryItemDto, user: ReqUser): Promise<InventoryItem> {
     const { inventoryId } = createInventoryItemDto;
 
     const inventory = await this.inventoriesRepository.findOneBy({ id: inventoryId });
@@ -46,20 +47,33 @@ export class InventoryItemsService {
       throw new BadRequestException({ error: 'Invalid Inventory ID' });
     }
 
-    const inventoryUser = await this.inventoryUsersRepository.findOne({ where: { inventoryId, userId }, relations: ['user'] });
+    let inventoryUser = await this.inventoryUsersRepository.findOne({
+      where: { inventoryId, userId: user.id },
+    });
+
+    if (!inventoryUser && user.role === UserRoles.ADMIN) {
+      inventoryUser = this.inventoryUsersRepository.create({
+        userId: user.id,
+        inventoryId,
+        role: InventoryUserRoles.ADMIN,
+        name: user.name,
+      });
+      await this.inventoryUsersRepository.save(inventoryUser);
+    }
+
     if (!inventoryUser) {
       throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
     }
 
-    if (inventoryUser.user.role === UserRoles.ADMIN) {
-      return await this.inventoryItemsRepository.save(this.inventoryItemsRepository.create(createInventoryItemDto));
-    }
-
-    if (inventoryUser.role !== InventoryUserRoles.CREATOR && inventoryUser.role !== InventoryUserRoles.EDITOR) {
+    if (
+      inventoryUser.role !== InventoryUserRoles.CREATOR &&
+      inventoryUser.role !== InventoryUserRoles.EDITOR &&
+      inventoryUser.role !== InventoryUserRoles.ADMIN
+    ) {
       throw new ForbiddenException({ error: 'You do not have permission to create items!' });
     }
 
-    const item = this.inventoryItemsRepository.create(createInventoryItemDto);
+    const item = this.inventoryItemsRepository.create({ ...createInventoryItemDto, creatorId: inventoryUser.id });
     return await this.inventoryItemsRepository.save(item);
   }
 
@@ -75,7 +89,7 @@ export class InventoryItemsService {
     return item;
   }
 
-  async deleteItemById(itemId: number): Promise<{ success: boolean }> {
+  async deleteItemById(itemId: number, user: ReqUser): Promise<{ success: boolean }> {
     if (!itemId || isNaN(itemId)) {
       throw new BadRequestException({ error: 'Invalid item ID!' });
     }
@@ -83,6 +97,20 @@ export class InventoryItemsService {
     const item = await this.inventoryItemsRepository.findOne({ where: { id: itemId } });
     if (!item) {
       throw new NotFoundException({ error: 'Item not found!' });
+    }
+
+    if (user.role === UserRoles.ADMIN) {
+      await this.inventoryItemsRepository.delete(itemId);
+      return { success: true };
+    }
+
+    const inventoryUser = await this.inventoryUsersRepository.findOneBy({ userId: user.id, inventoryId: item.inventoryId });
+    if (!inventoryUser) {
+      throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
+    }
+
+    if (inventoryUser.role !== InventoryUserRoles.CREATOR && inventoryUser.role !== InventoryUserRoles.EDITOR) {
+      throw new ForbiddenException({ error: 'You do not have permission to delete this item!' });
     }
 
     await this.inventoryItemsRepository.delete(itemId);

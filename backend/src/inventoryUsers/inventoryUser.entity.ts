@@ -13,6 +13,7 @@ import {
 import { InventoryUserRoles } from './inventoryUserRoles.enum';
 import { User } from 'src/users/user.entity';
 import { InventoryComment } from 'src/inventoryComments/inventoryComment.entity';
+import { InventoryItem } from 'src/inventoryItems/inventoryItem.entity';
 
 @Entity('inventory_users')
 @Unique(['inventoryId', 'userId'])
@@ -39,6 +40,9 @@ export class InventoryUser {
 
   @OneToMany(() => InventoryComment, (comment) => comment.author)
   comments: InventoryComment[];
+
+  @OneToMany(() => InventoryItem, (item) => item.creator)
+  items: InventoryItem[];
 
   @Column({ type: 'enum', enum: InventoryUserRoles, default: InventoryUserRoles.VIEWER })
   role: InventoryUserRoles;

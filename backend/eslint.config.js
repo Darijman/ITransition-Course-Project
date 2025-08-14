@@ -17,6 +17,10 @@ export default [
       },
       globals: {
         console: true,
+        process: true,
+        __dirname: true,
+        module: true,
+        require: true,
       },
     },
     // env: {

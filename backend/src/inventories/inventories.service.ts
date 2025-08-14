@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Inventory } from './inventory.entity';
@@ -9,6 +9,7 @@ import { InventoryTag } from 'src/inventoryTags/inventoryTag.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 import { UserRoles } from 'src/users/userRoles.enum';
+import { ReqUser } from 'src/interfaces/ReqUser';
 
 @Injectable()
 export class InventoriesService {
@@ -66,7 +67,7 @@ export class InventoriesService {
     return inventory;
   }
 
-  async deleteInventoryById(inventoryId: number): Promise<{ success: boolean }> {
+  async deleteInventoryById(inventoryId: number, user: ReqUser): Promise<{ success: boolean }> {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
@@ -74,6 +75,10 @@ export class InventoriesService {
     const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
+    }
+
+    if (user.id !== inventory.creatorId && user.role !== UserRoles.ADMIN) {
+      throw new ForbiddenException({ error: 'You do not have permission to delete this inventory!' });
     }
 
     if (inventory.imageUrl) {

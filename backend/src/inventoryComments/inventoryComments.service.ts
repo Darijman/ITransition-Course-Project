@@ -7,6 +7,7 @@ import { Inventory } from 'src/inventories/inventory.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { UserRoles } from 'src/users/userRoles.enum';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
+import { ReqUser } from 'src/interfaces/ReqUser';
 
 @Injectable()
 export class InventoryCommentsService {
@@ -25,7 +26,7 @@ export class InventoryCommentsService {
     return await this.inventoryCommentsRepository.find();
   }
 
-  async getAllCommentsByInventoryId(inventoryId: number): Promise<InventoryComment[]> {
+  async getAllCommentsByInventoryId(inventoryId: number, user: ReqUser): Promise<InventoryComment[]> {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
@@ -34,13 +35,17 @@ export class InventoryCommentsService {
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
     }
+
+    if (user.role !== UserRoles.ADMIN) {
+      const inventoryUser = await this.inventoryUsersRepository.findOne({ where: { inventoryId, userId: user.id } });
+      if (!inventoryUser) {
+        throw new ForbiddenException({ error: 'You do not have access to this inventory comments!' });
+      }
+    }
     return await this.inventoryCommentsRepository.find({ where: { inventoryId } });
   }
 
-  async createNewInventoryComment(
-    createInventoryCommentDto: CreateInventoryCommentDto,
-    user: { id: number; name: string; role: UserRoles },
-  ): Promise<InventoryComment> {
+  async createNewInventoryComment(createInventoryCommentDto: CreateInventoryCommentDto, user: ReqUser): Promise<InventoryComment> {
     const inventory = await this.inventoriesRepository.findOne({ where: { id: createInventoryCommentDto.inventoryId } });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
@@ -61,7 +66,7 @@ export class InventoryCommentsService {
     }
 
     if (!inventoryUser) {
-      throw new ForbiddenException({ error: 'You are not a member of this inventory!' });
+      throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
     }
 
     const inventoryComment = this.inventoryCommentsRepository.create({
@@ -83,7 +88,7 @@ export class InventoryCommentsService {
     return inventoryComment;
   }
 
-  async deleteInventoryCommentById(commentId: number): Promise<{ success: boolean }> {
+  async deleteInventoryCommentById(commentId: number, user: ReqUser): Promise<{ success: boolean }> {
     if (!commentId || isNaN(commentId)) {
       throw new BadRequestException({ error: 'Invalid Inventory Comment ID!' });
     }
@@ -91,6 +96,20 @@ export class InventoryCommentsService {
     const inventoryComment = await this.inventoryCommentsRepository.findOne({ where: { id: commentId } });
     if (!inventoryComment) {
       throw new NotFoundException({ error: 'Inventory Comment not found!' });
+    }
+
+    if (user.role === UserRoles.ADMIN) {
+      await this.inventoryCommentsRepository.delete(commentId);
+      return { success: true };
+    }
+
+    const inventoryUser = await this.inventoryUsersRepository.findOneBy({ userId: user.id, inventoryId: inventoryComment.inventoryId });
+    if (!inventoryUser) {
+      throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
+    }
+
+    if (inventoryUser.role !== InventoryUserRoles.CREATOR && inventoryUser.role !== InventoryUserRoles.EDITOR) {
+      throw new ForbiddenException({ error: 'You do not have permission to delete this comment!' });
     }
 
     await this.inventoryCommentsRepository.delete(commentId);
