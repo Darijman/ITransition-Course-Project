@@ -1,12 +1,8 @@
 import 'express';
-import { UserRoles } from 'src/users/userRoles.enum';
+import { SocialProfileFromDb } from 'src/auth/strategies/social.types';
 
 declare module 'express' {
   export interface Request {
-    user: {
-      id: number;
-      name: string;
-      role: UserRoles;
-    };
+    user: SocialProfileFromDb;
   }
 }

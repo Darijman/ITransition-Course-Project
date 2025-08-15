@@ -6,6 +6,8 @@ import { LoginUserDto } from './loginUser.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
+import { SocialProfile } from './strategies/social.types';
+import { UserRoles } from 'src/users/userRoles.enum';
 
 @Injectable()
 export class AuthService {
@@ -37,6 +39,42 @@ export class AuthService {
       throw new UnauthorizedException({ error: 'Incorrect login or password!' });
     }
 
+    const payload = { id: user.id, name: user.name, role: user.role };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
+  }
+
+  async socialLogin(profile: SocialProfile) {
+    let user = await this.usersRepository.findOne({
+      where: { provider: profile.provider, providerId: profile.providerId },
+    });
+
+    if (!user) {
+      user = await this.usersRepository.findOne({ where: { email: profile.email } });
+      if (user) {
+        user.provider = profile.provider;
+        user.providerId = profile.providerId;
+      } else {
+        user = this.usersRepository.create({
+          name: profile.name,
+          email: profile.email,
+          provider: profile.provider,
+          providerId: profile.providerId,
+          role: UserRoles.USER,
+        });
+      }
+    }
+
+    if (profile.avatarUrl) {
+      user.avatarUrl = profile.avatarUrl;
+    }
+
+    if (profile.name && profile.name !== user.name) {
+      user.name = profile.name;
+    }
+
+    await this.usersRepository.save(user);
     const payload = { id: user.id, name: user.name, role: user.role };
     return {
       access_token: await this.jwtService.signAsync(payload),

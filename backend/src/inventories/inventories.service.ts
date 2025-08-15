@@ -67,6 +67,38 @@ export class InventoriesService {
     return inventory;
   }
 
+  async updateInventoryVisibility(inventoryId: number, isPublic: boolean, user: ReqUser) {
+    if (!inventoryId || isNaN(inventoryId)) {
+      throw new BadRequestException({ error: 'Invalid Inventory ID!' });
+    }
+
+    const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
+    if (!inventory) {
+      throw new NotFoundException({ error: 'Inventory not found!' });
+    }
+
+    if (user.role === UserRoles.ADMIN) {
+      await this.inventoriesRepository.update(inventoryId, { isPublic });
+      return { success: true };
+    }
+
+    const inventoryUser = await this.inventoryUsersRepository.findOneBy({
+      userId: user.id,
+      inventoryId: inventory.id,
+    });
+
+    if (!inventoryUser) {
+      throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
+    }
+
+    if (inventoryUser.role !== InventoryUserRoles.CREATOR) {
+      throw new ForbiddenException({ error: 'You do not have permission to change visibility!' });
+    }
+
+    await this.inventoriesRepository.update(inventoryId, { isPublic });
+    return { success: true };
+  }
+
   async deleteInventoryById(inventoryId: number, user: ReqUser): Promise<{ success: boolean }> {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });

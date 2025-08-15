@@ -22,6 +22,9 @@ export class Inventory {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
+  @Column({ type: 'boolean', default: true })
+  isPublic: boolean;
+
   @Column({ type: 'varchar', length: 100 })
   title: string;
 

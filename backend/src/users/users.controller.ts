@@ -6,7 +6,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Express } from 'express';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
-import { Admin } from 'src/auth/auth.decorators';
+import { Admin, Public } from 'src/auth/auth.decorators';
 import { UserRoles } from './userRoles.enum';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
 
@@ -18,7 +18,7 @@ export class UsersController {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  @Admin()
+  @Public()
   @Get()
   async getAllUsers(): Promise<User[]> {
     return await this.usersService.getAllUsers();
@@ -30,13 +30,15 @@ export class UsersController {
     return await this.usersService.getAllNonAdminUsers();
   }
 
+  // @Public()
   @UseGuards(AuthGuard)
   @Get(':userId')
   async getUserById(@Param('userId', new CustomParseIntPipe('User ID')) userId: number): Promise<User> {
     return await this.usersService.getUserById(userId);
   }
 
-  @UseGuards(AuthGuard)
+  @Public()
+  // @UseGuards(AuthGuard)
   @Delete(':userId')
   async deleteUserById(@Param('userId', new CustomParseIntPipe('User ID')) userId: number): Promise<{ success: boolean }> {
     return await this.usersService.deleteUserById(userId);

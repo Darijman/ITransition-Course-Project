@@ -4,6 +4,7 @@ import { UserRoles } from './userRoles.enum';
 import { Inventory } from 'src/inventories/inventory.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import * as bcrypt from 'bcrypt';
+import { Providers } from './providers.enum';
 
 @Entity('users')
 export class User {
@@ -25,9 +26,9 @@ export class User {
   @Column({ type: 'varchar', length: 500, nullable: true })
   avatarUrl?: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   @Exclude()
-  password: string;
+  password?: string;
 
   @OneToMany(() => Inventory, (inventory) => inventory.creator)
   inventories: Inventory[];
@@ -37,6 +38,12 @@ export class User {
 
   @Column({ type: 'enum', enum: UserRoles, default: UserRoles.USER })
   role: UserRoles;
+
+  @Column({ type: 'enum', enum: Providers, nullable: true })
+  provider?: Providers;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  providerId?: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -54,6 +61,7 @@ export class User {
   }
 
   async validatePassword(plainPassword: string): Promise<boolean> {
+    if (!this.password) return false;
     return bcrypt.compare(plainPassword, this.password);
   }
 }

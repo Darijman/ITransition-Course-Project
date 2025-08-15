@@ -1,7 +1,3 @@
-import { UserRoles } from 'src/users/userRoles.enum';
+import { SocialProfileFromDb } from 'src/auth/strategies/social.types';
 
-export interface ReqUser {
-  id: number;
-  name: string;
-  role: UserRoles;
-}
+export interface ReqUser extends SocialProfileFromDb {}

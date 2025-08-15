@@ -8,6 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
+import { GithubStrategy } from './strategies/github/github.strategy';
+import { GoogleStrategy } from './strategies/google/google.strategy';
+import { SocialProfileMapper } from './strategies/social-profile.mapper';
 
 @Module({
   imports: [
@@ -19,7 +22,7 @@ import { AuthGuard } from './auth.guard';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  providers: [AuthService, { provide: APP_GUARD, useClass: AuthGuard }],
+  providers: [AuthService, GithubStrategy, GoogleStrategy, SocialProfileMapper, { provide: APP_GUARD, useClass: AuthGuard }],
   controllers: [AuthController],
   exports: [AuthService],
 })

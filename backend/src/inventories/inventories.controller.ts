@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req, Body } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req, Body, Patch } from '@nestjs/common';
 import { InventoriesService } from './inventories.service';
 import { Inventory } from './inventory.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
@@ -46,6 +46,16 @@ export class InventoriesController {
   @Get(':inventoryId')
   async getInventoryById(@Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number): Promise<Inventory> {
     return await this.inventoriesService.getInventoryById(inventoryId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch(':inventoryId/visibility')
+  async updateInventoryVisibility(
+    @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Body() body: { isPublic: boolean },
+    @Req() req: Request,
+  ): Promise<{ success: boolean }> {
+    return await this.inventoriesService.updateInventoryVisibility(inventoryId, body.isPublic, req.user);
   }
 
   @UseGuards(AuthGuard, InventoryOwnerOrAdminGuard)

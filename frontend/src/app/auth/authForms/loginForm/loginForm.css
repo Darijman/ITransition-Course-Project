@@ -1,0 +1,31 @@
+.login_form_container {
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+.login_form {
+  padding: 20px;
+  background-color: var(--foreground-color);
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.login_form_submit_button:disabled {
+  background-color: gray !important;
+  border: 1px solid gray !important;
+}
+
+.login_form_google_button,
+.login_form_github_button {
+  max-width: 250px;
+  width: 100%;
+  background-color: var(--primary-text-color) !important;
+  color: black !important;
+  &:hover {
+    border: 1px solid var(--submit-button-color) !important;
+    background-color: var(--primary-text-color) !important;
+    color: black !important;
+  }
+}
