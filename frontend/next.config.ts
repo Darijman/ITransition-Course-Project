@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   output: 'standalone',
   images: {
-    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
+    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com', 'res.cloudinary.com'],
   },
   webpack(config) {
     config.module.rules.push({

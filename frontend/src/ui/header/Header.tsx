@@ -65,6 +65,7 @@ export const Header = () => {
       key: 'signout',
       icon: <LogoutOutlined style={{ fontSize: 20 }} />,
       label: t('header.sign_out'),
+      onClick: () => setShowLogoutModal(true)
     },
   ];
 
@@ -118,9 +119,10 @@ export const Header = () => {
         open={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onDelete={logoutHandler}
-        title='Log out?'
-        text='You will be logged out of your account and will need to sign in again to continue.'
-        deleteButtonText='Yes, log out'
+        title={t('header.sign_out') + '?'}
+        text={t('delete_modal.logout_text')}
+        deleteButtonText={t('delete_modal.confirm_logout_text')}
+        cancelButtonText={t('delete_modal.cancel_logout_text')}
         errorMessage={logoutErrorText}
         isDeleting={isLoggingOut}
       />

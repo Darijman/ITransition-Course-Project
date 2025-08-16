@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { BasicUser } from '@/interfaces/BasicUser';
-import { UserRoles } from '@/interfaces/UserRoles';
+import { UserRoles } from '@/interfaces/UserRoles.enum';
 import api from '../../../axiosConfig';
 
 interface AuthContextType {

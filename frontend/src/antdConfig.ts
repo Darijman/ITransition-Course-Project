@@ -16,5 +16,6 @@ export const theme: ThemeConfig = {
     fontFamily: 'Signika Negative, sans-serif',
     colorText: 'var(--primary-text-color)',
     colorTextHeading: 'var(--primary-text-color)', // h1,h2,h3,h4,h5
+    colorTextDescription: 'var(--secondary-text-color)', // meta.description
   },
 };

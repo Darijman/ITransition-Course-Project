@@ -6,8 +6,6 @@ import { AuthController } from './auth.controller';
 import { jwtConstants } from './auth.constants';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './auth.guard';
 import { GithubStrategy } from './strategies/github/github.strategy';
 import { GoogleStrategy } from './strategies/google/google.strategy';
 import { SocialProfileMapper } from './strategies/social-profile.mapper';
@@ -22,7 +20,7 @@ import { SocialProfileMapper } from './strategies/social-profile.mapper';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  providers: [AuthService, GithubStrategy, GoogleStrategy, SocialProfileMapper, { provide: APP_GUARD, useClass: AuthGuard }],
+  providers: [AuthService, GithubStrategy, GoogleStrategy, SocialProfileMapper],
   controllers: [AuthController],
   exports: [AuthService],
 })

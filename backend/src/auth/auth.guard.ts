@@ -35,6 +35,7 @@ export class AuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException({ error: 'Session expired. Please log in again.' });
     }
+
     const user = await this.usersService.getUserById(payload.id);
     if (isAdminRequired && user.role !== UserRoles.ADMIN) {
       throw new ForbiddenException({ error: 'You do not have permission!' });

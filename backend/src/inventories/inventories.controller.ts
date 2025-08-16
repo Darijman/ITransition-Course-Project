@@ -9,7 +9,8 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { CreateInventoryDto } from './createInventory.dto';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
 import { InventoryOwnerOrAdminGuard } from 'src/guards/inventoryOwnerOrAdmin.guard';
-import { Public } from 'src/auth/auth.decorators';
+import { Admin } from 'src/auth/auth.decorators';
+import { OptionalAuthGuard } from 'src/guards/optionalAuth.guard';
 
 @Controller('inventories')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -19,10 +20,17 @@ export class InventoriesController {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  @Public()
+  @Admin()
   @Get()
   async getAllInventories(): Promise<Inventory[]> {
     return await this.inventoriesService.getAllInventories();
+  }
+
+  @UseGuards(OptionalAuthGuard)
+  @Get('/public')
+  async getAllPublicInventories(@Req() req: Request): Promise<Inventory[]> {
+    const userId: number | undefined = req.user?.id;
+    return this.inventoriesService.getAllPublicInventories(userId);
   }
 
   @UseGuards(AuthGuard)

@@ -29,6 +29,23 @@ export class InventoriesService {
     return await this.inventoriesRepository.find();
   }
 
+  async getAllPublicInventories(userId?: number): Promise<Inventory[]> {
+    const query = this.inventoriesRepository
+      .createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.category', 'category')
+      .leftJoinAndSelect('inventory.creator', 'creator')
+      .leftJoinAndSelect('inventory.items', 'items')
+      .leftJoinAndSelect('inventory.tags', 'tags');
+
+    if (userId) {
+      query.where('inventory.isPublic = :isPublic', { isPublic: true }).orWhere('inventory.creatorId = :userId', { userId });
+    } else {
+      query.where('inventory.isPublic = :isPublic', { isPublic: true });
+    }
+
+    return query.getMany();
+  }
+
   async createNewInventory(createInventoryDto: CreateInventoryDto, user: { id: number; name: string; role: UserRoles }): Promise<Inventory> {
     const tags = await this.tagsRepository.findBy({ id: In(createInventoryDto.tagIds) });
     const inventory = this.inventoriesRepository.create({ ...createInventoryDto, tags });

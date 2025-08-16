@@ -1,8 +1,9 @@
 import 'express';
-import { SocialProfileFromDb } from 'src/auth/strategies/social.types';
+
+import { ReqUser } from 'src/interfaces/ReqUser';
 
 declare module 'express' {
   export interface Request {
-    user: SocialProfileFromDb;
+    user: ReqUser;
   }
 }

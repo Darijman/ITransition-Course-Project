@@ -15,12 +15,13 @@ interface Props {
   onCancel?: () => void;
   isDeleting?: boolean;
   deleteButtonText?: string;
+  cancelButtonText?: string;
   title: string;
   text: string;
   errorMessage?: string;
 }
 
-export const DeleteModal = ({ open, onClose, onDelete, onCancel, isDeleting, deleteButtonText, title, text, errorMessage }: Props) => {
+export const DeleteModal = ({ open, onClose, onDelete, onCancel, isDeleting, deleteButtonText, cancelButtonText, title, text, errorMessage }: Props) => {
   const handleCancel = () => {
     if (onCancel) onCancel();
     onClose();
@@ -44,7 +45,7 @@ export const DeleteModal = ({ open, onClose, onDelete, onCancel, isDeleting, del
 
           <div className='modal_footer'>
             <Button className='delete_modal_cancel_button' style={{ marginRight: '10px' }} onClick={handleCancel}>
-              Cancel
+              {cancelButtonText ?? 'Cancel'}
             </Button>
             <Button className='delete_modal_delete_button' type='primary' danger onClick={onDelete} loading={isDeleting}>
               {deleteButtonText ?? 'Yes, delete it'}
