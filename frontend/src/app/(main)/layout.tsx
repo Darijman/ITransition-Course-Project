@@ -3,8 +3,8 @@
 import { ReactNode, useEffect } from 'react';
 import { AuthProvider } from '@/contexts/authContext/AuthContext';
 import { useRouter } from 'next/navigation';
+import { Header } from '@/ui/header/Header';
 // import { emitter } from '@/events';
-// import { Header } from '@/ui/header/Header';
 import api from '../../../axiosConfig';
 import './layout.css';
 // import { SocketProvider } from '@/contexts/socketContext/SocketContext';
@@ -24,7 +24,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <AuthProvider>
-        {/* <Header /> */}
+        <Header />
         <main className='main'>{children}</main>
     </AuthProvider>
   );

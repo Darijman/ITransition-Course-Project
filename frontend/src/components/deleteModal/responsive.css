@@ -1,0 +1,9 @@
+@media screen and (max-width: 335px) {
+  .custom_modal .modal_footer {
+    flex-direction: column;
+  }
+
+  .delete_modal_cancel_button {
+    margin-bottom: 20px;
+  }
+}

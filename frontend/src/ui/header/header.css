@@ -1,0 +1,134 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: var(--background-color);
+  box-shadow: 0 2px 8px var(--foreground-color);
+  border-bottom: 1px solid var(--foreground-color);
+}
+
+.header_inner {
+  padding: 20px 100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header_title {
+  font-weight: bold !important;
+  letter-spacing: 2px;
+  cursor: pointer !important;
+  margin: 0 !important;
+  &:hover {
+    opacity: 0.7 !important;
+  }
+}
+
+.header_logout_button {
+  background-color: var(--background-color) !important;
+  color: var(--primary-text-color) !important;
+  border: 1px solid var(--primary-text-color) !important;
+  margin-right: 20px;
+  &:hover {
+    opacity: 0.7;
+    border-color: var(--primary-text-color) !important;
+  }
+}
+
+.header_avatar {
+  cursor: pointer;
+}
+
+/* dropdown start */
+.custom_dropdown {
+  background-color: var(--foreground-color);
+  color: var(--primary-text-color);
+  border-radius: 10px;
+}
+
+.custom_dropdown .ant-dropdown-menu {
+  background-color: var(--foreground-color);
+  box-shadow: none !important;
+  padding: 0px;
+}
+
+.custom_dropdown .ant-dropdown-menu-item {
+  background-color: var(--foreground-color);
+  color: var(--primary-text-color);
+  padding: 10px !important;
+  margin: 10px 10px 5px 10px !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+  text-transform: capitalize;
+  text-align: left !important;
+
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+}
+
+.custom_dropdown .ant-dropdown-menu-item:last-child {
+  margin-bottom: 10px !important;
+}
+
+.custom_dropdown .ant-dropdown-menu-item:hover {
+  background-color: var(--hover-color) !important;
+}
+
+.custom_dropdown .ant-dropdown-arrow::before,
+.custom_dropdown .ant-dropdown-arrow::after {
+  border: 1px solid var(--secondary-text-color) !important;
+}
+
+.custom_dropdown .ant-dropdown-menu-item-divider {
+  margin: 5px 0 !important;
+  border-top: 1px solid var(--secondary-text-color);
+  padding: 0 !important;
+}
+
+.custom_dropdown .ant-dropdown-menu-submenu-title {
+  background-color: var(--foreground-color) !important;
+  color: var(--primary-text-color) !important;
+  padding: 10px !important;
+  margin: 10px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 15px !important;
+}
+
+.custom_dropdown .ant-dropdown-menu-submenu-title:hover {
+  background-color: var(--hover-color) !important;
+}
+
+.custom_dropdown.lang-en .ant-dropdown-menu-submenu-arrow {
+  transform: translateX(5px);
+}
+
+.custom_dropdown .ant-dropdown-menu-submenu-arrow svg {
+  color: var(--secondary-text-color) !important;
+}
+
+.custom_dropdown .ant-dropdown-menu-submenu {
+  background-color: var(--foreground-color) !important;
+}
+
+.ant-dropdown-menu-sub {
+  background-color: var(--foreground-color) !important;
+}
+
+.ant-dropdown-menu-sub .ant-dropdown-menu-item {
+  background-color: var(--foreground-color);
+  color: var(--primary-text-color);
+  padding: 10px !important;
+  font-size: 15px !important;
+  text-transform: capitalize;
+  text-align: left !important;
+}
+
+.ant-dropdown-menu-sub .ant-dropdown-menu-item:hover {
+  background-color: var(--hover-color) !important;
+}
+/* dropdown end */

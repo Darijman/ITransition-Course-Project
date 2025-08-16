@@ -39,7 +39,6 @@ interface Props {
   onClear?: () => void;
 }
 
-// 👇 оборачиваем весь компонент в forwardRef
 export const InputField = forwardRef<InputRef, Props>(({
   variant,
   size,
