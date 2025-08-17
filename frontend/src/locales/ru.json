@@ -6,11 +6,18 @@
     "lang_en": "Английский (US)",
     "lang_ru": "Русский (RU)",
     "profile": "Профиль",
-    "sign_out": "Выйти из аккаунта"
+    "sign_out": "Выйти из аккаунта",
+    "sign_in_text": "Войти",
+    "sign_up_text": "Создать аккаунт"
   },
   "delete_modal": {
     "logout_text": "Вы выйдете из своей учётной записи и вам нужно будет войти снова.",
     "confirm_logout_text": "Да, выйти",
     "cancel_logout_text": "Отмена"
+  },
+  "home": {
+    "top_inventories_title": "Топ Популярных Инвентарей",
+    "inventories_table_title": "Все Инвентари",
+    "inventories_table_search_placeholder": "Найти инвентарь.."
   }
 }

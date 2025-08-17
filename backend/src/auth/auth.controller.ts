@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './registerUser.dto';
@@ -9,6 +9,7 @@ import { UserDuplicateEmailFilter } from 'src/common/filters/user-duplicate-emai
 import { GoogleAuthGuard } from './strategies/google/google-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { GithubAuthGuard } from './strategies/github/github-auth.guard';
+import { SocialProfile } from './strategies/social.types';
 
 @UseFilters(UserDuplicateEmailFilter)
 @Controller('auth')
@@ -87,7 +88,20 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
-    const { access_token } = await this.authService.socialLogin(req.user);
+    if (!req.user?.provider || !req.user?.providerId) {
+      throw new BadRequestException({ error: 'Provider info missing!' });
+    }
+
+    const profile: SocialProfile = {
+      provider: req.user.provider,
+      providerId: req.user.providerId,
+      email: req.user.email!,
+      name: req.user.name!,
+      avatarUrl: req.user.avatarUrl,
+      role: req.user.role,
+    };
+
+    const { access_token } = await this.authService.socialLogin(profile);
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
@@ -111,7 +125,20 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
   async githubAuthCallback(@Req() req: Request, @Res() res: Response) {
-    const { access_token } = await this.authService.socialLogin(req.user);
+    if (!req.user?.provider || !req.user?.providerId) {
+      throw new BadRequestException({ error: 'Provider info missing!' });
+    }
+
+    const profile: SocialProfile = {
+      provider: req.user.provider,
+      providerId: req.user.providerId,
+      email: req.user.email!,
+      name: req.user.name!,
+      avatarUrl: req.user.avatarUrl,
+      role: req.user.role,
+    };
+
+    const { access_token } = await this.authService.socialLogin(profile);
 
     res.cookie('access_token', access_token, {
       httpOnly: true,

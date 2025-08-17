@@ -1,0 +1,79 @@
+.inventories_table {
+  background-color: var(--foreground-color);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.inventories_table_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.table {
+  background-color: var(--background-color);
+  color: var(--primary-text-color);
+  border: 1px solid var(--foreground-color);
+  border-radius: 10px;
+}
+
+.table .ant-table-thead > tr > th {
+  background-color: var(--hover-color);
+  color: var(--secondary-text-color);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px;
+}
+
+.table .ant-table-tbody > tr > td {
+  background-color: var(--background-color);
+  color: var(--primary-text-color);
+  border-bottom: 1px solid var(--foreground-color);
+  padding: 12px;
+}
+
+.table .ant-table-tbody > tr:not(.ant-table-row-selected):hover > td {
+  background-color: var(--foreground-color) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.table .ant-table-row-selected > td {
+  background-color: var(--submit-button-color) !important;
+  color: #fff;
+}
+
+.table .ant-table-row-selected:hover > td {
+  background-color: var(--submit-button-color) !important;
+}
+
+.table .ant-table-tbody > tr.ant-table-row-error > td {
+  background-color: var(--red-color);
+  color: #fff;
+}
+
+.custom_search .ant-input-search-button {
+  background-color: var(--submit-button-color) !important;
+  border-color: var(--submit-button-color) !important;
+  color: #ffffff !important;
+}
+
+.custom_search .ant-input-search-button:hover {
+  background-color: var(--submit-button-color) !important;
+  border-color: var(--submit-button-color) !important;
+  color: #ffffff !important;
+  opacity: 0.7 !important;
+}
+
+.custom_search .ant-input {
+  color: black !important;
+}
+
+.custom_search .ant-input::placeholder {
+  color: var(--secondary-text-color) !important;
+}
+
+.table_column_title:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}

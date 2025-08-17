@@ -16,14 +16,15 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
+import { InventoryStatuses } from './inventoryStatuses.enum';
 
 @Entity('inventories')
 export class Inventory {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column({ type: 'boolean', default: true })
-  isPublic: boolean;
+  @Column({ type: 'enum', enum: InventoryStatuses, default: InventoryStatuses.PUBLIC })
+  status: InventoryStatuses;
 
   @Column({ type: 'varchar', length: 100 })
   title: string;

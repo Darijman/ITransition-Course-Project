@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import { Inventory } from './inventory.entity';
 import { CreateInventoryDto } from './createInventory.dto';
 import { extractPublicIdFromUrl } from 'src/common/cloudinary/cloudinary.helpers';
@@ -10,6 +10,14 @@ import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 import { UserRoles } from 'src/users/userRoles.enum';
 import { ReqUser } from 'src/interfaces/ReqUser';
+import { InventoryStatuses } from './inventoryStatuses.enum';
+
+interface Query {
+  limit?: number;
+  offset?: number;
+  status?: InventoryStatuses | 'ALL';
+  searchValue?: string;
+}
 
 @Injectable()
 export class InventoriesService {
@@ -29,21 +37,93 @@ export class InventoriesService {
     return await this.inventoriesRepository.find();
   }
 
-  async getAllPublicInventories(userId?: number): Promise<Inventory[]> {
-    const query = this.inventoriesRepository
+  async getAllPublicInventories(user?: ReqUser, query: Query = {}): Promise<Inventory[]> {
+    const { limit = 10, offset = 0, status = 'ALL', searchValue } = query;
+
+    if (limit < 0 || offset < 0) {
+      throw new BadRequestException({ error: 'Negative numbers are not allowed!' });
+    }
+
+    const qb = this.inventoriesRepository
       .createQueryBuilder('inventory')
-      .leftJoinAndSelect('inventory.category', 'category')
       .leftJoinAndSelect('inventory.creator', 'creator')
+      .leftJoinAndSelect('inventory.category', 'category')
       .leftJoinAndSelect('inventory.items', 'items')
       .leftJoinAndSelect('inventory.tags', 'tags');
 
-    if (userId) {
-      query.where('inventory.isPublic = :isPublic', { isPublic: true }).orWhere('inventory.creatorId = :userId', { userId });
-    } else {
-      query.where('inventory.isPublic = :isPublic', { isPublic: true });
+    if (user?.role !== UserRoles.ADMIN) {
+      qb.where(
+        new Brackets((qb1) => {
+          if (!user) {
+            qb1.where('inventory.status = :publicStatus', { publicStatus: InventoryStatuses.PUBLIC });
+          } else if (status === 'ALL') {
+            qb1.where('inventory.status = :publicStatus OR inventory.creatorId = :userId', {
+              publicStatus: InventoryStatuses.PUBLIC,
+              userId: user.id,
+            });
+          } else {
+            qb1.where('inventory.status = :status OR inventory.creatorId = :userId', {
+              status,
+              userId: user.id,
+            });
+          }
+        }),
+      );
+    } else if (status !== 'ALL') {
+      qb.where('inventory.status = :status', { status });
     }
 
-    return query.getMany();
+    if (searchValue) {
+      const search = `%${searchValue.toLowerCase()}%`;
+      qb.andWhere(
+        new Brackets((qb1) => {
+          qb1
+            .where('LOWER(inventory.title) LIKE :search', { search })
+            .orWhere('LOWER(creator.name) LIKE :search', { search })
+            .orWhere('LOWER(category.title) LIKE :search', { search })
+            .orWhere(
+              (qb2) => {
+                const subQuery = qb2
+                  .subQuery()
+                  .select('itr.inventoryId')
+                  .from('inventory_tags_relation', 'itr')
+                  .leftJoin('inventory_tags', 't', 'itr.tagId = t.id')
+                  .where('LOWER(t.title) LIKE :search')
+                  .getQuery();
+                return 'inventory.id IN ' + subQuery;
+              },
+              { search },
+            );
+        }),
+      );
+    }
+
+    qb.orderBy('inventory.createdAt', 'DESC').take(limit).skip(offset).distinct(true);
+    return qb.getMany();
+  }
+
+  async getTopPublicInventories(user?: ReqUser, limit: number = 5): Promise<Inventory[]> {
+    const inventories = await this.inventoriesRepository
+      .createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.category', 'category')
+      .leftJoinAndSelect('inventory.creator', 'creator')
+      .leftJoinAndSelect('inventory.tags', 'tags')
+      .loadRelationCountAndMap('inventory._itemsCount', 'inventory.items')
+      .getMany();
+
+    let filtered: Inventory[];
+
+    if (user?.role === UserRoles.ADMIN) {
+      filtered = inventories.sort((a, b) => ((b as any)._itemsCount ?? 0) - ((a as any)._itemsCount ?? 0)).slice(0, limit);
+    } else {
+      filtered = inventories
+        .filter((inv) => inv.status === InventoryStatuses.PUBLIC || (user && inv.creatorId === user.id))
+        .sort((a, b) => ((b as any)._itemsCount ?? 0) - ((a as any)._itemsCount ?? 0))
+        .slice(0, limit);
+    }
+
+    filtered.forEach((inv) => delete (inv as any)._itemsCount);
+    return filtered;
   }
 
   async createNewInventory(createInventoryDto: CreateInventoryDto, user: { id: number; name: string; role: UserRoles }): Promise<Inventory> {
@@ -84,7 +164,7 @@ export class InventoriesService {
     return inventory;
   }
 
-  async updateInventoryVisibility(inventoryId: number, isPublic: boolean, user: ReqUser) {
+  async updateInventoryStatus(inventoryId: number, status: InventoryStatuses, user: ReqUser) {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
@@ -95,7 +175,7 @@ export class InventoriesService {
     }
 
     if (user.role === UserRoles.ADMIN) {
-      await this.inventoriesRepository.update(inventoryId, { isPublic });
+      await this.inventoriesRepository.update(inventoryId, { status });
       return { success: true };
     }
 
@@ -112,7 +192,7 @@ export class InventoriesService {
       throw new ForbiddenException({ error: 'You do not have permission to change visibility!' });
     }
 
-    await this.inventoriesRepository.update(inventoryId, { isPublic });
+    await this.inventoriesRepository.update(inventoryId, { status });
     return { success: true };
   }
 

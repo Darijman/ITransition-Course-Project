@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
-import { IsString, IsOptional, IsNotEmpty, IsInt, MaxLength, MinLength, Min, IsArray, ArrayNotEmpty, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsInt, MaxLength, MinLength, Min, IsArray, ArrayNotEmpty, IsEnum } from 'class-validator';
+import { InventoryStatuses } from './inventoryStatuses.enum';
 
 export class CreateInventoryDto {
   @IsString({ message: 'Title must be a string!' })
@@ -34,12 +35,12 @@ export class CreateInventoryDto {
   @Min(1, { message: 'Inventory category ID must be positive!' })
   categoryId: number;
 
+  @IsEnum(InventoryStatuses, { message: 'Status must be either PUBLIC or PRIVATE!' })
   @Transform(({ value }) => {
     if (typeof value === 'string') {
-      return value === 'true';
+      return value.toUpperCase() === 'PRIVATE' ? InventoryStatuses.PRIVATE : InventoryStatuses.PUBLIC;
     }
-    return Boolean(value);
+    return InventoryStatuses.PUBLIC;
   })
-  @IsBoolean({ message: 'isPublic must be a boolean!' })
-  isPublic: boolean;
+  status: InventoryStatuses;
 }

@@ -2,6 +2,7 @@
   background-color: var(--foreground-color);
   padding: 20px;
   border-radius: 10px;
+  margin-bottom: 20px;
 }
 
 .home_top_five_grid {

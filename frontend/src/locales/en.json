@@ -5,11 +5,18 @@
     "lang_en": "English (US)",
     "lang_ru": "Russian (RU)",
     "profile": "Profile",
-    "sign_out": "Sign Out"
+    "sign_out": "Sign Out",
+    "sign_in_text": "Log in",
+    "sign_up_text": "Sign up"
   },
   "delete_modal": {
     "logout_text": "You will be logged out of your account and will need to sign in again.",
     "confirm_logout_text": "Yes, sign out",
     "cancel_logout_text": "Cancel"
+  },
+  "home": {
+    "top_inventories_title": "Top Popular Inventories",
+    "inventories_table_title": "All Inventories",
+    "inventories_table_search_placeholder": "Search inventory.."
   }
 }

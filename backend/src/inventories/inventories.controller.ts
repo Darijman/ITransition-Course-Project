@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req, Body, Patch, Query } from '@nestjs/common';
 import { InventoriesService } from './inventories.service';
 import { Inventory } from './inventory.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
@@ -11,6 +11,7 @@ import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomPa
 import { InventoryOwnerOrAdminGuard } from 'src/guards/inventoryOwnerOrAdmin.guard';
 import { Admin } from 'src/auth/auth.decorators';
 import { OptionalAuthGuard } from 'src/guards/optionalAuth.guard';
+import { InventoryStatuses } from './inventoryStatuses.enum';
 
 @Controller('inventories')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -28,9 +29,28 @@ export class InventoriesController {
 
   @UseGuards(OptionalAuthGuard)
   @Get('/public')
-  async getAllPublicInventories(@Req() req: Request): Promise<Inventory[]> {
-    const userId: number | undefined = req.user?.id;
-    return this.inventoriesService.getAllPublicInventories(userId);
+  async getAllPublicInventories(
+    @Req() req: Request,
+    @Query('searchValue') searchValue: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('status') status?: InventoryStatuses | 'ALL',
+  ): Promise<Inventory[]> {
+    const query = {
+      limit: limit ? parseInt(limit, 10) : undefined,
+      offset: offset ? parseInt(offset, 10) : undefined,
+      status,
+      searchValue,
+    };
+
+    return this.inventoriesService.getAllPublicInventories(req.user, query);
+  }
+
+  @UseGuards(OptionalAuthGuard)
+  @Get('/public/top')
+  async getTopPublicInventories(@Req() req: Request, @Query('limit') limit?: string): Promise<Inventory[]> {
+    const parsedLimit = limit ? parseInt(limit, 10) : 5;
+    return this.inventoriesService.getTopPublicInventories(req.user, parsedLimit);
   }
 
   @UseGuards(AuthGuard)
@@ -57,13 +77,13 @@ export class InventoriesController {
   }
 
   @UseGuards(AuthGuard)
-  @Patch(':inventoryId/visibility')
-  async updateInventoryVisibility(
+  @Patch(':inventoryId/status')
+  async updateInventoryStatus(
     @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
-    @Body() body: { isPublic: boolean },
+    @Body() body: { status: InventoryStatuses },
     @Req() req: Request,
   ): Promise<{ success: boolean }> {
-    return await this.inventoriesService.updateInventoryVisibility(inventoryId, body.isPublic, req.user);
+    return await this.inventoriesService.updateInventoryStatus(inventoryId, body.status, req.user);
   }
 
   @UseGuards(AuthGuard, InventoryOwnerOrAdminGuard)

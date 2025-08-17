@@ -1,6 +1,6 @@
 'use client';
 
-import { Typography, Avatar, MenuProps, Dropdown } from 'antd';
+import { Typography, Avatar, MenuProps, Dropdown, Button } from 'antd';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { SwitchTheme } from './switchThemes/SwitchTheme';
@@ -11,6 +11,7 @@ import { IoLanguageOutline } from 'react-icons/io5';
 import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
+import NoAvatar from '@/assets/svg/no-avatar.svg';
 import api from '../../../axiosConfig';
 import './header.css';
 import './responsive.css';
@@ -31,13 +32,24 @@ export const Header = () => {
   const [isLoggingOut, setIsloggingOut] = useState<boolean>(false);
 
   const items: MenuProps['items'] = [
-    {
-      key: 'profile',
-      icon: <UserOutlined style={{ fontSize: 20 }} />,
-      label: t('header.profile'),
-      style: pathname === '/profile' ? { fontWeight: 'bold', backgroundColor: 'var(--background-color)' } : {},
-      onClick: () => router.push('/profile'),
-    },
+    ...(user.id
+      ? [
+          {
+            key: 'profile',
+            icon: <UserOutlined style={{ fontSize: 20 }} />,
+            label: t('header.profile'),
+            style: pathname === '/profile' ? { fontWeight: 'bold', backgroundColor: 'var(--background-color)' } : {},
+            onClick: () => router.push('/profile'),
+          },
+          { type: 'divider' as const },
+          {
+            key: 'signout',
+            icon: <LogoutOutlined style={{ fontSize: 20 }} />,
+            label: t('header.sign_out'),
+            onClick: () => setShowLogoutModal(true),
+          },
+        ]
+      : []),
     {
       key: 'language',
       icon: <IoLanguageOutline style={{ fontSize: 20 }} />,
@@ -58,15 +70,6 @@ export const Header = () => {
         },
       ],
     },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'signout',
-      icon: <LogoutOutlined style={{ fontSize: 20 }} />,
-      label: t('header.sign_out'),
-      onClick: () => setShowLogoutModal(true)
-    },
   ];
 
   const logoutHandler = async () => {
@@ -75,7 +78,7 @@ export const Header = () => {
 
     try {
       await api.post(`/auth/logout`);
-      router.push('/auth');
+      router.push('/auth/login');
     } catch {
       setLogoutErrorText('Something went wrong..');
     } finally {
@@ -97,8 +100,15 @@ export const Header = () => {
         <Title level={5} onClick={() => router.push('/')} className='header_title'>
           {t('header.home')}
         </Title>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ marginRight: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {!user.id ? 
+            <div>
+              <Button onClick={() => router.push('/auth/login')} type='text'>{t('header.sign_in_text')}</Button>
+              <Button onClick={() => router.push('/auth/register')} type='primary'>{t('header.sign_up_text')}</Button>
+            </div>
+            : null
+          }
+          <div>
             <SwitchTheme />
           </div>
           <Dropdown
@@ -109,7 +119,7 @@ export const Header = () => {
             trigger={['click']}
           >
             <Avatar className='header_avatar' size={40} src={user?.avatarUrl || undefined}>
-              {user?.name?.[0]}
+              {!user?.avatarUrl && <NoAvatar />}
             </Avatar>
           </Dropdown>
         </div>

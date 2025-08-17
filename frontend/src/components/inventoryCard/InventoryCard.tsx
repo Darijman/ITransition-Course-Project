@@ -44,12 +44,27 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
             )}
           </Link>
         }
-        title={inventory.title}
+        title={
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <Tooltip title={inventory.title}>
+                <Text className='inventory_card_title' ellipsis={{ tooltip: inventory.title }}>
+                  {inventory.title}
+                </Text>
+              </Tooltip>
+            </div>
+            <Tag color='#595959' style={{ marginLeft: 8 }}>
+              {inventory.isPublic ? 'Public' : 'Private'}
+            </Tag>
+          </div>
+        }
         description={
           <div className='meta'>
             <Space size={8} wrap>
               {inventory.category?.title && <Tag color='gray'>{inventory?.category.title}</Tag>}
+
               <Text>{inventory?.items?.length ?? 0} items</Text>
+
               {inventory.creator?.name && (
                 <Link href={`/users/${inventory.creator.id}`}>
                   <Text className='inventory_card_creator_name'>· by {inventory.creator.name}</Text>
