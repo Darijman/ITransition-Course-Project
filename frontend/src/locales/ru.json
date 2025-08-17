@@ -6,6 +6,7 @@
     "lang_en": "Английский (US)",
     "lang_ru": "Русский (RU)",
     "profile": "Профиль",
+    "new_inventory": "Новый инвентарь",
     "sign_out": "Выйти из аккаунта",
     "sign_in_text": "Войти",
     "sign_up_text": "Создать аккаунт"
@@ -18,6 +19,21 @@
   "home": {
     "top_inventories_title": "Топ Популярных Инвентарей",
     "inventories_table_title": "Все Инвентари",
-    "inventories_table_search_placeholder": "Найти инвентарь.."
+    "inventories_table_search_placeholder": "Найти инвентарь..",
+    "create_inventory_text": "Создать Инвентарь",
+    "top_inventories_error_text": "Не удалось загрузить топ инвентари!"
+  },
+  "inventory": {
+    "title": "Инвентарь"
+  },
+  "profile": {
+    "error_text": "Не удалось загрузить ваш профиль!",
+    "user_info": "Информация о пользователе",
+    "user_info_name": "Имя",
+    "user_info_email": "Электронная почта",
+    "user_info_provider": "Вход через",
+    "user_info_provider_default": "Вручную",
+    "user_info_joined_date": "Присоединился"
+
   }
 }

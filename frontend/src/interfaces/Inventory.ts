@@ -5,9 +5,14 @@ import { InventoryTag } from './InventoryTag';
 import { InventoryUser } from './InventoryUser';
 import { User } from './User';
 
+export enum InventoryStatuses {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+}
+
 export interface Inventory {
   id: number;
-  isPublic: boolean;
+  status: InventoryStatuses;
   title: string;
   description?: string;
   imageUrl: string;

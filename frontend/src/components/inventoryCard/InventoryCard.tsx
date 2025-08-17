@@ -2,9 +2,8 @@
 
 import { Card, Tag, Avatar, Typography, Space, Tooltip } from 'antd';
 import { AppstoreOutlined } from '@ant-design/icons';
-import { Inventory } from '@/interfaces/Inventory';
+import { Inventory, InventoryStatuses } from '@/interfaces/Inventory';
 import Link from 'next/link';
-import NoAvatar from '@/assets/svg/no-avatar.svg';
 import Image from 'next/image';
 import './inventoryCard.css';
 
@@ -19,13 +18,15 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
   const imageSrc = inventory.imageUrl && inventory.imageUrl.trim().length > 0 ? inventory.imageUrl : undefined;
   const avatarSrc = inventory.creator?.avatarUrl && inventory.creator.avatarUrl.trim().length > 0 ? inventory.creator.avatarUrl : undefined;
 
+  console.log(`inventory`, inventory);
+
   return (
     <Card
       className='inventory_card'
       cover={
         <div className='cover_wrap'>
           {imageSrc ? (
-            <Image alt={inventory.title} src={imageSrc} width={300} height={200} className='cover_img' />
+            <Image alt={inventory.title} src={imageSrc || '/inventory-placeholder.svg'} width={300} height={200} className='cover_img' />
           ) : (
             <div className='cover_placeholder'>
               <AppstoreOutlined className='cover_icon' />
@@ -37,11 +38,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
       <Meta
         avatar={
           <Link href={`/users/${inventory.creator?.id}`}>
-            {avatarSrc ? (
-              <Avatar className='inventory_card_avatar' size={40} src={avatarSrc} />
-            ) : (
-              <Avatar className='inventory_card_avatar' size={40} icon={<NoAvatar />} />
-            )}
+            <Avatar className='inventory_card_avatar' size={40} src={avatarSrc || '/no-avatar.svg'} />
           </Link>
         }
         title={
@@ -54,7 +51,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
               </Tooltip>
             </div>
             <Tag color='#595959' style={{ marginLeft: 8 }}>
-              {inventory.isPublic ? 'Public' : 'Private'}
+              {inventory.status === InventoryStatuses.PUBLIC ? 'Public' : 'Private'}
             </Tag>
           </div>
         }

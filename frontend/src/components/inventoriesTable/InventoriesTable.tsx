@@ -2,11 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Table, Typography, Spin, Empty, message, Input, Button } from 'antd';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { FileAddOutlined } from '@ant-design/icons';
-import './inventoriesTable.css';
 import { useTranslations } from 'next-intl';
 import { Select } from '../select/Select';
+import { InventoryStatuses } from '@/interfaces/Inventory';
+import { ColumnsType } from 'antd/es/table';
+import { MdBackpack } from 'react-icons/md';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import api from '../../../axiosConfig';
+import './inventoriesTable.css';
 
 const { Title } = Typography;
 
@@ -16,21 +19,24 @@ const selectOptions = [
   { label: 'Private', value: 'PRIVATE' },
 ];
 
+interface Query {
+  offset?: number;
+  limit?: number;
+  status?: 'ALL' | InventoryStatuses;
+  searchValue?: string;
+}
+
 interface InventoriesTableProps<T> {
-  data: T[]; // массив данных
-  getData?: (offset: number, limit: number) => Promise<T[]>; // функция для подгрузки
-  columns: any[]; // колонки таблицы
-  rowKey: string | ((record: T) => string | number); // ключ строки
-  title?: string; // заголовок таблицы
+  columns: ColumnsType<T>;
+  rowKey: string | ((record: T) => string | number);
+  title: string;
   pageLimit?: number;
-  searchKeys?: string[];
+  searchKeys: string[];
   showCreateButton?: boolean;
   onCreate?: () => void;
 }
 
 export const InventoriesTable = <T extends object>({
-  data,
-  getData,
   columns,
   rowKey,
   title = 'Items',
@@ -42,29 +48,29 @@ export const InventoriesTable = <T extends object>({
   const t = useTranslations();
 
   const [items, setItems] = useState<T[]>([]);
-  const [offset, setOffset] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
 
+  const [query, setQuery] = useState<Query>({
+    offset: 0,
+    limit: pageLimit,
+    status: 'ALL',
+    searchValue: '',
+  });
   const [searchValue, setSearchValue] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PUBLIC' | 'PRIVATE'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | InventoryStatuses>('ALL');
 
   useEffect(() => {
     const fetchInitial = async () => {
-      if (!getData) {
-        setItems(data);
-        setHasMore(false);
-        return;
-      }
-
       setIsLoading(true);
+
       try {
-        const initial = await getData(0, pageLimit);
-        setItems(initial);
-        setHasMore(initial.length === pageLimit);
-        setOffset(0);
+        const { data } = await api.get(`/inventories/public`, { params: query });
+        setItems(data);
+        setHasMore(data.length === (query.limit ?? pageLimit));
+        setQuery((prev) => ({ ...prev, offset: 0 }));
       } catch {
         messageApi.open({ type: 'error', content: 'Failed to load data!' });
       } finally {
@@ -73,18 +79,21 @@ export const InventoriesTable = <T extends object>({
     };
 
     fetchInitial();
-  }, [data, getData, messageApi, pageLimit]);
+  }, [messageApi, query, pageLimit]);
 
   const loadMore = async () => {
-    if (isLoading || !hasMore || !getData) return;
-    setIsLoading(true);
+    if (isLoading || !hasMore) return;
 
+    setIsLoading(true);
     try {
-      const nextOffset = offset + items.length;
-      const newItems = await getData(nextOffset, pageLimit);
-      setItems((prev) => [...prev, ...newItems]);
-      setHasMore(newItems.length === pageLimit);
-      setOffset(nextOffset);
+      const nextOffset = (query.offset ?? 0) + (query.limit ?? pageLimit);
+      const { data } = await api.get(`/inventories/public`, {
+        params: { ...query, offset: nextOffset },
+      });
+
+      setItems((prev) => [...prev, ...data]);
+      setHasMore(data.length === (query.limit ?? pageLimit));
+      setQuery((prev) => ({ ...prev, offset: nextOffset }));
     } catch {
       messageApi.open({ type: 'error', content: 'Failed to load more data!' });
     } finally {
@@ -92,11 +101,20 @@ export const InventoriesTable = <T extends object>({
     }
   };
 
+  const handleSearchChange = (val: string) => {
+    setSearchValue(val);
+    setQuery((prev) => ({ ...prev, searchValue: val, offset: 0 }));
+  };
+
+  const handleStatusChange = (val: 'ALL' | InventoryStatuses) => {
+    setStatusFilter(val);
+    setQuery((prev) => ({ ...prev, status: val, offset: 0 }));
+  };
+
   const getValueByPath = (obj: any, path: string) => {
     return path.split('.').reduce((acc, part) => {
       if (!acc) return undefined;
       if (Array.isArray(acc)) {
-        // для массивов собираем все значения
         return acc
           .map((item) => item?.[part])
           .filter(Boolean)
@@ -108,21 +126,22 @@ export const InventoriesTable = <T extends object>({
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
-      // Фильтр по статусу
       if (statusFilter !== 'ALL') {
-        const isPublic = (item as any).isPublic;
-        if ((statusFilter === 'PUBLIC' && !isPublic) || (statusFilter === 'PRIVATE' && isPublic)) {
+        const status = (item as any).status as InventoryStatuses;
+        if (
+          (statusFilter === 'PUBLIC' && status !== InventoryStatuses.PUBLIC) ||
+          (statusFilter === 'PRIVATE' && status !== InventoryStatuses.PRIVATE)
+        ) {
           return false;
         }
       }
 
-      // Фильтр по поиску
       if (!searchValue) return true;
 
       return searchKeys.some((key) => {
         let val;
         if (key === 'status') {
-          val = (item as any).isPublic ? 'Public' : 'Private';
+          val = (item as any).status;
         } else {
           val = getValueByPath(item, key as string);
         }
@@ -144,7 +163,7 @@ export const InventoriesTable = <T extends object>({
           style={{ width: 200 }}
           placeholder={t('home.inventories_table_search_placeholder')}
           value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
         />
 
         <Select
@@ -152,14 +171,12 @@ export const InventoriesTable = <T extends object>({
           placeholder='Select a status'
           value={statusFilter}
           style={{ width: 200 }}
-          onChange={(value) => {
-            setStatusFilter(value);
-          }}
+          onChange={handleStatusChange}
         />
 
         {showCreateButton && onCreate && (
-          <Button type='primary' icon={<FileAddOutlined />} onClick={onCreate}>
-            Create
+          <Button type='primary' icon={<MdBackpack />} onClick={onCreate}>
+            {t('home.create_inventory_text')}
           </Button>
         )}
       </div>

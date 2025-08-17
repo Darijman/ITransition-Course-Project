@@ -11,7 +11,7 @@ import { IoLanguageOutline } from 'react-icons/io5';
 import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
-import NoAvatar from '@/assets/svg/no-avatar.svg';
+import { MdBackpack } from 'react-icons/md';
 import api from '../../../axiosConfig';
 import './header.css';
 import './responsive.css';
@@ -41,13 +41,14 @@ export const Header = () => {
             style: pathname === '/profile' ? { fontWeight: 'bold', backgroundColor: 'var(--background-color)' } : {},
             onClick: () => router.push('/profile'),
           },
-          { type: 'divider' as const },
           {
-            key: 'signout',
-            icon: <LogoutOutlined style={{ fontSize: 20 }} />,
-            label: t('header.sign_out'),
-            onClick: () => setShowLogoutModal(true),
+            key: 'inventoryNew',
+            icon: <MdBackpack style={{ fontSize: 20 }} />,
+            label: t('header.new_inventory'),
+            style: pathname === '/inventories/new' ? { fontWeight: 'bold', backgroundColor: 'var(--background-color)' } : {},
+            onClick: () => router.push('/inventories/new'),
           },
+          { type: 'divider' as const },
         ]
       : []),
     {
@@ -70,6 +71,16 @@ export const Header = () => {
         },
       ],
     },
+    ...(user.id
+      ? [
+          {
+            key: 'signout',
+            icon: <LogoutOutlined style={{ fontSize: 20 }} />,
+            label: t('header.sign_out'),
+            onClick: () => setShowLogoutModal(true),
+          },
+        ]
+      : []),
   ];
 
   const logoutHandler = async () => {
@@ -101,13 +112,16 @@ export const Header = () => {
           {t('header.home')}
         </Title>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {!user.id ? 
+          {!user.id ? (
             <div>
-              <Button onClick={() => router.push('/auth/login')} type='text'>{t('header.sign_in_text')}</Button>
-              <Button onClick={() => router.push('/auth/register')} type='primary'>{t('header.sign_up_text')}</Button>
+              <Button onClick={() => router.push('/auth/login')} type='text'>
+                {t('header.sign_in_text')}
+              </Button>
+              <Button onClick={() => router.push('/auth/register')} type='primary'>
+                {t('header.sign_up_text')}
+              </Button>
             </div>
-            : null
-          }
+          ) : null}
           <div>
             <SwitchTheme />
           </div>
@@ -118,8 +132,8 @@ export const Header = () => {
             arrow
             trigger={['click']}
           >
-            <Avatar className='header_avatar' size={40} src={user?.avatarUrl || undefined}>
-              {!user?.avatarUrl && <NoAvatar />}
+            <Avatar className='header_avatar' size={40} src={user?.avatarUrl || '/no-avatar.svg'}>
+              {!user?.avatarUrl}
             </Avatar>
           </Dropdown>
         </div>

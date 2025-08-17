@@ -10,3 +10,28 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
+
+.inventories_table_columns_creator_name {
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.inventories_table_columns_title {
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.inventories_table_columns_image {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  &:hover {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}

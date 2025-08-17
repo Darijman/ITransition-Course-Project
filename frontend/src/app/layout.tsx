@@ -21,7 +21,9 @@ export default function RootLayout({
       <body>
         <ConfigProvider theme={theme}>
           <ThemeProvider attribute='data-theme' defaultTheme='system' enableSystem>
-            <LocaleProvider>{children}</LocaleProvider>
+            <LocaleProvider>
+              {children}
+            </LocaleProvider>
           </ThemeProvider>
         </ConfigProvider>
       </body>

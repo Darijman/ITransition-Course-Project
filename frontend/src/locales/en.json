@@ -5,6 +5,7 @@
     "lang_en": "English (US)",
     "lang_ru": "Russian (RU)",
     "profile": "Profile",
+    "new_inventory": "New inventory",
     "sign_out": "Sign Out",
     "sign_in_text": "Log in",
     "sign_up_text": "Sign up"
@@ -17,6 +18,20 @@
   "home": {
     "top_inventories_title": "Top Popular Inventories",
     "inventories_table_title": "All Inventories",
-    "inventories_table_search_placeholder": "Search inventory.."
+    "inventories_table_search_placeholder": "Search inventory..",
+    "create_inventory_text": "Create Inventory",
+    "top_inventories_error_text": "Failed to load top inventories!"
+  },
+  "inventory": {
+    "title": "Inventory"
+  },
+  "profile": {
+    "error_text": "Failed to load your profile!",
+    "user_info": "User Info",
+    "user_info_name": "Name",
+    "user_info_email": "Email",
+    "user_info_provider": "Sign in with",
+    "user_info_provider_default": "Manual",
+    "user_info_joined_date": "Joined"
   }
 }
