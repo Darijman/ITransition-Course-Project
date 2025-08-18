@@ -8,21 +8,25 @@ import { useCallback, useEffect, useState } from 'react';
 import { CiSettings } from 'react-icons/ci';
 import { MdDelete } from 'react-icons/md';
 import { Loader } from '@/ui/loader/Loader';
+import { useRouter } from 'next/navigation';
+import { DeleteModal } from '@/components/deleteModal/DeleteModal';
+import { UserRoles } from '@/interfaces/UserRoles.enum';
 import api from '../../../../axiosConfig';
 import './profile.css';
-import { useRouter } from 'next/navigation';
 
 const { Title } = Typography;
 const { Item } = Descriptions;
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const t = useTranslations();
   const router = useRouter();
 
   const [userData, setUserData] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
+
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState<boolean>(false);
 
   const getUserData = useCallback(async () => {
     if (!user.id) return;
@@ -42,7 +46,27 @@ const Profile = () => {
     getUserData();
   }, [getUserData]);
 
-  console.log(`userData`, userData);
+  const deleteUserAccountHandler = async () => {
+    if (!user.id) return;
+
+    setIsLoading(true);
+    try {
+      await api.delete(`/users/${user.id}`);
+      await api.post(`/auth/logout`);
+      setUser({ id: 0, name: '', role: UserRoles.USER, avatarUrl: '', hasPassword: false });
+      setUserData(null);
+
+      messageApi.info({
+        content: t('profile.account_deleted_text'),
+        onClose: () => router.push('/'),
+        duration: 3,
+      });
+    } catch {
+      messageApi.error({ content: t('profile.account_deleted_error_text') });
+    } finally {
+      setShowDeleteAccountModal(false);
+    }
+  };
 
   return (
     <div>
@@ -99,6 +123,7 @@ const Profile = () => {
               danger
               iconPosition='start'
               icon={<MdDelete style={{ fontSize: '20px' }} />}
+              onClick={() => setShowDeleteAccountModal(true)}
             >
               {t('profile.delete_account_text')}
             </Button>
@@ -109,11 +134,22 @@ const Profile = () => {
               icon={<CiSettings style={{ fontSize: '20px' }} />}
               onClick={() => router.push('/profile/settings')}
             >
-              {t('profile.settings')}
+              {t('profile.account_settings_text')}
             </Button>
           </div>
         </div>
       )}
+
+      <DeleteModal
+        open={showDeleteAccountModal}
+        onClose={() => setShowDeleteAccountModal(false)}
+        onDelete={deleteUserAccountHandler}
+        title={t('profile.delete_account_modal_title')}
+        text={t('profile.delete_account_modal_text')}
+        deleteButtonText={t('profile.delete_account_confirm_button_text')}
+        cancelButtonText={t('profile.delete_account_cancel_button_text')}
+        doubleConfirm
+      />
     </div>
   );
 };

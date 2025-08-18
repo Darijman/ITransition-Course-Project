@@ -95,7 +95,7 @@ export const LoginForm = () => {
             <Button
               className='login_form_github_button'
               icon={<FaGithub style={{ fontSize: '24px' }} />}
-              onClick={() => 'http://localhost:9000/auth/github'}
+              onClick={() => (window.location.href = 'http://localhost:9000/auth/github')}
             >
               Continue with GitHub
             </Button>

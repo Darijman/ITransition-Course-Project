@@ -41,7 +41,13 @@
     "user_info_joined_date": "Присоединился",
     "profile_management": "Управление профилем",
     "delete_account_text": "Удалить мой аккаунт",
-    "settings": "Настройки",
-    "settings_title": "Настройки профиля"
+    "account_settings_text": "Настройки аккаунта",
+    "settings_title": "Настройки профиля",
+    "delete_account_modal_title": "Вы действительно хотите удалить ваш аккаунт?",
+    "delete_account_modal_text": "Это действие не может быть отменено. После удаления все ваши данные будут безвозвратно удалены.",
+    "delete_account_confirm_button_text": "Да, удалить мой аккаунт",
+    "delete_account_cancel_button_text": "Отмена",
+    "account_deleted_text": "Аккаунт успешно удален. Перенаправляем на главную страницу!",
+    "account_deleted_error_text": "Не удалось удалить аккаунт. Попробуйте позже!"
   }
 }

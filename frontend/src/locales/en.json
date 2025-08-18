@@ -40,7 +40,13 @@
     "user_info_joined_date": "Joined",
     "profile_management": "Profile Management",
     "delete_account_text": "Delete My Account",
-    "settings": "Settings",
-    "settings_title": "Profile settings"
+    "account_settings_text": "Account settings",
+    "settings_title": "Profile settings",
+    "delete_account_modal_title": "Do you really want to delete your account?",
+    "delete_account_modal_text": "This action cannot be undone. All your account data, including inventories, will be permanently deleted.",
+    "delete_account_confirm_button_text": "Yes, delete my account",
+    "delete_account_cancel_button_text": "Cancel",
+    "account_deleted_text": "Account deleted successfully. Taking you to the Home page..",
+    "account_deleted_error_text": "Failed to delete your account! Try again later.."
   }
 }

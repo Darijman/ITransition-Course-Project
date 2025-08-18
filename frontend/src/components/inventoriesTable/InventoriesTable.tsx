@@ -10,6 +10,7 @@ import { MdBackpack } from 'react-icons/md';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../axiosConfig';
 import './inventoriesTable.css';
+import { useAuth } from '@/contexts/authContext/AuthContext';
 
 const { Title } = Typography;
 
@@ -26,8 +27,7 @@ interface InventoriesTableProps<T> {
   title: string;
   pageLimit?: number;
   searchKeys: string[];
-  showCreateButton?: boolean;
-  onCreate?: () => void;
+  onCreate: () => void;
 }
 
 export const InventoriesTable = <T extends object>({
@@ -36,11 +36,11 @@ export const InventoriesTable = <T extends object>({
   title = 'Items',
   pageLimit = 20,
   searchKeys = [],
-  showCreateButton = false,
   onCreate,
 }: InventoriesTableProps<T>) => {
+  const { user } = useAuth();
   const t = useTranslations();
-  
+
   const [items, setItems] = useState<T[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -172,11 +172,11 @@ export const InventoriesTable = <T extends object>({
           onChange={handleStatusChange}
         />
 
-        {showCreateButton && onCreate && (
+        {user.id ? (
           <Button type='primary' icon={<MdBackpack />} onClick={onCreate}>
             {t('home.create_inventory_text')}
           </Button>
-        )}
+        ) : null}
       </div>
 
       <div id='scrollable-table-body' style={{ height: 500, overflow: 'auto' }}>

@@ -104,7 +104,7 @@ export const RegisterForm = () => {
               iconPosition='start'
               icon={<FaGithub style={{ fontSize: '24px' }} color='#000000' />}
               style={{ width: '100%' }}
-              onClick={() => 'http://localhost:9000/auth/github'}
+              onClick={() => (window.location.href = 'http://localhost:9000/auth/github')}
             >
               Create account with GitHub
             </Button>

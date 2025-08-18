@@ -83,7 +83,6 @@ export default function Home() {
           title={t('home.inventories_table_title')}
           pageLimit={20}
           searchKeys={['title', 'creator.name', 'tags.title', 'category.title']}
-          showCreateButton
           onCreate={() => router.push('/inventories/new')}
         />
       </div>
