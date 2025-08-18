@@ -55,12 +55,15 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('profile')
   async getProfile(@Req() req: Request) {
+    console.log(`req.user`, req.user);
+
     const user = await this.usersService.getUserById(req.user.id);
     return {
       id: user.id,
       name: user.name,
       role: user.role,
       avatarUrl: user.avatarUrl,
+      hasPassword: req.user.hasPassword,
     };
   }
 

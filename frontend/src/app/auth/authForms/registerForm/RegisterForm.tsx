@@ -6,6 +6,7 @@ import { Typography, Form, Button } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub } from 'react-icons/fa';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import api from '../../../../../axiosConfig';
 import './registerForm.css';
@@ -24,18 +25,6 @@ export const RegisterForm = () => {
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorText, setErrorText] = useState<string>('');
-  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
-  const [githubLoading, setGithubLoading] = useState<boolean>(false);
-
-  const handleGoogleRegister = () => {
-    setGoogleLoading(true);
-    window.location.href = 'http://localhost:9000/auth/google';
-  };
-
-  const handleGithubRegister = () => {
-    setGithubLoading(true);
-    window.location.href = 'http://localhost:9000/auth/github';
-  };
 
   const onFinishHandler = async (values: RegisterForm) => {
     setIsSubmitting(true);
@@ -104,8 +93,7 @@ export const RegisterForm = () => {
               iconPosition='start'
               icon={<FcGoogle style={{ fontSize: '24px' }} />}
               style={{ width: '100%' }}
-              onClick={handleGoogleRegister}
-              loading={googleLoading}
+              onClick={() => (window.location.href = 'http://localhost:9000/auth/google')}
             >
               Create account with Google
             </Button>
@@ -116,10 +104,15 @@ export const RegisterForm = () => {
               iconPosition='start'
               icon={<FaGithub style={{ fontSize: '24px' }} color='#000000' />}
               style={{ width: '100%' }}
-              onClick={handleGithubRegister}
-              loading={githubLoading}
+              onClick={() => 'http://localhost:9000/auth/github'}
             >
               Create account with GitHub
+            </Button>
+          </Form.Item>
+
+          <Form.Item>
+            <Button type='primary' href='/' iconPosition='start' icon={<ArrowLeftOutlined />}>
+              Back Home
             </Button>
           </Form.Item>
 

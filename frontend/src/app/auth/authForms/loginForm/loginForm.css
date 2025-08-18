@@ -29,3 +29,12 @@
     color: black !important;
   }
 }
+
+.login_form_home_button {
+  text-align: left;
+  justify-self: left;
+}
+
+.login_form_home_button:hover {
+  background-color: var(--background-color);
+}

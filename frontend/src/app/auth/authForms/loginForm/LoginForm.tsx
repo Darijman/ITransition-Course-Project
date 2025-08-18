@@ -6,6 +6,7 @@ import { Typography, Form, Button } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub } from 'react-icons/fa';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import api from '../../../../../axiosConfig';
 import './loginForm.css';
@@ -23,18 +24,6 @@ export const LoginForm = () => {
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorText, setErrorText] = useState<string>('');
-  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
-  const [githubLoading, setGithubLoading] = useState<boolean>(false);
-
-  const handleGoogleLogin = () => {
-    setGoogleLoading(true);
-    window.location.href = 'http://localhost:9000/auth/google';
-  };
-
-  const handleGithubLogin = () => {
-    setGithubLoading(true);
-    window.location.href = 'http://localhost:9000/auth/github';
-  };
 
   const onFinishHandler = async (values: LoginForm) => {
     setIsSubmitting(true);
@@ -95,23 +84,26 @@ export const LoginForm = () => {
 
           <Form.Item>
             <Button
-              loading={googleLoading}
               className='login_form_google_button'
               icon={<FcGoogle style={{ fontSize: '24px' }} />}
-              onClick={handleGoogleLogin}
+              onClick={() => (window.location.href = 'http://localhost:9000/auth/google')}
             >
               Continue with Google
             </Button>
-
           </Form.Item>
           <Form.Item>
             <Button
-              loading={githubLoading}
               className='login_form_github_button'
               icon={<FaGithub style={{ fontSize: '24px' }} />}
-              onClick={handleGithubLogin}
+              onClick={() => 'http://localhost:9000/auth/github'}
             >
               Continue with GitHub
+            </Button>
+          </Form.Item>
+
+          <Form.Item>
+            <Button type='primary' href='/' iconPosition='start' icon={<ArrowLeftOutlined />}>
+              Back Home
             </Button>
           </Form.Item>
 

@@ -132,8 +132,12 @@ export const Header = () => {
             arrow
             trigger={['click']}
           >
-            <Avatar className='header_avatar' size={40} src={user?.avatarUrl || '/no-avatar.svg'}>
-              {!user?.avatarUrl}
+            <Avatar
+              className={`header_avatar ${!user?.avatarUrl ? 'header_avatar_no_image' : ''}`}
+              size={40}
+              src={user?.avatarUrl || '/no-avatar.svg'}
+            >
+              {!user?.avatarUrl && user?.name?.[0]?.toUpperCase()}
             </Avatar>
           </Dropdown>
         </div>

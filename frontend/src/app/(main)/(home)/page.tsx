@@ -1,16 +1,16 @@
 'use client';
 
-import { Typography } from 'antd';
+import { notification, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { Inventory } from '@/interfaces/Inventory';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoriesTable } from '@/components/inventoriesTable/InventoriesTable';
 import { useRouter } from 'next/navigation';
+import { inventoryTableColumns } from './inventoriesTable.columns';
 import api from '../../../../axiosConfig';
 import InventoryCard from '@/components/inventoryCard/InventoryCard';
 import './home.css';
-import { inventoryTableColumns } from './inventoriesTable.columns';
 
 const { Title } = Typography;
 
@@ -19,7 +19,7 @@ export default function Home() {
   const router = useRouter();
   const t = useTranslations();
 
-  console.log(`user.id`, user.id);
+  const [notificationApi, contextHolder] = notification.useNotification();
 
   const [topFiveInventories, setTopFiveInventories] = useState<Inventory[]>([]);
   const [fiveInventoriesErrorText, setFiveInventoriesErrorText] = useState<string>('');
@@ -37,8 +37,24 @@ export default function Home() {
     getTopFiveInventories();
   }, [getTopFiveInventories]);
 
+  useEffect(() => {
+    const hasShown = sessionStorage.getItem('passwordNotificationShown');
+
+    if (user.id && !user.hasPassword && !hasShown) {
+      notificationApi.info({
+        message: t('home.notification_password_message'),
+        description: t('home.notification_password_description'),
+        duration: 5,
+        showProgress: true,
+      });
+
+      sessionStorage.setItem('passwordNotificationShown', 'true');
+    }
+  }, [user, notificationApi, t]);
+
   return (
     <div>
+      {contextHolder}
       <Title level={1} style={{ textAlign: 'center', margin: '0px 0px 20px 0px' }}>
         {t('header.home')}
       </Title>

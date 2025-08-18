@@ -21,7 +21,12 @@
     "inventories_table_title": "Все Инвентари",
     "inventories_table_search_placeholder": "Найти инвентарь..",
     "create_inventory_text": "Создать Инвентарь",
-    "top_inventories_error_text": "Не удалось загрузить топ инвентари!"
+    "top_inventories_error_text": "Не удалось загрузить топ инвентари!",
+    "select_status_all": "Все",
+    "select_status_public": "Публичные",
+    "select_status_private": "Приватные",
+    "notification_password_message": "Рекомендуем установить пароль!",
+    "notification_password_description": "Сейчас вы можете войти только через социальную сеть. Для удобства входа установите пароль в настройках профиля."
   },
   "inventory": {
     "title": "Инвентарь"
@@ -33,7 +38,10 @@
     "user_info_email": "Электронная почта",
     "user_info_provider": "Вход через",
     "user_info_provider_default": "Вручную",
-    "user_info_joined_date": "Присоединился"
-
+    "user_info_joined_date": "Присоединился",
+    "profile_management": "Управление профилем",
+    "delete_account_text": "Удалить мой аккаунт",
+    "settings": "Настройки",
+    "settings_title": "Настройки профиля"
   }
 }

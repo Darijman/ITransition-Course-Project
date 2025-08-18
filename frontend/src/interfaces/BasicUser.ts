@@ -5,4 +5,5 @@ export interface BasicUser {
   name: string;
   role: UserRoles;
   avatarUrl: string;
+  hasPassword: boolean;
 }

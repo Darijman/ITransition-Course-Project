@@ -20,7 +20,12 @@
     "inventories_table_title": "All Inventories",
     "inventories_table_search_placeholder": "Search inventory..",
     "create_inventory_text": "Create Inventory",
-    "top_inventories_error_text": "Failed to load top inventories!"
+    "top_inventories_error_text": "Failed to load top inventories!",
+    "select_status_all": "All",
+    "select_status_public": "Public",
+    "select_status_private": "Private",
+    "notification_password_message": "We recommend setting a password!",
+    "notification_password_description": "Currently you can log in only via a social network. For convenience, set a password in your profile settings."
   },
   "inventory": {
     "title": "Inventory"
@@ -32,6 +37,10 @@
     "user_info_email": "Email",
     "user_info_provider": "Sign in with",
     "user_info_provider_default": "Manual",
-    "user_info_joined_date": "Joined"
+    "user_info_joined_date": "Joined",
+    "profile_management": "Profile Management",
+    "delete_account_text": "Delete My Account",
+    "settings": "Settings",
+    "settings_title": "Profile settings"
   }
 }

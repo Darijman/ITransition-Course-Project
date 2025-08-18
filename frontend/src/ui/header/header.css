@@ -41,6 +41,16 @@
   cursor: pointer;
 }
 
+.header_avatar_no_image {
+  border: 1px solid black;
+}
+
+[data-theme='dark'] {
+  .header_avatar_no_image {
+    border: 1px solid #ffffff;
+  }
+}
+
 /* dropdown start */
 .custom_dropdown {
   background-color: var(--foreground-color);

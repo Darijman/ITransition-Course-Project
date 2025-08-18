@@ -20,7 +20,7 @@ export class AuthService {
 
   async registerNewUser(@Body() registerUserDto: RegisterUserDto): Promise<{ access_token: string }> {
     const createdUser = await this.usersService.createNewUser(registerUserDto);
-    const payload = { id: createdUser.id, name: createdUser.name, role: createdUser.role };
+    const payload = { id: createdUser.id, name: createdUser.name, role: createdUser.role, hasPassword: true };
 
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -39,7 +39,7 @@ export class AuthService {
       throw new UnauthorizedException({ error: 'Incorrect login or password!' });
     }
 
-    const payload = { id: user.id, name: user.name, role: user.role };
+    const payload = { id: user.id, name: user.name, role: user.role, hasPassword: !!user.password };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
@@ -75,7 +75,7 @@ export class AuthService {
     }
 
     const savedUser = await this.usersRepository.save(user);
-    const payload = { id: savedUser.id, name: savedUser.name, role: savedUser.role };
+    const payload = { id: savedUser.id, name: savedUser.name, role: savedUser.role, hasPassword: !!savedUser.password };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };

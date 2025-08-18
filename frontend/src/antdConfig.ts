@@ -11,6 +11,11 @@ export const theme: ThemeConfig = {
     Popover: {
       colorBgElevated: 'var(--foreground-color)',
     },
+    Notification: {
+      colorBgElevated: 'var(--foreground-color)', // background-color
+      colorIcon: 'var(--primary-text-color)', // X
+      colorIconHover: 'var(--secondary-text-color)', // X
+    },
   },
   token: {
     fontFamily: 'Signika Negative, sans-serif',

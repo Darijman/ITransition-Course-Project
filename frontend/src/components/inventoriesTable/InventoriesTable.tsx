@@ -13,12 +13,6 @@ import './inventoriesTable.css';
 
 const { Title } = Typography;
 
-const selectOptions = [
-  { label: 'All', value: 'ALL' },
-  { label: 'Public', value: 'PUBLIC' },
-  { label: 'Private', value: 'PRIVATE' },
-];
-
 interface Query {
   offset?: number;
   limit?: number;
@@ -46,7 +40,7 @@ export const InventoriesTable = <T extends object>({
   onCreate,
 }: InventoriesTableProps<T>) => {
   const t = useTranslations();
-
+  
   const [items, setItems] = useState<T[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -167,7 +161,11 @@ export const InventoriesTable = <T extends object>({
         />
 
         <Select
-          options={selectOptions}
+          options={[
+            { label: t('home.select_status_all'), value: 'ALL' },
+            { label: t('home.select_status_public'), value: 'PUBLIC' },
+            { label: t('home.select_status_private'), value: 'PRIVATE' },
+          ]}
           placeholder='Select a status'
           value={statusFilter}
           style={{ width: 200 }}

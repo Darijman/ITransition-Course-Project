@@ -9,4 +9,5 @@ export interface ReqUser {
   providerId?: string;
   email?: string;
   avatarUrl?: string;
+  hasPassword: boolean;
 }
