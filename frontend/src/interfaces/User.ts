@@ -7,6 +7,7 @@ export interface User {
   email: string;
   avatarUrl: string | null;
   role: UserRoles;
+  passwordUpdatedAt: string;
 
   providerId: string | null;
   provider?: Providers;

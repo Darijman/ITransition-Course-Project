@@ -50,5 +50,20 @@
     "delete_account_cancel_button_text": "Отмена",
     "account_deleted_text": "Аккаунт успешно удален. Перенаправляем на главную страницу!",
     "account_deleted_error_text": "Не удалось удалить аккаунт. Попробуйте позже!"
+  },
+  "profile_settings": {
+    "title": "Настройки профиля",
+    "text": "Реальная информация и активность вашего аккаунта.",
+    "avatar_upload_text": "Загрузить новый аватар",
+    "avatar_delete_text": "Удалить аватар",
+    "password_title": "Пароль",
+    "password_text": "Измените ваш текущий пароль.",
+    "profile_picture": "Фото профиля",
+    "back_to_profile": "Назад в профиль",
+    "old_password": "Старый пароль",
+    "new_passsword": "Новый пароль",
+    "password_last_modified": "Последнее изменение",
+    "name_title": "Имя",
+    "name_text": "Измените ваше текущее имя."
   }
 }

@@ -6,6 +6,7 @@ import { RegisterUserDto } from 'src/auth/registerUser.dto';
 import { UserRoles } from './userRoles.enum';
 import { extractPublicIdFromUrl } from 'src/common/cloudinary/cloudinary.helpers';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { UpdateUserPasswordDto } from './updateUserPassword.dto';
 
 @Injectable()
 export class UsersService {
@@ -80,7 +81,9 @@ export class UsersService {
     await this.usersRepository.update(userId, { avatarUrl });
   }
 
-  async updateUserPassword(userId: number, newPassword: string): Promise<{ success: boolean }> {
+  async updateUserPassword(userId: number, updateUserPasswordDto: UpdateUserPasswordDto): Promise<{ success: boolean }> {
+    const { oldPassword, newPassword } = updateUserPasswordDto;
+
     if (!userId || isNaN(userId)) {
       throw new BadRequestException({ error: 'Invalid user ID!' });
     }
@@ -90,8 +93,9 @@ export class UsersService {
       throw new NotFoundException({ error: 'User not found!' });
     }
 
-    if (!newPassword || newPassword.length < 6 || newPassword.length > 100) {
-      throw new BadRequestException({ error: 'Password must be between 6-100 characters!' });
+    const isValid = await user.validatePassword(oldPassword);
+    if (!isValid) {
+      throw new BadRequestException({ error: 'Old password is incorrect!' });
     }
 
     user.password = newPassword;

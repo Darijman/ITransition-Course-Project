@@ -1,0 +1,21 @@
+.profile_settings_top {
+  position: relative;
+}
+
+.profile_settings_back_button {
+  position: absolute;
+  left: 0;
+}
+
+.profile_settings_avatar {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-bottom: 20px;
+}
+
+.profile_settings_avatar_buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -42,12 +42,26 @@
     "profile_management": "Profile Management",
     "delete_account_text": "Delete My Account",
     "account_settings_text": "Account settings",
-    "settings_title": "Profile settings",
     "delete_account_modal_title": "Do you really want to delete your account?",
     "delete_account_modal_text": "This action cannot be undone. All your account data, including inventories, will be permanently deleted.",
     "delete_account_confirm_button_text": "Yes, delete my account",
     "delete_account_cancel_button_text": "Cancel",
     "account_deleted_text": "Account deleted successfully. Taking you to the Home page..",
     "account_deleted_error_text": "Failed to delete your account! Try again later.."
+  },
+  "profile_settings": {
+    "title": "Profile settings",
+    "text": "Real-time information and activies of your account.",
+    "avatar_upload_text": "Upload new picture",
+    "avatar_delete_text": "Delete avatar",
+    "password_title": "Password",
+    "password_text": "Modify your current password",
+    "profile_picture": "Profile picture",
+    "back_to_profile": "Back to profile",
+    "old_password": "Old password",
+    "new_passsword": "New password",
+    "password_last_modified": "Last modified",
+    "name_title": "Name",
+    "name_text": "Modify your current name"
   }
 }

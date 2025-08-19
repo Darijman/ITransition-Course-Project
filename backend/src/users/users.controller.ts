@@ -22,6 +22,7 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { Admin, Public } from 'src/auth/auth.decorators';
 import { UserRoles } from './userRoles.enum';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
+import { UpdateUserPasswordDto } from './updateUserPassword.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -89,7 +90,7 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Patch('/password')
-  async updateUserPassword(@Req() req: Request, @Body() body: { newPassword: string }) {
-    return await this.usersService.updateUserPassword(req.user.id, body.newPassword);
+  async updateUserPassword(@Req() req: Request, @Body() updateUserPasswordDto: UpdateUserPasswordDto) {
+    return await this.usersService.updateUserPassword(req.user.id, updateUserPasswordDto);
   }
 }
