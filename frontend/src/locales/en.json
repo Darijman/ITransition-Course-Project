@@ -25,7 +25,8 @@
     "select_status_public": "Public",
     "select_status_private": "Private",
     "notification_password_message": "We recommend setting a password!",
-    "notification_password_description": "Currently you can log in only via a social network. For convenience, set a password in your profile settings."
+    "notification_password_description": "Currently you can log in only via a social network. For convenience, set a password in your profile settings.",
+    "go_to_profile_settings": "Go to profile settings"
   },
   "inventory": {
     "title": "Inventory"

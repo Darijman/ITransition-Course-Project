@@ -1,12 +1,13 @@
 'use client';
 
-import { notification, Typography } from 'antd';
+import { Button, notification, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { Inventory } from '@/interfaces/Inventory';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoriesTable } from '@/components/inventoriesTable/InventoriesTable';
 import { useRouter } from 'next/navigation';
+import { ArrowRightOutlined } from '@ant-design/icons';
 import { inventoryTableColumns } from './inventoriesTable.columns';
 import api from '../../../../axiosConfig';
 import InventoryCard from '@/components/inventoryCard/InventoryCard';
@@ -46,11 +47,24 @@ export default function Home() {
         description: t('home.notification_password_description'),
         duration: 5,
         showProgress: true,
+        actions: (
+          <Button
+            type='primary'
+            iconPosition='end'
+            icon={<ArrowRightOutlined />}
+            onClick={() => {
+              router.push('/profile/settings');
+              notificationApi.destroy();
+            }}
+          >
+            {t('home.go_to_profile_settings')}
+          </Button>
+        ),
       });
 
       sessionStorage.setItem('passwordNotificationShown', 'true');
     }
-  }, [user, notificationApi, t]);
+  }, [user, notificationApi, t, router]);
 
   return (
     <div>

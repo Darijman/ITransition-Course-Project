@@ -1,4 +1,17 @@
-import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  UseInterceptors,
+  Delete,
+  UseGuards,
+  Post,
+  UploadedFile,
+  Req,
+  ForbiddenException,
+  Patch,
+  Body,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
@@ -72,5 +85,11 @@ export class UsersController {
       }
       throw error;
     }
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('/password')
+  async updateUserPassword(@Req() req: Request, @Body() body: { newPassword: string }) {
+    return await this.usersService.updateUserPassword(req.user.id, body.newPassword);
   }
 }

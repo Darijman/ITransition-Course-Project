@@ -79,4 +79,25 @@ export class UsersService {
     }
     await this.usersRepository.update(userId, { avatarUrl });
   }
+
+  async updateUserPassword(userId: number, newPassword: string): Promise<{ success: boolean }> {
+    if (!userId || isNaN(userId)) {
+      throw new BadRequestException({ error: 'Invalid user ID!' });
+    }
+
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException({ error: 'User not found!' });
+    }
+
+    if (!newPassword || newPassword.length < 6 || newPassword.length > 100) {
+      throw new BadRequestException({ error: 'Password must be between 6-100 characters!' });
+    }
+
+    user.password = newPassword;
+    user.passwordUpdatedAt = new Date();
+
+    await this.usersRepository.save(user);
+    return { success: true };
+  }
 }

@@ -30,6 +30,9 @@ export class User {
   @Exclude()
   password?: string;
 
+  @Column({ type: 'timestamp', nullable: true })
+  passwordUpdatedAt?: Date;
+
   @OneToMany(() => Inventory, (inventory) => inventory.creator)
   inventories: Inventory[];
 
@@ -57,6 +60,7 @@ export class User {
     if (this.password && !this.password.startsWith('$2b$')) {
       const salt = await bcrypt.genSalt();
       this.password = await bcrypt.hash(this.password, salt);
+      this.passwordUpdatedAt = new Date();
     }
   }
 

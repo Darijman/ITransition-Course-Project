@@ -26,7 +26,8 @@
     "select_status_public": "Публичные",
     "select_status_private": "Приватные",
     "notification_password_message": "Рекомендуем установить пароль!",
-    "notification_password_description": "Сейчас вы можете войти только через социальную сеть. Для удобства входа установите пароль в настройках профиля."
+    "notification_password_description": "Сейчас вы можете войти только через социальную сеть. Для удобства входа установите пароль в настройках профиля.",
+    "go_to_profile_settings": "Перейти в настройки профиля"
   },
   "inventory": {
     "title": "Инвентарь"
