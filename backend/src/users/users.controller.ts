@@ -87,4 +87,10 @@ export class UsersController {
     const result = await this.usersService.updateUser(userId, updateUserDto, avatarFile);
     return result;
   }
+
+  @UseGuards(AuthGuard)
+  @Delete(':userId/avatar')
+  async deleteUserAvatar(@Param('userId', new CustomParseIntPipe('User ID')) userId: number): Promise<{ success: boolean }> {
+    return this.usersService.deleteUserAvatar(userId);
+  }
 }

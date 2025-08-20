@@ -64,8 +64,6 @@ export class UsersService {
   }
 
   async updateUser(userId: number, updateUserDto: UpdateUserDto, avatarFile?: Express.Multer.File): Promise<Omit<User, 'password'>> {
-    console.log(`updateUserDto`, updateUserDto);
-
     if (!userId || isNaN(userId)) {
       throw new BadRequestException({ error: 'Invalid user ID!' });
     }
@@ -115,5 +113,27 @@ export class UsersService {
     await this.usersRepository.save(user);
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword as Omit<User, 'password'>;
+  }
+
+  async deleteUserAvatar(userId: number): Promise<{ success: boolean }> {
+    if (!userId || isNaN(userId)) {
+      throw new BadRequestException({ error: 'Invalid user ID!' });
+    }
+
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException({ error: 'User not found!' });
+    }
+
+    if (user.avatarUrl) {
+      const publicId = extractPublicIdFromUrl(user.avatarUrl);
+      if (publicId) {
+        await this.cloudinaryService.deleteImage(publicId);
+      }
+      user.avatarUrl = null;
+    }
+
+    await this.usersRepository.save(user);
+    return { success: true };
   }
 }

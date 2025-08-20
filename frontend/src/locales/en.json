@@ -69,6 +69,10 @@
     "save_changes": "Save Changes",
     "update_success": "Your profile has been updated!",
     "update_fail": "Something went wrong while updating your profile. Please try again later!",
-    "wrong_password": "You entered the wrong password!"
+    "wrong_password": "You entered the wrong password!",
+    "delete_avatar_title": "Are you sure?",
+    "delete_avatar_text": "This will permanently remove your profile picture.",
+    "delete_avatar_success": "Your profile picture has been successfully deleted.",
+    "delete_avatar_fail": "Failed to delete your profile picture. Please try again later."
   }
 }

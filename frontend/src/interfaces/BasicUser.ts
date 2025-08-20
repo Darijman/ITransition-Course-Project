@@ -4,6 +4,6 @@ export interface BasicUser {
   id: number;
   name: string;
   role: UserRoles;
-  avatarUrl: string;
+  avatarUrl: string | null | undefined;
   hasPassword: boolean;
 }

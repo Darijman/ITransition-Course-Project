@@ -7,7 +7,7 @@ import api from '../../../axiosConfig';
 
 interface AuthContextType {
   user: BasicUser;
-  setUser: (user: BasicUser) => void;
+  setUser: React.Dispatch<React.SetStateAction<BasicUser>>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);

@@ -14,6 +14,7 @@ import type { UploadProps, RcFile, UploadFile } from 'antd/es/upload/interface';
 import api from '../../../../../axiosConfig';
 import './profileSettings.css';
 import './responsive.css';
+import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 
 const { Title, Text } = Typography;
 
@@ -32,6 +33,8 @@ const ProfileSettingsPage = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [showDeleteAvatarModal, setShowDeleteAvatarModal] = useState<boolean>(false);
+  const [isAvatarDeleting, setIsAvatarDeleting] = useState<boolean>(false);
 
   const [userData, setUserData] = useState<User | null>(null);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -111,12 +114,14 @@ const ProfileSettingsPage = () => {
         name,
         role,
         avatarUrl,
-        hasPassword: user.hasPassword
+        hasPassword: user.hasPassword,
       });
 
       messageApi.success(t('profile_settings.update_success'));
       getUserData();
 
+      setFileList([]);
+      setPreview(null);
       form.resetFields();
     } catch (error: any) {
       const response = error.response?.data;
@@ -128,6 +133,28 @@ const ProfileSettingsPage = () => {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const deleteAvatarHandler = async () => {
+    if (!user.id) return;
+    setIsAvatarDeleting(true);
+
+    try {
+      await api.delete(`/users/${user.id}/avatar`);
+      setUser((prev) => ({
+        ...prev,
+        avatarUrl: undefined,
+      }));
+
+      messageApi.success(t('profile_settings.delete_avatar_success'));
+      setShowDeleteAvatarModal(false);
+      setFileList([]);
+      setPreview(null);
+    } catch {
+      messageApi.error(t('profile_settings.delete_avatar_fail'));
+    } finally {
+      setIsAvatarDeleting(true);
     }
   };
 
@@ -181,18 +208,16 @@ const ProfileSettingsPage = () => {
                     </Upload>
                   </Form.Item>
 
-                  <Button
-                    type='primary'
-                    danger
-                    icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
-                    onClick={() => {
-                      setFileList([]);
-                      setPreview(null);
-                      form.setFieldsValue({ avatar: undefined });
-                    }}
-                  >
-                    {t('profile_settings.avatar_delete_text')}
-                  </Button>
+                  {user.avatarUrl && (
+                    <Button
+                      type='primary'
+                      danger
+                      icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
+                      onClick={() => setShowDeleteAvatarModal(true)}
+                    >
+                      {t('profile_settings.avatar_delete_text')}
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -219,6 +244,15 @@ const ProfileSettingsPage = () => {
           </Form>
         </>
       )}
+
+      <DeleteModal
+        open={showDeleteAvatarModal}
+        onClose={() => setShowDeleteAvatarModal(false)}
+        onDelete={deleteAvatarHandler}
+        title={t('profile_settings.delete_avatar_title')}
+        text={t('profile_settings.delete_avatar_text')}
+        isDeleting={isAvatarDeleting}
+      />
     </div>
   );
 };

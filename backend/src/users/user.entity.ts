@@ -24,11 +24,11 @@ export class User {
   email: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   @Exclude()
-  password?: string;
+  password?: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
   passwordUpdatedAt?: Date;
@@ -43,10 +43,10 @@ export class User {
   role: UserRoles;
 
   @Column({ type: 'enum', enum: Providers, nullable: true })
-  provider?: Providers;
+  provider?: Providers | null;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  providerId?: string;
+  providerId?: string | null;
 
   @CreateDateColumn()
   createdAt: Date;
