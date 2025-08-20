@@ -13,6 +13,7 @@ import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 import { UserRoles } from '@/interfaces/UserRoles.enum';
 import api from '../../../../axiosConfig';
 import './profile.css';
+import './responsive.css';
 
 const { Title } = Typography;
 const { Item } = Descriptions;

@@ -29,6 +29,9 @@ const ProfileSettingsPage = () => {
   const t = useTranslations();
   const router = useRouter();
 
+  console.log(`user`, user);
+  
+
   const [userData, setUserData] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
