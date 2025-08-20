@@ -6,7 +6,6 @@ import { RegisterUserDto } from 'src/auth/registerUser.dto';
 import { UserRoles } from './userRoles.enum';
 import { extractPublicIdFromUrl } from 'src/common/cloudinary/cloudinary.helpers';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
-import { UpdateUserPasswordDto } from './updateUserPassword.dto';
 import { UpdateUserDto } from './updateUser.dto';
 import { Express } from 'express';
 
@@ -64,7 +63,7 @@ export class UsersService {
     return { success: true };
   }
 
-  async updateUser(userId: number, updateUserDto: UpdateUserDto, avatarFile?: Express.Multer.File): Promise<{ success: boolean }> {
+  async updateUser(userId: number, updateUserDto: UpdateUserDto, avatarFile?: Express.Multer.File): Promise<Omit<User, 'password'>> {
     console.log(`updateUserDto`, updateUserDto);
 
     if (!userId || isNaN(userId)) {
@@ -87,7 +86,7 @@ export class UsersService {
 
       const isValid = await user.validatePassword(updateUserDto.oldPassword);
       if (!isValid) {
-        throw new BadRequestException({ error: 'Invalid credentials' });
+        throw new BadRequestException({ error: 'Invalid credentials', type: 'password' });
       }
 
       user.password = updateUserDto.newPassword;
@@ -114,6 +113,7 @@ export class UsersService {
     }
 
     await this.usersRepository.save(user);
-    return { success: true };
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword as Omit<User, 'password'>;
   }
 }

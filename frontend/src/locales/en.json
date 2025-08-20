@@ -66,6 +66,9 @@
     "password_min": "Password must be at least 6 characters.",
     "password_max": "Password must not exceed 100 characters.",
     "password_same": "New password cannot be the same as the old one.",
-    "save_changes": "Save Changes"
+    "save_changes": "Save Changes",
+    "update_success": "Your profile has been updated!",
+    "update_fail": "Something went wrong while updating your profile. Please try again later!",
+    "wrong_password": "You entered the wrong password!"
   }
 }

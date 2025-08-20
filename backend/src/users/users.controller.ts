@@ -5,11 +5,9 @@ import {
   UseInterceptors,
   Delete,
   UseGuards,
-  Post,
   UploadedFile,
   Req,
   ForbiddenException,
-  Patch,
   Body,
   BadRequestException,
   Put,
@@ -24,7 +22,6 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { Admin, Public } from 'src/auth/auth.decorators';
 import { UserRoles } from './userRoles.enum';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
-import { UpdateUserPasswordDto } from './updateUserPassword.dto';
 import { UpdateUserDto } from './updateUser.dto';
 
 @Controller('users')

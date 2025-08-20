@@ -28,7 +28,6 @@ export const UpdateNameForm = ({ userData }: Props) => {
         <Form.Item
           name='name'
           label={t('profile_settings.name_title')}
-          initialValue={userData?.name}
           style={{ flex: 1 }}
           rules={[{ required: false }]}
         >
