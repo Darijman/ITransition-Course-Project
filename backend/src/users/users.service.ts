@@ -7,6 +7,8 @@ import { UserRoles } from './userRoles.enum';
 import { extractPublicIdFromUrl } from 'src/common/cloudinary/cloudinary.helpers';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { UpdateUserPasswordDto } from './updateUserPassword.dto';
+import { UpdateUserDto } from './updateUser.dto';
+import { Express } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -62,7 +64,9 @@ export class UsersService {
     return { success: true };
   }
 
-  async updateUserAvatar(userId: number, avatarUrl: string): Promise<void> {
+  async updateUser(userId: number, updateUserDto: UpdateUserDto, avatarFile?: Express.Multer.File): Promise<{ success: boolean }> {
+    console.log(`updateUserDto`, updateUserDto);
+
     if (!userId || isNaN(userId)) {
       throw new BadRequestException({ error: 'Invalid user ID!' });
     }
@@ -72,34 +76,42 @@ export class UsersService {
       throw new NotFoundException({ error: 'User not found!' });
     }
 
-    if (user.avatarUrl) {
-      const publicId = extractPublicIdFromUrl(user.avatarUrl);
-      if (publicId) {
-        await this.cloudinaryService.deleteImage(publicId);
+    if (updateUserDto.name !== undefined) {
+      user.name = updateUserDto.name;
+    }
+
+    if (updateUserDto.oldPassword || updateUserDto.newPassword) {
+      if (!updateUserDto.oldPassword || !updateUserDto.newPassword) {
+        throw new BadRequestException({ error: 'Invalid credentials' });
       }
-    }
-    await this.usersRepository.update(userId, { avatarUrl });
-  }
 
-  async updateUserPassword(userId: number, updateUserPasswordDto: UpdateUserPasswordDto): Promise<{ success: boolean }> {
-    const { oldPassword, newPassword } = updateUserPasswordDto;
+      const isValid = await user.validatePassword(updateUserDto.oldPassword);
+      if (!isValid) {
+        throw new BadRequestException({ error: 'Invalid credentials' });
+      }
 
-    if (!userId || isNaN(userId)) {
-      throw new BadRequestException({ error: 'Invalid user ID!' });
-    }
-
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException({ error: 'User not found!' });
+      user.password = updateUserDto.newPassword;
+      user.passwordUpdatedAt = new Date();
     }
 
-    const isValid = await user.validatePassword(oldPassword);
-    if (!isValid) {
-      throw new BadRequestException({ error: 'Old password is incorrect!' });
+    if (avatarFile) {
+      if (user.avatarUrl) {
+        const publicId = extractPublicIdFromUrl(user.avatarUrl);
+        if (publicId) {
+          await this.cloudinaryService.deleteImage(publicId);
+        }
+      }
+      const uploaded = await this.cloudinaryService.uploadImage(avatarFile, 'avatars');
+      user.avatarUrl = uploaded.secure_url;
+    } else if (updateUserDto.avatarUrl === '' || updateUserDto.avatarUrl === null) {
+      if (user.avatarUrl) {
+        const publicId = extractPublicIdFromUrl(user.avatarUrl);
+        if (publicId) {
+          await this.cloudinaryService.deleteImage(publicId);
+        }
+      }
+      user.avatarUrl = undefined;
     }
-
-    user.password = newPassword;
-    user.passwordUpdatedAt = new Date();
 
     await this.usersRepository.save(user);
     return { success: true };

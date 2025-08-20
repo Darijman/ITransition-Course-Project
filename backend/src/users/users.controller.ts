@@ -12,6 +12,7 @@ import {
   Patch,
   Body,
   BadRequestException,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
@@ -24,6 +25,7 @@ import { Admin, Public } from 'src/auth/auth.decorators';
 import { UserRoles } from './userRoles.enum';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
 import { UpdateUserPasswordDto } from './updateUserPassword.dto';
+import { UpdateUserDto } from './updateUser.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -65,7 +67,7 @@ export class UsersController {
       fileFilter: (req, file, callback) => {
         const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg'];
         if (!allowedMimes.includes(file.mimetype)) {
-          return callback(new BadRequestException({ error: 'Only .png, .jpg, .jpeg and .svg files are allowed!' }), false);
+          return callback(new BadRequestException({ error: 'Only .png, .jpg, .jpeg files are allowed!' }), false);
         }
         callback(null, true);
       },
@@ -74,37 +76,18 @@ export class UsersController {
       },
     }),
   )
-  @Post(':userId/upload-avatar')
-  async uploadAvatar(
+  @Put(':userId')
+  async updateUser(
     @Param('userId', new CustomParseIntPipe('User ID')) userId: number,
-    @UploadedFile() avatar: Express.Multer.File,
     @Req() req: Request,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() avatarFile?: Express.Multer.File,
   ) {
     if (req.user.role !== UserRoles.ADMIN && req.user.id !== userId) {
-      throw new ForbiddenException({ error: 'You can only update your own avatar!' });
+      throw new ForbiddenException({ error: 'You can only update your own profile!' });
     }
 
-    let uploadResult: { secure_url: string; public_id: string } | null = null;
-
-    try {
-      uploadResult = await this.cloudinaryService.uploadImage(avatar, 'avatars');
-      await this.usersService.updateUserAvatar(userId, uploadResult.secure_url);
-      return { avatarUrl: uploadResult.secure_url };
-    } catch (error) {
-      if (uploadResult?.public_id) {
-        try {
-          await this.cloudinaryService.deleteImage(uploadResult.public_id);
-        } catch (cleanupError) {
-          console.error('Failed to clean up Cloudinary image:', cleanupError);
-        }
-      }
-      throw error;
-    }
-  }
-
-  @UseGuards(AuthGuard)
-  @Patch('/password')
-  async updateUserPassword(@Req() req: Request, @Body() updateUserPasswordDto: UpdateUserPasswordDto) {
-    return await this.usersService.updateUserPassword(req.user.id, updateUserPasswordDto);
+    const result = await this.usersService.updateUser(userId, updateUserDto, avatarFile);
+    return result;
   }
 }
