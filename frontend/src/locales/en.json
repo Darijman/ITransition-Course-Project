@@ -59,9 +59,13 @@
     "profile_picture": "Profile picture",
     "back_to_profile": "Back to profile",
     "old_password": "Old password",
-    "new_passsword": "New password",
+    "new_password": "New password",
     "password_last_modified": "Last modified",
     "name_title": "Name",
-    "name_text": "Modify your current name"
+    "name_text": "Modify your current name",
+    "password_min": "Password must be at least 6 characters.",
+    "password_max": "Password must not exceed 100 characters.",
+    "password_same": "New password cannot be the same as the old one.",
+    "save_changes": "Save Changes"
   }
 }

@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { User } from '@/interfaces/User';
-import { Typography, Avatar, message, Button, Upload } from 'antd';
+import { Typography, Avatar, message, Button, Upload, Form } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { UploadOutlined, DeleteOutlined, ArrowLeftOutlined } from '@ant-design/icons';
@@ -17,6 +17,8 @@ const { Title, Text } = Typography;
 
 const ProfileSettingsPage = () => {
   const { user } = useAuth();
+  const [form] = Form.useForm();
+
   const t = useTranslations();
   const router = useRouter();
 
@@ -49,7 +51,13 @@ const ProfileSettingsPage = () => {
       {contextHolder}
 
       <div className='profile_settings_top'>
-        <Button className='profile_settings_back_button' type='primary' icon={<ArrowLeftOutlined />} onClick={() => router.push('/profile')}>
+        <Button
+          style={{ backgroundColor: 'var(--secondary-text-color)' }}
+          className='profile_settings_back_button'
+          type='primary'
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.push('/profile')}
+        >
           {t('profile_settings.back_to_profile')}
         </Button>
         <Title level={1} style={{ textAlign: 'center', margin: 0 }}>
@@ -61,35 +69,52 @@ const ProfileSettingsPage = () => {
       </Title>
       <hr style={{ border: '1px solid var(--foreground-color)' }} />
 
-      <div>
-        <div className='profile_settings_avatar'>
-          <div>
-            <Avatar
-              className={`header_avatar ${!user?.avatarUrl ? 'header_avatar_no_image' : ''}`}
-              size={100}
-              src={user?.avatarUrl || '/no-avatar.svg'}
-              style={{ marginRight: 10, cursor: 'default' }}
-            >
-              {!user?.avatarUrl && user?.name?.[0]?.toUpperCase()}
-            </Avatar>
-            <Text>{t('profile_settings.profile_picture')}</Text>
-          </div>
-          <div className='profile_settings_avatar_buttons'>
-            <Upload>
-              <Button type='primary' icon={<UploadOutlined style={{ fontSize: '20px' }} />}>
-                {t('profile_settings.avatar_upload_text')}
+      <Form form={form} layout='vertical' requiredMark={false}>
+        <div>
+          <div className='profile_settings_avatar'>
+            <div>
+              <Avatar
+                className={`header_avatar ${!user?.avatarUrl ? 'header_avatar_no_image' : ''}`}
+                size={100}
+                src={user?.avatarUrl || '/no-avatar.svg'}
+                style={{ marginRight: 10, cursor: 'default' }}
+              >
+                {!user?.avatarUrl && user?.name?.[0]?.toUpperCase()}
+              </Avatar>
+              <Text>{t('profile_settings.profile_picture')}</Text>
+            </div>
+            <div className='profile_settings_avatar_buttons'>
+              <Upload>
+                <Button type='primary' icon={<UploadOutlined style={{ fontSize: '20px' }} />}>
+                  {t('profile_settings.avatar_upload_text')}
+                </Button>
+              </Upload>
+              <Button type='primary' danger icon={<DeleteOutlined style={{ fontSize: '20px' }} />}>
+                {t('profile_settings.avatar_delete_text')}
               </Button>
-            </Upload>
-            <Button type='primary' danger icon={<DeleteOutlined style={{ fontSize: '20px' }} />}>
-              {t('profile_settings.avatar_delete_text')}
-            </Button>
+            </div>
           </div>
-        </div>
 
-        <div style={{ marginBottom: 20 }}>
-          <UpdateNameForm userData={userData} />
+          <div style={{ marginBottom: 20 }}>
+            <UpdateNameForm userData={userData} />
+          </div>
+          <UpdatePasswordForm userData={userData} />
         </div>
-        <UpdatePasswordForm userData={userData} />
+      </Form>
+
+      <div className='profile_settings_footer'>
+        <Button
+          style={{ backgroundColor: 'var(--secondary-text-color)' }}
+          size='large'
+          type='primary'
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.push('/profile')}
+        >
+          {t('profile_settings.back_to_profile')}
+        </Button>
+        <Button type='primary' size='large'>
+          {t('profile_settings.save_changes')}
+        </Button>
       </div>
     </div>
   );

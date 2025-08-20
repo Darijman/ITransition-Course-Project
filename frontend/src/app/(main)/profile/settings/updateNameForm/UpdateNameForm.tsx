@@ -8,17 +8,12 @@ import './updateNameForm.css';
 
 const { Title } = Typography;
 
-interface UpdateNameForm {
-  name: string;
-}
-
 interface Props {
   userData: User | null;
 }
 
 export const UpdateNameForm = ({ userData }: Props) => {
   const t = useTranslations();
-  const [form] = Form.useForm<UpdateNameForm>();
 
   return (
     <div className='update_name_form'>
@@ -28,13 +23,18 @@ export const UpdateNameForm = ({ userData }: Props) => {
       <Title level={5} style={{ textAlign: 'center', color: 'var(--secondary-text-color)', margin: '0px 0px 20px 0px' }}>
         {t('profile_settings.name_text')}
       </Title>
-      <Form form={form} layout='vertical' requiredMark={false}>
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <Form.Item name='name' label={t('profile_settings.name_title')} style={{ flex: 1 }}>
-            <InputField placeHolder={userData?.name} />
-          </Form.Item>
-        </div>
-      </Form>
+
+      <div style={{ display: 'flex', gap: '16px' }}>
+        <Form.Item
+          name='name'
+          label={t('profile_settings.name_title')}
+          initialValue={userData?.name}
+          style={{ flex: 1 }}
+          rules={[{ required: false }]}
+        >
+          <InputField placeHolder={userData?.name} />
+        </Form.Item>
+      </div>
     </div>
   );
 };

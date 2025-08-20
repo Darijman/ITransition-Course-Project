@@ -19,3 +19,26 @@
   align-items: center;
   gap: 10px;
 }
+
+.profile_settings_footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: var(--background-color);
+  border-top: 1px solid var(--foreground-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.profile_settings_footer button {
+  min-width: 200px;
+}
+
+.profile_settings_footer_back_button {
+  background-color: var(--secondary-text-color);
+}

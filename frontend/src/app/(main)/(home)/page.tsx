@@ -73,22 +73,24 @@ export default function Home() {
         {t('header.home')}
       </Title>
 
-      <div className='home_top_five'>
-        <Title level={3} style={{ textAlign: 'center', margin: '0px 0px 10px 0px', textTransform: 'capitalize' }}>
-          {t('home.top_inventories_title')}
-        </Title>
-        {fiveInventoriesErrorText ? (
-          <Title level={5} style={{ textAlign: 'center', color: 'var(--red-color)' }}>
-            {fiveInventoriesErrorText}
+      {topFiveInventories.length ? (
+        <div className='home_top_five'>
+          <Title level={3} style={{ textAlign: 'center', margin: '0px 0px 10px 0px', textTransform: 'capitalize' }}>
+            {t('home.top_inventories_title')}
           </Title>
-        ) : (
-          <div className='home_top_five_grid'>
-            {topFiveInventories.map((inventory) => {
-              return <InventoryCard key={inventory.id} inventory={inventory} />;
-            })}
-          </div>
-        )}
-      </div>
+          {fiveInventoriesErrorText ? (
+            <Title level={5} style={{ textAlign: 'center', color: 'var(--red-color)' }}>
+              {fiveInventoriesErrorText}
+            </Title>
+          ) : (
+            <div className='home_top_five_grid'>
+              {topFiveInventories.map((inventory) => {
+                return <InventoryCard key={inventory.id} inventory={inventory} />;
+              })}
+            </div>
+          )}
+        </div>
+      ) : null}
 
       <div>
         <InventoriesTable<Inventory>
