@@ -11,6 +11,7 @@ import {
   ForbiddenException,
   Patch,
   Body,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
@@ -59,7 +60,20 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      fileFilter: (req, file, callback) => {
+        const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg'];
+        if (!allowedMimes.includes(file.mimetype)) {
+          return callback(new BadRequestException({ error: 'Only .png, .jpg, .jpeg and .svg files are allowed!' }), false);
+        }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5 MB
+      },
+    }),
+  )
   @Post(':userId/upload-avatar')
   async uploadAvatar(
     @Param('userId', new CustomParseIntPipe('User ID')) userId: number,
