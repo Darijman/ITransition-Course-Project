@@ -89,6 +89,8 @@
     "create_inventory": "Create Inventory",
     "delete_image": "Delete Image",
     "created_successfully": "Inventory has been created successfully, taking you to the inventory page..",
-    "creating_error": "An error occurred while creating the inventory. Please try again later."
+    "creating_error": "An error occurred while creating the inventory. Please try again later.",
+    "public": "Public",
+    "private": "Private"
   }
 }

@@ -227,7 +227,7 @@ export const NewInventoryForm = () => {
                         style={{ maxWidth: '250px', width: '100%', color: current === InventoryStatuses.PRIVATE ? '#FFFFFF' : 'black' }}
                         onClick={() => setFieldsValue({ status: InventoryStatuses.PRIVATE })}
                       >
-                        Private
+                        {t('inventories_new.private')}
                       </Button>
                     </Tooltip>
                     <Tooltip title={t('inventories_new.status_tooltip_public')}>
@@ -236,7 +236,7 @@ export const NewInventoryForm = () => {
                         style={{ maxWidth: '250px', width: '100%', color: current === InventoryStatuses.PUBLIC ? '#FFFFFF' : 'black' }}
                         onClick={() => setFieldsValue({ status: InventoryStatuses.PUBLIC })}
                       >
-                        Public
+                        {t('inventories_new.public')}
                       </Button>
                     </Tooltip>
                   </Space.Compact>
