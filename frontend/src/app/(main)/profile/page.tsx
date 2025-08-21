@@ -110,6 +110,7 @@ const Profile = () => {
             <Title level={5} style={{ textAlign: 'center', margin: '0px 0px 15px 0px' }}>
               {t('profile.profile_management')}
             </Title>
+
             <Button
               style={{
                 maxWidth: '200px',
@@ -128,6 +129,7 @@ const Profile = () => {
             >
               {t('profile.delete_account_text')}
             </Button>
+
             <Button
               style={{ maxWidth: '200px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 8 }}
               type='primary'

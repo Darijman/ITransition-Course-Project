@@ -83,6 +83,12 @@
     "upload_image_text": "Нажмите или перетащите файл в эту область для загрузки",
     "drag_drop_hint": "Поддерживается одна загрузка. Только файлы PNG, JPG, JPEG",
     "form_input_title": "Название*",
-    "form_input_description": "Описание"
+    "form_input_description": "Описание",
+    "tags_title": "Теги*",
+    "select_category_placeholder": "Выберите категорию*",
+    "status_tooltip_private": "Видно только вам и выбранным пользователям.",
+    "status_tooltip_public": "Видно всем пользователям платформы.",
+    "create_inventory": "Создать Инвентарь",
+    "delete_image": "Удалить обложку"
   }
 }

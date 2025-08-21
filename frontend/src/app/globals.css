@@ -26,6 +26,10 @@ body {
 
   --red-color: #d32f2f;
   --green-color: #228b22;
+
+  --tag-color: #678aaf;
+  --category-color: gray;
+  --status-color: #595959;
 }
 
 [data-theme='dark'] {
@@ -38,4 +42,8 @@ body {
 
   --red-color: #e57373;
   --green-color: #98fb98;
+
+  --tag-color: #678aaf;
+  --category-color: gray;
+  --status-color: #595959;
 }

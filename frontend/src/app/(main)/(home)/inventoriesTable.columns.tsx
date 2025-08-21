@@ -31,7 +31,7 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     key: 'title',
     render: (text: string, record: Inventory) => (
       <Link href={`/inventories/${record.id}`}>
-        <Text  className='inventories_table_columns_title' ellipsis={{ tooltip: text }}>
+        <Text className='inventories_table_columns_title' ellipsis={{ tooltip: text }}>
           {text}
         </Text>
       </Link>
@@ -59,7 +59,7 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     key: 'category',
     render: (_, record: Inventory) => {
       return (
-        <Tag color='gray' key={record?.category?.id}>
+        <Tag color='var(--category-color)' key={record?.category?.id}>
           {record?.category?.title}
         </Tag>
       );
@@ -73,7 +73,7 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
       <>
         {record?.tags?.map((tag) => {
           return (
-            <Tag color='#678aaf' key={tag.id}>
+            <Tag color='var(--tag-color)' key={tag.id}>
               {tag.title.toUpperCase()}
             </Tag>
           );
@@ -93,6 +93,8 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     title: 'Status',
     key: 'status',
     dataIndex: 'status',
-    render: (status: InventoryStatuses) => <Tag color='#595959'>{status === InventoryStatuses.PUBLIC ? 'Public' : 'Private'}</Tag>,
+    render: (status: InventoryStatuses) => (
+      <Tag color='var(--status-color)'>{status === InventoryStatuses.PUBLIC ? 'Public' : 'Private'}</Tag>
+    ),
   },
 ];

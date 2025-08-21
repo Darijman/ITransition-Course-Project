@@ -19,3 +19,25 @@
 .custom_dragger .ant-upload.ant-upload-drag {
   border: 1px dashed var(--primary-text-color);
 }
+
+.inventory_form_image_container {
+  padding: 20px;
+  background-color: var(--background-color);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-self: center;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.inventory_form_image {
+  width: 300px !important;
+  height: 250px !important;
+}
+
+.ant-upload-list-item-actions .anticon-delete {
+  color: var(--red-color) !important;
+  font-size: 20px !important;
+}

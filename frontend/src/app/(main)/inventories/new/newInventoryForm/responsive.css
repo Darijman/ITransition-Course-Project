@@ -1,0 +1,6 @@
+@media screen and (max-width: 430px) {
+  .inventory_form_image {
+    width: 200px !important;
+    height: 200px !important;
+  }
+}

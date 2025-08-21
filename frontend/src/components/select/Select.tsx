@@ -54,6 +54,13 @@ export const Select = ({
             colorBorder: 'var(--secondary-text-color)',
             hoverBorderColor: 'none',
             colorTextPlaceholder: 'var(--secondary-text-color)',
+
+            colorError: 'var(--red-color)',
+            colorSuccess: 'var(--green-color)',
+            colorErrorBorder: 'var(--red-color)',
+            colorErrorBorderHover: 'var(--red-color)',
+            colorSuccessBorder: 'var(--green-color)',
+            colorSuccessBorderHover: 'var(--green-color)',
           },
         },
       }}

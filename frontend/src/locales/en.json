@@ -70,7 +70,7 @@
     "update_success": "Your profile has been updated!",
     "update_fail": "Something went wrong while updating your profile. Please try again later!",
     "wrong_password": "You entered the wrong password!",
-    "wrong_name": "You did not change your name!", 
+    "wrong_name": "You did not change your name!",
     "delete_avatar_title": "Are you sure?",
     "delete_avatar_text": "This will permanently remove your profile picture.",
     "delete_avatar_success": "Your profile picture has been successfully deleted.",
@@ -81,6 +81,12 @@
     "upload_image_text": "Click or drag file to this area to upload",
     "drag_drop_hint": "Support for a single upload. Only PNG, JPG, JPEG files.",
     "form_input_title": "Title*",
-    "form_input_description": "Description"
+    "form_input_description": "Description",
+    "tags_title": "Tags*",
+    "select_category_placeholder": "Select category*",
+    "status_tooltip_private": "Visible only to you and specific people you invite.",
+    "status_tooltip_public": "Visible to everyone on the platform.",
+    "create_inventory": "Create Inventory",
+    "delete_image": "Delete Image"
   }
 }

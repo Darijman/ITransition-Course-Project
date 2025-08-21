@@ -50,7 +50,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
                 </Text>
               </Tooltip>
             </div>
-            <Tag color='#595959' style={{ marginLeft: 8 }}>
+            <Tag color='var(--status-color)' style={{ marginLeft: 8 }}>
               {inventory.status === InventoryStatuses.PUBLIC ? 'Public' : 'Private'}
             </Tag>
           </div>
@@ -58,7 +58,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
         description={
           <div className='meta'>
             <Space size={8} wrap>
-              {inventory.category?.title && <Tag color='gray'>{inventory?.category.title}</Tag>}
+              {inventory.category?.title && <Tag color='var(--category-color)'>{inventory?.category.title}</Tag>}
 
               <Text>{inventory?.items?.length ?? 0} items</Text>
 
