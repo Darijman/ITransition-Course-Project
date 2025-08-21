@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Form, UploadFile, Upload, Button, Image, Flex, Tag, Space, Tooltip, UploadProps } from 'antd';
+import { Form, UploadFile, Upload, Button, Image, Space, Tooltip, UploadProps, message, Spin } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
 import { InventoryStatuses } from '@/interfaces/Inventory';
 import { UploadOutlined } from '@ant-design/icons';
@@ -13,6 +13,7 @@ import { InventoryCategory } from '@/interfaces/InventoryCategory';
 import { Select } from '@/components/select/Select';
 import { TagSelector } from './tagsSelector/TagsSelector';
 import { RcFile } from 'antd/es/upload';
+import { useRouter } from 'next/navigation';
 import './newInventoryForm.css';
 import api from '../../../../../../axiosConfig';
 import './responsive.css';
@@ -31,6 +32,8 @@ interface NewInventoryForm {
 export const NewInventoryForm = () => {
   const { user } = useAuth();
   const t = useTranslations();
+  const router = useRouter();
+
   const [form] = Form.useForm<NewInventoryForm>();
 
   const [tags, setTags] = useState<InventoryTag[]>([]);
@@ -39,6 +42,8 @@ export const NewInventoryForm = () => {
 
   const [imageError, setImageError] = useState<boolean>(false);
   const [tagsError, setTagsError] = useState<boolean>(false);
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
 
   const handleImageChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
     if (!newFileList.length) {
@@ -82,11 +87,56 @@ export const NewInventoryForm = () => {
   };
 
   const onFinishHandler = async (values: NewInventoryForm) => {
-    console.log(`values`, values);
+    if (!user.id) return;
+    setIsCreating(true);
+
+    const formData = new FormData();
+    formData.append('title', values.title.trim());
+    formData.append('status', values.status.trim());
+    formData.append('categoryId', values.categoryId.toString().trim());
+    formData.append('tagIds', JSON.stringify(values.tagIds.map(Number)));
+    if (values.description) {
+      formData.append('description', values.description.trim());
+    }
+
+    if (values.image && values.image.length > 0 && values.image[0].originFileObj) {
+      formData.append('image', values.image[0].originFileObj as RcFile);
+    } else {
+      setImageError(true);
+      setIsCreating(false);
+      return;
+    }
+
+    try {
+      const { data: inventory } = await api.post('/inventories', formData);
+      form.resetFields();
+      setFileList([]);
+
+      messageApi.success({
+        content: (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {t('inventories_new.created_successfully')}
+            <Spin size='default' />
+          </div>
+        ),
+        onClose: () => router.push(`/inventories/${inventory.id}`),
+        duration: 2,
+        key: 'creatingInventory',
+      });
+    } catch {
+      messageApi.error({
+        content: t('inventories_new.creating_error'),
+        duration: 3,
+      });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
     <div className='inventory_form_wrapper'>
+      {contextHolder}
+
       <div className='new_inventory_form'>
         <Form
           form={form}
@@ -146,6 +196,14 @@ export const NewInventoryForm = () => {
             <InputField placeHolder={t('inventories_new.form_input_title')} />
           </Form.Item>
 
+          <Form.Item name='tagIds' rules={[{ required: true, message: '' }]}>
+            <TagSelector tags={tags} hasError={tagsError} />
+          </Form.Item>
+
+          <Form.Item name='description' rules={[{ required: false }]}>
+            <TextField placeHolder={t('inventories_new.form_input_description')} maxLength={255} rows={4} />
+          </Form.Item>
+
           <Form.Item name='categoryId' rules={[{ required: true, message: '' }]}>
             <Select
               style={{ width: '100%', height: '45px' }}
@@ -155,14 +213,6 @@ export const NewInventoryForm = () => {
                 value: category.id,
               }))}
             />
-          </Form.Item>
-
-          <Form.Item name='tagIds' rules={[{ required: true, message: '' }]}>
-            <TagSelector tags={tags} hasError={tagsError} />
-          </Form.Item>
-
-          <Form.Item name='description' rules={[{ required: false }]}>
-            <TextField placeHolder={t('inventories_new.form_input_description')} maxLength={255} rows={4} />
           </Form.Item>
 
           <Form.Item name='status' rules={[{ required: true, message: '' }]}>
@@ -196,7 +246,7 @@ export const NewInventoryForm = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button htmlType='submit' type='primary' style={{ width: '100%', height: '40px' }}>
+            <Button loading={isCreating} htmlType='submit' type='primary' style={{ width: '100%', height: '40px' }}>
               {t('inventories_new.create_inventory')}
             </Button>
           </Form.Item>
