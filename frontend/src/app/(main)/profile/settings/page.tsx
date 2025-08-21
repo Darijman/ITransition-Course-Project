@@ -109,11 +109,12 @@ const ProfileSettingsPage = () => {
 
       const { data } = await api.put(`/users/${user.id}`, formData);
       const { id, name, role, avatarUrl } = data;
+
       setUser({
         id,
         name,
         role,
-        avatarUrl,
+        avatarUrl: avatarUrl ?? user.avatarUrl,
         hasPassword: user.hasPassword,
       });
 
@@ -128,6 +129,8 @@ const ProfileSettingsPage = () => {
 
       if (response?.type === 'password') {
         messageApi.error(t('profile_settings.wrong_password'));
+      } else if (response?.type === 'name') {
+        messageApi.error(t('profile_settings.wrong_name'));
       } else {
         messageApi.error(t('profile.error_text'));
       }

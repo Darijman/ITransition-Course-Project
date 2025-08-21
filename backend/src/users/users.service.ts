@@ -8,6 +8,7 @@ import { extractPublicIdFromUrl } from 'src/common/cloudinary/cloudinary.helpers
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { UpdateUserDto } from './updateUser.dto';
 import { Express } from 'express';
+import { ReqUser } from 'src/interfaces/ReqUser';
 
 @Injectable()
 export class UsersService {
@@ -42,7 +43,7 @@ export class UsersService {
     return user;
   }
 
-  async deleteUserById(userId: number): Promise<{ success: boolean }> {
+  async deleteUserById(userId: number, reqUser: ReqUser): Promise<{ success: boolean }> {
     if (!userId || isNaN(userId)) {
       throw new BadRequestException({ error: 'Invalid user ID!' });
     }
@@ -50,6 +51,10 @@ export class UsersService {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException({ error: 'User not found!' });
+    }
+
+    if (reqUser.id !== userId && reqUser.role !== UserRoles.ADMIN) {
+      throw new NotFoundException({ error: 'You do not have permission to delete this user!' });
     }
 
     if (user.avatarUrl) {
@@ -74,6 +79,10 @@ export class UsersService {
     }
 
     if (updateUserDto.name !== undefined) {
+      if (updateUserDto.name === user.name) {
+        throw new BadRequestException({ error: 'You did not change your name!', type: 'name' });
+      }
+
       user.name = updateUserDto.name;
     }
 

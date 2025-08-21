@@ -51,11 +51,13 @@ export class UsersController {
     return await this.usersService.getUserById(userId);
   }
 
-  @Public()
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Delete(':userId')
-  async deleteUserById(@Param('userId', new CustomParseIntPipe('User ID')) userId: number): Promise<{ success: boolean }> {
-    return await this.usersService.deleteUserById(userId);
+  async deleteUserById(
+    @Param('userId', new CustomParseIntPipe('User ID')) userId: number,
+    @Req() req: Request,
+  ): Promise<{ success: boolean }> {
+    return await this.usersService.deleteUserById(userId, req.user);
   }
 
   @UseGuards(AuthGuard)

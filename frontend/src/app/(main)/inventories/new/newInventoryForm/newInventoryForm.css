@@ -1,0 +1,21 @@
+.inventory_form_wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.new_inventory_form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  background-color: var(--foreground-color);
+  border-radius: 10px;
+  max-width: 700px;
+  width: 100%;
+}
+
+.custom_dragger .ant-upload.ant-upload-drag {
+  border: 1px dashed var(--primary-text-color);
+}
