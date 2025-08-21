@@ -1,5 +1,23 @@
 @media screen and (max-width: 500px) {
   .header_inner {
-    padding: 20px; 
+    padding: 20px;
+  }
+
+  .bottom_row {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 350px) {
+  .auth_buttons_inline {
+    display: none;
+  }
+
+  .bottom_row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
   }
 }

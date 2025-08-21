@@ -10,10 +10,36 @@
 }
 
 .header_inner {
+  display: flex;
+  flex-direction: column;
   padding: 20px 100px;
+}
+
+.top_row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth_buttons_inline {
+  display: flex;
+  gap: 10px;
+}
+
+.bottom_row {
+  display: none; /* по умолчанию скрыта */
 }
 
 .header_title {
@@ -35,6 +61,11 @@
     opacity: 0.7;
     border-color: var(--primary-text-color) !important;
   }
+}
+
+.auth_buttons {
+  display: flex;
+  gap: 8px;
 }
 
 .header_avatar {

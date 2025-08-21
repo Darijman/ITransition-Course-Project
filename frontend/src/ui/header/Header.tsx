@@ -108,12 +108,47 @@ export const Header = () => {
   return (
     <header className='header'>
       <div className='header_inner'>
-        <Title level={5} onClick={() => router.push('/')} className='header_title'>
-          {t('header.home')}
-        </Title>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {!user.id ? (
-            <div>
+        <div className='top_row'>
+          <div className='left'>
+            <Title level={5} onClick={() => router.push('/')} className='header_title'>
+              {t('header.home')}
+            </Title>
+          </div>
+
+          <div className='right'>
+            {!user?.id && (
+              <div className='auth_buttons_inline'>
+                <Button onClick={() => router.push('/auth/login')} type='text'>
+                  {t('header.sign_in_text')}
+                </Button>
+                <Button onClick={() => router.push('/auth/register')} type='primary'>
+                  {t('header.sign_up_text')}
+                </Button>
+              </div>
+            )}
+
+            <SwitchTheme />
+            <Dropdown
+              overlayClassName={`custom_dropdown ${locale === 'en' ? 'lang-en' : ''}`}
+              menu={{ items }}
+              placement='bottomRight'
+              arrow
+              trigger={['click']}
+            >
+              <Avatar
+                className={`header_avatar ${!user?.avatarUrl ? 'header_avatar_no_image' : ''}`}
+                size={40}
+                src={user?.avatarUrl || '/no-avatar.svg'}
+              >
+                {!user?.avatarUrl && user?.name?.[0]?.toUpperCase()}
+              </Avatar>
+            </Dropdown>
+          </div>
+        </div>
+
+        {!user?.id && (
+          <div className='bottom_row'>
+            <div className='auth_buttons_mobile'>
               <Button onClick={() => router.push('/auth/login')} type='text'>
                 {t('header.sign_in_text')}
               </Button>
@@ -121,26 +156,8 @@ export const Header = () => {
                 {t('header.sign_up_text')}
               </Button>
             </div>
-          ) : null}
-          <div>
-            <SwitchTheme />
           </div>
-          <Dropdown
-            overlayClassName={`custom_dropdown ${locale === 'en' ? 'lang-en' : ''}`}
-            menu={{ items }}
-            placement='bottomRight'
-            arrow
-            trigger={['click']}
-          >
-            <Avatar
-              className={`header_avatar ${!user?.avatarUrl ? 'header_avatar_no_image' : ''}`}
-              size={40}
-              src={user?.avatarUrl || '/no-avatar.svg'}
-            >
-              {!user?.avatarUrl && user?.name?.[0]?.toUpperCase()}
-            </Avatar>
-          </Dropdown>
-        </div>
+        )}
       </div>
 
       <DeleteModal

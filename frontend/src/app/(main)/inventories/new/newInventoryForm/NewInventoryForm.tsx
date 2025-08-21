@@ -1,20 +1,20 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Typography, Form, UploadFile, Upload, Button, Image, Flex, Tag, Space, Tooltip, UploadProps } from 'antd';
+import { Form, UploadFile, Upload, Button, Image, Flex, Tag, Space, Tooltip, UploadProps } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
 import { InventoryStatuses } from '@/interfaces/Inventory';
-import { UploadOutlined, DeleteOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { UploadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { useTranslations } from 'next-intl';
-import './newInventoryForm.css';
 import { TextField } from '@/components/textField/TextField';
-import api from '../../../../../../axiosConfig';
 import { InventoryTag } from '@/interfaces/InventoryTag';
 import { InventoryCategory } from '@/interfaces/InventoryCategory';
 import { Select } from '@/components/select/Select';
 import { TagSelector } from './tagsSelector/TagsSelector';
 import { RcFile } from 'antd/es/upload';
+import './newInventoryForm.css';
+import api from '../../../../../../axiosConfig';
 import './responsive.css';
 
 const { Dragger } = Upload;
@@ -31,6 +31,7 @@ interface NewInventoryForm {
 export const NewInventoryForm = () => {
   const { user } = useAuth();
   const t = useTranslations();
+  const [form] = Form.useForm<NewInventoryForm>();
 
   const [tags, setTags] = useState<InventoryTag[]>([]);
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
@@ -74,8 +75,6 @@ export const NewInventoryForm = () => {
   useEffect(() => {
     getCategoriesAndTags();
   }, [getCategoriesAndTags]);
-
-  const [form] = Form.useForm<NewInventoryForm>();
 
   const onFinishFailedHandler = async () => {
     setTagsError(true);
