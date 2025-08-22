@@ -9,7 +9,7 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { CreateInventoryDto } from './createInventory.dto';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
 import { InventoryOwnerOrAdminGuard } from 'src/guards/inventoryOwnerOrAdmin.guard';
-import { Admin } from 'src/auth/auth.decorators';
+import { Admin, Public } from 'src/auth/auth.decorators';
 import { OptionalAuthGuard } from 'src/guards/optionalAuth.guard';
 import { InventoryStatuses } from './inventoryStatuses.enum';
 
@@ -31,7 +31,7 @@ export class InventoriesController {
   @Get('/public')
   async getAllPublicInventories(
     @Req() req: Request,
-    @Query('searchValue') searchValue: string,
+    @Query('searchValue') searchValue?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
     @Query('status') status?: InventoryStatuses | 'ALL',
@@ -70,10 +70,14 @@ export class InventoriesController {
     return await this.inventoriesService.createNewInventory(newInventoryData, req.user);
   }
 
-  @UseGuards(AuthGuard, InventoryOwnerOrAdminGuard)
+  // @Public()
+  @UseGuards(OptionalAuthGuard)
   @Get(':inventoryId')
-  async getInventoryById(@Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number): Promise<Inventory> {
-    return await this.inventoriesService.getInventoryById(inventoryId);
+  async getInventoryById(
+    @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Req() req: Request,
+  ): Promise<Inventory> {
+    return await this.inventoriesService.getInventoryById(inventoryId, req.user);
   }
 
   @UseGuards(AuthGuard)

@@ -35,11 +35,6 @@
   background-color: var(--secondary-text-color);
 }
 
-.ant-upload-list-item-actions .anticon-delete {
-  color: var(--red-color) !important;
-  font-size: 20px !important;
-}
-
 .profile_settings_avatar_buttons {
   display: flex;
   align-items: center;

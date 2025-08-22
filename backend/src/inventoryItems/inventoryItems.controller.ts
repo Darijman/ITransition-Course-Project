@@ -1,4 +1,18 @@
-import { Controller, Get, Param, UseInterceptors, Delete, Post, Body, UseGuards, Req, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  UseInterceptors,
+  Delete,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  UploadedFile,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { InventoryItem } from './inventoryItem.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
@@ -28,8 +42,17 @@ export class InventoryItemsController {
   @Get('/inventory/:inventoryId')
   async getItemsByInventoryIdWithLikes(
     @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Query('offset') offset?: string,
+    @Query('limit') limit?: string,
+    @Query('searchValue') searchValue?: string,
   ): Promise<InventoryItem[]> {
-    return await this.inventoryItemsService.getItemsByInventoryIdWithLikes(inventoryId);
+    const query = {
+      limit: limit ? parseInt(limit, 10) : undefined,
+      offset: offset ? parseInt(offset, 10) : undefined,
+      searchValue,
+    };
+
+    return await this.inventoryItemsService.getItemsByInventoryIdWithLikes(inventoryId, query);
   }
 
   @UseGuards(AuthGuard)
@@ -39,7 +62,7 @@ export class InventoryItemsController {
     @Body() createInventoryItemDto: CreateInventoryItemDto,
     @Req() req: Request,
     @UploadedFile() image?: Express.Multer.File,
-  ): Promise<InventoryItem> {
+  ): Promise<InventoryItem | null> {
     let imageUrl: string | undefined = undefined;
     if (image) {
       const uploadResult = await this.cloudinaryService.uploadImage(image, 'items');

@@ -1,8 +1,8 @@
 import { Inventory } from './Inventory';
 import { InventoryComment } from './InventoryComment';
 import { InventoryItem } from './InventoryItem';
+import { InventoryUserRoles } from './InventoryUserRoles';
 import { User } from './User';
-import { UserRoles } from './UserRoles.enum';
 
 export interface InventoryUser {
   id: number;
@@ -17,7 +17,7 @@ export interface InventoryUser {
   comments?: InventoryComment[];
   items?: InventoryItem[];
 
-  role: UserRoles;
+  role: InventoryUserRoles;
   createdAt: string;
   updatedAt: string;
 }

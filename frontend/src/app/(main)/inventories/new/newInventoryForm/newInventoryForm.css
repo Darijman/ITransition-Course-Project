@@ -36,8 +36,3 @@
   width: 300px !important;
   height: 250px !important;
 }
-
-.ant-upload-list-item-actions .anticon-delete {
-  color: var(--red-color) !important;
-  font-size: 20px !important;
-}

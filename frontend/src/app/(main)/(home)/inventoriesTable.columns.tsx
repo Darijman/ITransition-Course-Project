@@ -16,7 +16,7 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     render: (url: string, record: Inventory) => (
       <Link href={`/inventories/${record.id}`} scroll={false}>
         <Image
-          src={url || '/inventory-placeholder.svg'}
+          src={url || '/image-placeholder.svg'}
           alt={record.title}
           width={50}
           height={50}

@@ -40,6 +40,10 @@ export class InventoriesService {
   async getAllPublicInventories(user?: ReqUser, query: Query = {}): Promise<Inventory[]> {
     const { limit = 10, offset = 0, status = 'ALL', searchValue } = query;
 
+    if (isNaN(limit) || isNaN(offset)) {
+      throw new BadRequestException({ error: 'Limit and offset must be valid numbers!' });
+    }
+
     if (limit < 0 || offset < 0) {
       throw new BadRequestException({ error: 'Negative numbers are not allowed!' });
     }
@@ -149,7 +153,7 @@ export class InventoriesService {
     return savedInventory;
   }
 
-  async getInventoryById(inventoryId: number): Promise<Inventory> {
+  async getInventoryById(inventoryId: number, reqUser?: ReqUser): Promise<Inventory> {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
@@ -161,7 +165,23 @@ export class InventoriesService {
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
     }
-    return inventory;
+
+    if (reqUser?.role === UserRoles.ADMIN) {
+      return inventory;
+    }
+
+    if (inventory.status === InventoryStatuses.PUBLIC) {
+      return inventory;
+    }
+
+    if (reqUser) {
+      const userHasAccess = inventory.inventoryUsers.some((iu) => iu.userId === reqUser.id);
+      if (userHasAccess) {
+        return inventory;
+      }
+    }
+
+    throw new ForbiddenException({ error: 'You do not have permission to access this inventory!' });
   }
 
   async updateInventoryStatus(inventoryId: number, status: InventoryStatuses, user: ReqUser) {

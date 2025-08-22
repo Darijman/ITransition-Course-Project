@@ -1,0 +1,39 @@
+.create_item_form_modal_save_button {
+  background-color: var(--submit-button-color) !important;
+  border-color: var(--submit-button-color) !important;
+  color: #ffffff;
+  text-transform: uppercase;
+  min-width: 120px;
+}
+
+.create_item_form_modal_save_button:hover {
+  background-color: var(--submit-button-color) !important;
+  border-color: var(--submit-button-color) !important;
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+
+.create_item_form_modal_cancel_button {
+  background-color: var(--secondary-text-color) !important;
+  border-color: var(--secondary-text-color) !important;
+  color: #ffffff;
+  text-transform: uppercase;
+  min-width: 120px;
+}
+
+.create_item_form_modal_cancel_button:hover {
+  background-color: var(--secondary-text-color) !important;
+  border-color: var(--secondary-text-color) !important;
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+
+.create_item_form_modal_save_button:disabled,
+.create_item_form_modal_save_button[disabled] {
+  background-color: var(--submit-button-color) !important;
+  border-color: var(--submit-button-color) !important;
+  color: #ffffff80 !important;
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

@@ -26,20 +26,38 @@ export class InventoryItemsService {
     return await this.inventoryItemsRepository.find();
   }
 
-  async getItemsByInventoryIdWithLikes(inventoryId: number) {
+  async getItemsByInventoryIdWithLikes(inventoryId: number, query?: { offset?: number; limit?: number; searchValue?: string }) {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid inventory ID!' });
     }
 
-    return await this.inventoryItemsRepository
+    const { offset = 0, limit = 20, searchValue } = query || {};
+    if (isNaN(limit) || isNaN(offset)) {
+      throw new BadRequestException({ error: 'Limit and offset must be valid numbers!' });
+    }
+
+    if (limit < 0 || offset < 0) {
+      throw new BadRequestException({ error: 'Negative numbers are not allowed!' });
+    }
+
+    let qb = this.inventoryItemsRepository
       .createQueryBuilder('item')
       .leftJoinAndSelect('item.likes', 'like')
+      .leftJoinAndSelect('item.creator', 'creator')
       .where('item.inventoryId = :inventoryId', { inventoryId })
-      .loadRelationCountAndMap('item.likeCount', 'item.likes')
-      .getMany();
+      .loadRelationCountAndMap('item.likeCount', 'item.likes');
+
+    if (searchValue) {
+      qb = qb.andWhere('LOWER(item.title) LIKE :searchValue', {
+        searchValue: `%${searchValue.toLowerCase()}%`,
+      });
+    }
+
+    qb = qb.orderBy('item.createdAt', 'DESC').skip(offset).take(limit);
+    return await qb.getMany();
   }
 
-  async createNewItem(createInventoryItemDto: CreateInventoryItemDto, user: ReqUser): Promise<InventoryItem> {
+  async createNewItem(createInventoryItemDto: CreateInventoryItemDto, user: ReqUser): Promise<InventoryItem | null> {
     const { inventoryId } = createInventoryItemDto;
 
     const inventory = await this.inventoriesRepository.findOneBy({ id: inventoryId });
@@ -74,7 +92,13 @@ export class InventoryItemsService {
     }
 
     const item = this.inventoryItemsRepository.create({ ...createInventoryItemDto, creatorId: inventoryUser.id });
-    return await this.inventoryItemsRepository.save(item);
+    const savedItem = await this.inventoryItemsRepository.save(item);
+
+    const fullItem = await this.inventoryItemsRepository.findOne({
+      where: { id: savedItem.id },
+      relations: ['creator', 'likes'],
+    });
+    return fullItem;
   }
 
   async getItemById(itemId: number): Promise<InventoryItem> {

@@ -3,6 +3,7 @@
   border-radius: 10px;
   color: var(--primary-text-color);
   border: none;
+  cursor: pointer;
   &:hover {
     background-color: var(--hover-color);
   }
@@ -67,4 +68,7 @@
   white-space: nowrap !important;
   max-width: 220px !important;
   width: 100% !important;
+  &:hover {
+    text-decoration: underline;
+  }
 }

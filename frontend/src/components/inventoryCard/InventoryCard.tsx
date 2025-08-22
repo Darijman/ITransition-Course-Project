@@ -3,6 +3,7 @@
 import { Card, Tag, Avatar, Typography, Space, Tooltip } from 'antd';
 import { AppstoreOutlined } from '@ant-design/icons';
 import { Inventory, InventoryStatuses } from '@/interfaces/Inventory';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import './inventoryCard.css';
@@ -10,19 +11,22 @@ import './inventoryCard.css';
 const { Meta } = Card;
 const { Text, Paragraph } = Typography;
 
-interface InventoryCardProps {
+interface Props {
   inventory: Inventory;
 }
 
-export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
+export const InventoryCard = ({ inventory }: Props) => {
+  const router = useRouter();
   const imageSrc = inventory.imageUrl && inventory.imageUrl.trim().length > 0 ? inventory.imageUrl : undefined;
   const avatarSrc = inventory.creator?.avatarUrl && inventory.creator.avatarUrl.trim().length > 0 ? inventory.creator.avatarUrl : undefined;
-
-  console.log(`inventory`, inventory);
 
   return (
     <Card
       className='inventory_card'
+      onClick={(e) => {
+        e.stopPropagation();
+        router.push(`/inventories/${inventory.id}`);
+      }}
       cover={
         <div className='cover_wrap'>
           {imageSrc ? (
@@ -38,16 +42,18 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ inventory }) => {
       <Meta
         avatar={
           <Link href={`/users/${inventory.creator?.id}`}>
-            <Avatar className='inventory_card_avatar' size={40} src={avatarSrc || '/no-avatar.svg'} />
+            <Avatar className='inventory_card_avatar' size={40} src={avatarSrc || '/no-avatar.svg'} onClick={(e: any) => e.stopPropagation()} />
           </Link>
         }
         title={
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <Tooltip title={inventory.title}>
-                <Text className='inventory_card_title' ellipsis={{ tooltip: inventory.title }}>
-                  {inventory.title}
-                </Text>
+                <Link href={`/inventories/${inventory.id}`}>
+                  <Text className='inventory_card_title' ellipsis={{ tooltip: inventory.title }}>
+                    {inventory.title}
+                  </Text>
+                </Link>
               </Tooltip>
             </div>
             <Tag color='var(--status-color)' style={{ marginLeft: 8 }}>
