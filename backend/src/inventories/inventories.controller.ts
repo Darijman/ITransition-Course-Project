@@ -9,7 +9,7 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { CreateInventoryDto } from './createInventory.dto';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
 import { InventoryOwnerOrAdminGuard } from 'src/guards/inventoryOwnerOrAdmin.guard';
-import { Admin, Public } from 'src/auth/auth.decorators';
+import { Admin } from 'src/auth/auth.decorators';
 import { OptionalAuthGuard } from 'src/guards/optionalAuth.guard';
 import { InventoryStatuses } from './inventoryStatuses.enum';
 
@@ -70,7 +70,6 @@ export class InventoriesController {
     return await this.inventoriesService.createNewInventory(newInventoryData, req.user);
   }
 
-  // @Public()
   @UseGuards(OptionalAuthGuard)
   @Get(':inventoryId')
   async getInventoryById(

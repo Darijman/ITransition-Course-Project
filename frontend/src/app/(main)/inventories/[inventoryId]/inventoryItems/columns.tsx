@@ -5,7 +5,7 @@ import { formatDate } from '@/helpers/formatDate';
 import React from 'react';
 import Link from 'next/link';
 
-const { Text } = Typography;
+const { Text, Paragraph } = Typography;
 
 export const inventoryItemsColumns: ColumnsType<InventoryItem> = [
   {
@@ -13,13 +13,7 @@ export const inventoryItemsColumns: ColumnsType<InventoryItem> = [
     dataIndex: 'imageUrl',
     key: 'image',
     render: (url: string, record: InventoryItem) => (
-      <Image
-        src={url || '/image-placeholder.svg'}
-        alt={record.title}
-        width={50}
-        height={50}
-        className='items_table_columns_image'
-      />
+      <Image src={url || '/image-placeholder.svg'} alt={record.title} width={50} height={50} className='items_table_columns_image' />
     ),
   },
   {
@@ -27,6 +21,17 @@ export const inventoryItemsColumns: ColumnsType<InventoryItem> = [
     dataIndex: 'title',
     key: 'title',
     render: (text: string) => <Text ellipsis={{ tooltip: text }}>{text}</Text>,
+  },
+  {
+    title: 'Description',
+    dataIndex: 'description',
+    key: 'description',
+    width: 400,
+    render: (text: string) => (
+      <Paragraph style={{ margin: 0, maxWidth: '400px' }} ellipsis={{ tooltip: text }}>
+        {text}
+      </Paragraph>
+    ),
   },
   {
     title: 'Creator',

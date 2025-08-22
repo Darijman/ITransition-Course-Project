@@ -1,20 +1,22 @@
 'use client';
 
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoryItem } from '@/interfaces/InventoryItem';
 import { inventoryItemsColumns } from './columns';
 import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { IoIosAddCircle } from 'react-icons/io';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { useParams } from 'next/navigation';
-import api from '../../../../../../axiosConfig';
-import './inventoryItems.css';
 import { CreateItemModal } from './createItemModal/CreateItemModal';
 import { InventoryUser } from '@/interfaces/InventoryUser';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import api from '../../../../../../axiosConfig';
+import './inventoryItems.css';
+import { canModifyInventory } from '@/helpers/canModifyInventory';
 
 const { Title } = Typography;
+const limit: number = 10;
 
 interface Props {
   currentInventoryUser: InventoryUser | null;
@@ -34,10 +36,6 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
   const [showCreateItemModal, setShowCreateItemModal] = useState<boolean>(false);
 
   const [offset, setOffset] = useState<number>(0);
-  const limit: number = 10;
-
-  console.log(`currentInventoryUser`, currentInventoryUser);
-  
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -57,7 +55,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     };
 
     fetchInitial();
-  }, [inventoryId, searchValue, limit, messageApi]);
+  }, [inventoryId, searchValue, messageApi]);
 
   const loadMore = async () => {
     if (isLoading || !hasMore) return;
@@ -84,9 +82,6 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     return items.filter((item) => item.title?.toLowerCase().includes(searchValue.toLowerCase()));
   }, [items, searchValue]);
 
-  console.log(`items`, items);
-  
-
   return (
     <div>
       <Title level={3} style={{ textAlign: 'center', margin: '0 0 20px 0' }}>
@@ -108,7 +103,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
             onChange={(e) => setSearchValue(e.target.value)}
           />
 
-          {user.id ? (
+          {canModifyInventory(currentInventoryUser, user) ? (
             <Button onClick={() => setShowCreateItemModal(true)} type='primary' icon={<IoIosAddCircle style={{ fontSize: '20px' }} />}>
               {t('inventory.items.create_item')}
             </Button>

@@ -1,20 +1,20 @@
 'use client';
 
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Modal, Form, Typography, Button, Upload, message } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoryItem } from '@/interfaces/InventoryItem';
 import { UploadOutlined } from '@ant-design/icons';
-import type { InputRef, UploadFile, UploadProps } from 'antd';
-import api from '../../../../../../../axiosConfig';
-import './createItemModal.css';
 import { RcFile } from 'antd/es/upload';
 import { useTranslations } from 'next-intl';
 import { TextField } from '@/components/textField/TextField';
 import { InventoryUser } from '@/interfaces/InventoryUser';
-import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
 import { ParamValue } from 'next/dist/server/request/params';
+import { canModifyInventory } from '@/helpers/canModifyInventory';
+import type { UploadFile, UploadProps } from 'antd';
+import api from '../../../../../../../axiosConfig';
+import './createItemModal.css';
 
 const { Title } = Typography;
 const { Dragger } = Upload;
@@ -69,16 +69,10 @@ export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser,
   };
 
   const onFinishHandler = async (values: CreateItemForm) => {
-    console.log(`values`, values);
     if (!user.id || !inventoryId) return;
-    if (
-      !currentInventoryUser ||
-      ![InventoryUserRoles.ADMIN, InventoryUserRoles.CREATOR, InventoryUserRoles.EDITOR].includes(currentInventoryUser.role)
-    ) {
-      return;
-    }
-
+    if (!canModifyInventory(currentInventoryUser, user)) return;
     setIsCreating(true);
+
     try {
       if (values.image && values.image.length > 0 && values.image[0].originFileObj) {
         const formData = new FormData();
@@ -170,7 +164,7 @@ export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser,
           </Form.Item>
 
           <Form.Item name='description' rules={[{ required: false }]}>
-            <TextField placeHolder={t('inventories_new.form_input_description')} maxLength={255} rows={4} />
+            <TextField placeHolder={t('inventories_new.form_input_description')} maxLength={255} rows={4} showCount />
           </Form.Item>
 
           <div className='modal_footer'>
