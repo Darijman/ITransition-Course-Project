@@ -77,7 +77,7 @@ const InventoryPage = () => {
             </Title>
           </div>
 
-          {isLoading ? <Loader /> : <Tabs defaultActiveKey='1' items={getTabs(currentInventoryUser)} tabBarGutter={25} />}
+          {isLoading ? <Loader /> : <Tabs defaultActiveKey='1' items={getTabs(currentInventoryUser, inventory)} tabBarGutter={25} />}
         </>
       )}
     </div>

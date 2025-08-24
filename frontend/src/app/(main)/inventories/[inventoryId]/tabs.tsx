@@ -9,6 +9,8 @@ import {
 } from '@ant-design/icons';
 import { InventoryItems } from './inventoryItems/InventoryItems';
 import { InventoryUser } from '@/interfaces/InventoryUser';
+import { InventoryInfo } from './inventoryInfo/InventoryInfo';
+import { Inventory } from '@/interfaces/Inventory';
 
 interface TabItem {
   key: string;
@@ -18,6 +20,7 @@ interface TabItem {
 
 export const getTabs = (
   currentInventoryUser: InventoryUser | null,
+  inventory: Inventory | null, 
 ): TabItem[] => [
   {
     key: '1',
@@ -67,6 +70,6 @@ export const getTabs = (
         Info
       </span>
     ),
-    children: <div>Inventory Info</div>,
+    children: <InventoryInfo inventory={inventory} />,
   },
 ];

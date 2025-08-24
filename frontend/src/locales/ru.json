@@ -36,6 +36,13 @@
       "title": "Айтемы инвентаря",
       "table_search_placeholder": "Искать айтем..",
       "create_item": "Создать Айтем"
+    },
+    "info": {
+      "title": "Информация об инвентаре",
+      "description": "Описание",
+      "users": "Пользователи",
+      "table_title": "Пользователи инвентаря",
+      "table_search_placeholder": "Искать пользователей.."
     }
   },
   "profile": {

@@ -35,6 +35,13 @@
       "title": "Inventory Items",
       "table_search_placeholder": "Search item..",
       "create_item": "Create Item"
+    },
+    "info": {
+      "title": "Inventory Info",
+      "description": "Description",
+      "users": "Users",
+      "table_title": "Inventory Users",
+      "table_search_placeholder": "Search users.."
     }
   },
   "profile": {
