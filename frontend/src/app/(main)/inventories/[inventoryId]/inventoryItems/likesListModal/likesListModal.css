@@ -1,0 +1,42 @@
+.likes_list_modal .ant-modal-content {
+  background-color: var(--foreground-color) !important;
+  color: var(--primary-text-color) !important;
+}
+
+.likes_list_modal .ant-modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.likes_list_modal .ant-modal-header {
+  background-color: var(--foreground-color);
+  border-bottom: 1px solid var(--secondary-text-color);
+}
+
+.likes_list_modal .ant-modal-title {
+  color: var(--primary-text-color);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.likes_list_modal .ant-modal-close {
+  color: var(--secondary-text-color) !important;
+}
+
+.likes_list_username {
+  font-size: 16px;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.likes_list_modal_avatar {
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  &:hover {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}

@@ -86,3 +86,7 @@
 .items_table td.ant-table-cell {
   background-color: var(--background-color) !important;
 }
+
+.item_like_button:hover  {
+  background-color: var(--hover-color) !important;
+}

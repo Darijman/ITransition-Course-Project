@@ -7,8 +7,8 @@ export interface InventoryItemLike {
   itemId: number;
   item?: InventoryItem;
 
-  userId: number;
-  user?: InventoryUser;
+  inventoryUserId: number;
+  inventoryUser?: InventoryUser;
 
   createdAt: string;
   updatedAt: string;

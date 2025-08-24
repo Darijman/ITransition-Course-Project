@@ -66,6 +66,9 @@ export default function Home() {
     }
   }, [user, notificationApi, t, router]);
 
+  console.log(`topFiveInventories`, topFiveInventories);
+  
+
   return (
     <div>
       {contextHolder}

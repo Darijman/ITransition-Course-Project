@@ -112,6 +112,7 @@ export class InventoriesService {
       .leftJoinAndSelect('inventory.category', 'category')
       .leftJoinAndSelect('inventory.creator', 'creator')
       .leftJoinAndSelect('inventory.tags', 'tags')
+      .leftJoinAndSelect('inventory.items', 'items')
       .loadRelationCountAndMap('inventory._itemsCount', 'inventory.items')
       .getMany();
 

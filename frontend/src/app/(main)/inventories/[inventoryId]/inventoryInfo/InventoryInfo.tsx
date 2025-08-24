@@ -70,7 +70,7 @@ export const InventoryInfo = ({ inventory }: Props) => {
             dataSource={filteredUsers}
             rowKey='id'
             pagination={false}
-            scroll={{ y: 400 }}
+            scroll={{ y: 600 }}
             locale={{
               emptyText: (
                 <div style={{ textAlign: 'center' }}>

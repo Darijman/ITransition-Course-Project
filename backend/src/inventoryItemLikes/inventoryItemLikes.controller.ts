@@ -21,7 +21,10 @@ export class InventoryItemLikesController {
 
   @UseGuards(AuthGuard)
   @Post()
-  async createNewLike(@Body() createInventoryItemLikeDto: CreateInventoryItemLikeDto, @Req() req: Request): Promise<InventoryItemLike> {
+  async createNewLike(
+    @Body() createInventoryItemLikeDto: CreateInventoryItemLikeDto,
+    @Req() req: Request,
+  ): Promise<InventoryItemLike | null> {
     return await this.inventoryItemLikesService.createNewLike(createInventoryItemLikeDto, req.user);
   }
 

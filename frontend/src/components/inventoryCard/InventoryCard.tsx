@@ -17,8 +17,9 @@ interface Props {
 
 export const InventoryCard = ({ inventory }: Props) => {
   const router = useRouter();
-  const imageSrc = inventory.imageUrl && inventory.imageUrl.trim().length > 0 ? inventory.imageUrl : undefined;
-  const avatarSrc = inventory.creator?.avatarUrl && inventory.creator.avatarUrl.trim().length > 0 ? inventory.creator.avatarUrl : undefined;
+  const imageSrc = inventory.imageUrl && inventory.imageUrl.trim().length > 0 ? inventory.imageUrl : '/inventory-placeholder.svg';
+  const avatarSrc =
+    inventory.creator?.avatarUrl && inventory.creator.avatarUrl.trim().length > 0 ? inventory.creator.avatarUrl : '/no-avatar.svg';
 
   return (
     <Card
@@ -30,7 +31,7 @@ export const InventoryCard = ({ inventory }: Props) => {
       cover={
         <div className='cover_wrap'>
           {imageSrc ? (
-            <Image alt={inventory.title} src={imageSrc || '/inventory-placeholder.svg'} width={300} height={200} className='cover_img' />
+            <Image alt={inventory.title} src={imageSrc} width={300} height={200} className='cover_img' />
           ) : (
             <div className='cover_placeholder'>
               <AppstoreOutlined className='cover_icon' />
@@ -42,7 +43,7 @@ export const InventoryCard = ({ inventory }: Props) => {
       <Meta
         avatar={
           <Link href={`/users/${inventory.creator?.id}`}>
-            <Avatar className='inventory_card_avatar' size={40} src={avatarSrc || '/no-avatar.svg'} onClick={(e: any) => e.stopPropagation()} />
+            <Avatar className='inventory_card_avatar' size={40} src={avatarSrc} onClick={(e: any) => e.stopPropagation()} />
           </Link>
         }
         title={

@@ -3,17 +3,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoryItem } from '@/interfaces/InventoryItem';
-import { inventoryItemsColumns } from './columns';
+import { getInventoryItemsColumns } from './columns';
 import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { IoIosAddCircle } from 'react-icons/io';
 import { useParams } from 'next/navigation';
 import { CreateItemModal } from './createItemModal/CreateItemModal';
 import { InventoryUser } from '@/interfaces/InventoryUser';
+import { canModifyInventory } from '@/helpers/canModifyInventory';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../../axiosConfig';
 import './inventoryItems.css';
-import { canModifyInventory } from '@/helpers/canModifyInventory';
+import { LikesListModal } from './likesListModal/LikesListModal';
+import { InventoryItemLike } from '@/interfaces/InventoryItemLike';
 
 const { Title } = Typography;
 const limit: number = 10;
@@ -32,10 +34,12 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [searchValue, setSearchValue] = useState<string>('');
-  const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
-  const [showCreateItemModal, setShowCreateItemModal] = useState<boolean>(false);
-
   const [offset, setOffset] = useState<number>(0);
+  const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
+
+  const [showCreateItemModal, setShowCreateItemModal] = useState<boolean>(false);
+  const [showLikesListModal, setShowLikesListModal] = useState<boolean>(false);
+  const [selectedLikes, setSelectedLikes] = useState<InventoryItemLike[]>([]);
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -75,6 +79,41 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleToggleLike = async (itemId: number, likeId?: number) => {
+    if (!canModifyInventory(currentInventoryUser, user)) return;
+    const action: 'like' | 'unlike' = likeId ? 'unlike' : 'like';
+
+    try {
+      if (likeId) {
+        await api.delete(`/inventory_item_likes/${likeId}`);
+        setItems((prev) =>
+          prev.map((item) => (item.id === itemId ? { ...item, likes: (item.likes ?? []).filter((like) => like.id !== likeId) } : item)),
+        );
+      } else {
+        const { data } = await api.post(`/inventory_item_likes`, { itemId });
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === itemId
+              ? {
+                  ...item,
+                  likes: [...(item.likes ?? []), data],
+                }
+              : item,
+          ),
+        );
+      }
+    } catch {
+      messageApi.error({
+        content: action === 'like' ? t('inventory.items.like_failed') : t('inventory.items.unlike_failed'),
+      });
+    }
+  };
+
+  const handleOpenLikesModal = (likes: InventoryItemLike[]) => {
+    setSelectedLikes(likes);
+    setShowLikesListModal(true);
   };
 
   const filteredItems = useMemo(() => {
@@ -125,7 +164,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
           >
             <Table
               className='items_table'
-              columns={inventoryItemsColumns}
+              columns={getInventoryItemsColumns(t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal)}
               dataSource={filteredItems}
               rowKey='id'
               pagination={false}
@@ -148,6 +187,8 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
         setItems={setItems}
         inventoryId={inventoryId}
       />
+
+      <LikesListModal open={showLikesListModal} onClose={() => setShowLikesListModal(false)} likes={selectedLikes} />
     </div>
   );
 };

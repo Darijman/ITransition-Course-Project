@@ -15,11 +15,11 @@ export class InventoryItemLike {
   item: InventoryItem;
 
   @Column()
-  userId: number;
+  inventoryUserId: number;
 
   @ManyToOne(() => InventoryUser, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
-  user: InventoryUser;
+  @JoinColumn({ name: 'inventoryUserId' })
+  inventoryUser: InventoryUser;
 
   @CreateDateColumn()
   createdAt: Date;

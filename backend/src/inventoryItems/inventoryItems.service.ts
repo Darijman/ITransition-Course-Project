@@ -35,7 +35,6 @@ export class InventoryItemsService {
     if (isNaN(limit) || isNaN(offset)) {
       throw new BadRequestException({ error: 'Limit and offset must be valid numbers!' });
     }
-
     if (limit < 0 || offset < 0) {
       throw new BadRequestException({ error: 'Negative numbers are not allowed!' });
     }
@@ -43,6 +42,8 @@ export class InventoryItemsService {
     let qb = this.inventoryItemsRepository
       .createQueryBuilder('item')
       .leftJoinAndSelect('item.likes', 'like')
+      .leftJoinAndSelect('like.inventoryUser', 'inventoryUser')
+      .leftJoinAndSelect('inventoryUser.user', 'user')
       .leftJoinAndSelect('item.creator', 'creator')
       .where('item.inventoryId = :inventoryId', { inventoryId })
       .loadRelationCountAndMap('item.likeCount', 'item.likes');

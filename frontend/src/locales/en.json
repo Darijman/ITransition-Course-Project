@@ -34,7 +34,11 @@
     "items": {
       "title": "Inventory Items",
       "table_search_placeholder": "Search item..",
-      "create_item": "Create Item"
+      "create_item": "Create Item",
+      "like_failed": "Couldn’t add like. Please try again.",
+      "unlike_failed": "Couldn’t remove like. Please try again.",
+      "view_all_likes": "View all",
+      "liked_by": "Liked by"
     },
     "info": {
       "title": "Inventory Info",
