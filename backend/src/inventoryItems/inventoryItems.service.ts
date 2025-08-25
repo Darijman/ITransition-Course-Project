@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InventoryItem } from './inventoryItem.entity';
 import { CreateInventoryItemDto } from './createInventoryItem.dto';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
@@ -8,6 +8,9 @@ import { UserRoles } from 'src/users/userRoles.enum';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { Inventory } from 'src/inventories/inventory.entity';
 import { ReqUser } from 'src/interfaces/ReqUser';
+import { extractPublicIdFromUrl } from 'src/common/cloudinary/cloudinary.helpers';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { InventoriesGateway } from 'src/inventories/inventories.gateway';
 
 @Injectable()
 export class InventoryItemsService {
@@ -20,6 +23,9 @@ export class InventoryItemsService {
 
     @InjectRepository(Inventory)
     private readonly inventoriesRepository: Repository<Inventory>,
+
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly inventoriesGateway: InventoriesGateway,
   ) {}
 
   async getAllItems(): Promise<InventoryItem[]> {
@@ -99,6 +105,11 @@ export class InventoryItemsService {
       where: { id: savedItem.id },
       relations: ['creator', 'likes'],
     });
+
+    this.inventoriesGateway.server.to(inventoryId.toString()).emit('item-added', {
+      item: fullItem,
+      addedBy: user.name,
+    });
     return fullItem;
   }
 
@@ -139,6 +150,66 @@ export class InventoryItemsService {
     }
 
     await this.inventoryItemsRepository.delete(itemId);
+    return { success: true };
+  }
+
+  async deleteManyItems(itemIds: number[], user: ReqUser): Promise<{ success: boolean }> {
+    if (!itemIds || !itemIds.length) {
+      throw new BadRequestException({ error: 'No item IDs provided!' });
+    }
+
+    if (itemIds.some((id) => isNaN(id))) {
+      throw new BadRequestException({ error: 'Invalid item IDs!' });
+    }
+
+    const items = await this.inventoryItemsRepository.findBy({ id: In(itemIds) });
+    if (!items || !items.length) {
+      throw new NotFoundException({ error: 'Items not found!' });
+    }
+
+    for (const item of items) {
+      const inventoryUser = await this.inventoryUsersRepository.findOneBy({
+        userId: user.id,
+        inventoryId: item.inventoryId,
+      });
+
+      if (!inventoryUser) {
+        // Если админ, разрешаем
+        if (user.role === UserRoles.ADMIN) continue;
+        throw new ForbiddenException({ error: `No access to inventory ${item.inventoryId}` });
+      }
+
+      if (
+        inventoryUser.role !== InventoryUserRoles.CREATOR &&
+        inventoryUser.role !== InventoryUserRoles.EDITOR &&
+        user.role !== UserRoles.ADMIN
+      ) {
+        throw new ForbiddenException({ error: `No permission to delete item ${item.id}` });
+      }
+    }
+
+    // Удаляем картинки (для всех ролей, если есть)
+    for (const item of items) {
+      if (item.imageUrl) {
+        const publicId = extractPublicIdFromUrl(item.imageUrl);
+        if (publicId) {
+          await this.cloudinaryService.deleteImage(publicId);
+        }
+      }
+    }
+
+    // Удаляем элементы из базы
+    await this.inventoryItemsRepository.delete(itemIds);
+
+    // WebSocket уведомление
+    const inventoryIds = [...new Set(items.map((i) => i.inventoryId.toString()))];
+    inventoryIds.forEach((invId) => {
+      this.inventoriesGateway.server.to(invId).emit('items-deleted', {
+        itemIds,
+        deletedBy: user.name,
+      });
+    });
+
     return { success: true };
   }
 }

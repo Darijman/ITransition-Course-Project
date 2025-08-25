@@ -10,11 +10,14 @@ import { Loader } from '@/ui/loader/Loader';
 import { getTabs } from './tabs';
 import api from '../../../../../axiosConfig';
 import './inventory.css';
+import { useSocket } from '@/contexts/socketContext/SocketContext';
 
 const { Title } = Typography;
 
 const InventoryPage = () => {
   const { user } = useAuth();
+  const { socket } = useSocket();
+
   const t = useTranslations();
   const router = useRouter();
 
@@ -63,7 +66,29 @@ const InventoryPage = () => {
     return inventory?.inventoryUsers?.find((invUser) => invUser.userId === user.id) || null;
   }, [inventory, user]);
 
-  console.log(`inventory`, inventory);
+  useEffect(() => {
+    if (!inventoryId || !socket || accessDenied) return;
+
+    const handleConnect = () => {
+      socket.emit('join-inventory', {
+        inventoryId,
+        user: { id: currentInventoryUser?.id, name: currentInventoryUser?.name, role: currentInventoryUser?.role },
+      });
+      socket.emit('get-users', { inventoryId });
+      console.log(`socket connected!`);
+      
+    };
+
+    socket.on('connect', handleConnect);
+
+    if (socket.connected) {
+      handleConnect();
+    }
+
+    return () => {
+      socket.off('connect', handleConnect);
+    };
+  }, [inventoryId, socket, accessDenied, currentInventoryUser]);
 
   return (
     <div>

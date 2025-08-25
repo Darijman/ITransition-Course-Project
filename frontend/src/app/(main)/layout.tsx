@@ -7,6 +7,7 @@ import { Header } from '@/ui/header/Header';
 // import { emitter } from '@/events';
 import api from '../../../axiosConfig';
 import './layout.css';
+import { SocketProvider } from '@/contexts/socketContext/SocketContext';
 // import { SocketProvider } from '@/contexts/socketContext/SocketContext';
 
 export default function MainLayout({ children }: { children: ReactNode }) {
@@ -24,8 +25,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <AuthProvider>
+      <SocketProvider>
         <Header />
         <main className='main'>{children}</main>
+      </SocketProvider>
     </AuthProvider>
   );
 }

@@ -88,7 +88,7 @@ export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser,
         }
 
         const { data } = await api.post('/inventory_items', formData);
-        setItems((prev) => [data, ...prev]);
+        // setItems((prev) => [data, ...prev]);
       } else {
         const body = {
           title: values.title.trim(),
@@ -97,7 +97,7 @@ export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser,
         };
 
         const { data } = await api.post('/inventory_items', body);
-        setItems((prev) => [data, ...prev]);
+        // setItems((prev) => [data, ...prev]);
       }
 
       form.resetFields();

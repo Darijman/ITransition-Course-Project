@@ -74,4 +74,10 @@ export class InventoryItemsController {
   ): Promise<{ success: boolean }> {
     return await this.inventoryItemsService.deleteItemById(inventoryItemId, req.user);
   }
+
+  @UseGuards(AuthGuard)
+  @Delete()
+  async deleteManyItems(@Body('itemIds') itemIds: number[], @Req() req: Request): Promise<{ success: boolean }> {
+    return await this.inventoryItemsService.deleteManyItems(itemIds, req.user);
+  }
 }

@@ -7,11 +7,12 @@ import { Inventory } from './inventory.entity';
 import { UsersModule } from 'src/users/users.module';
 import { InventoryTag } from 'src/inventoryTags/inventoryTag.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
+import { InventoriesGateway } from './inventories.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Inventory, InventoryTag, InventoryUser]), CloudinaryModule, UsersModule],
   controllers: [InventoriesController],
-  providers: [InventoriesService],
-  exports: [InventoriesService],
+  providers: [InventoriesService, InventoriesGateway],
+  exports: [InventoriesService, InventoriesGateway],
 })
 export class InventoriesModule {}

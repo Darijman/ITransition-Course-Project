@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-// import { IoAdapter } from '@nestjs/platform-socket.io';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as cors from 'cors';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
@@ -29,7 +29,7 @@ async function bootstrap() {
     }),
   );
 
-  // app.useWebSocketAdapter(new IoAdapter(app));
+  app.useWebSocketAdapter(new IoAdapter(app));
   app.use(express.static('public'));
   app.use(express.json());
   app.use(cookieParser());

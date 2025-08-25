@@ -11,6 +11,7 @@ import { InventoryItems } from './inventoryItems/InventoryItems';
 import { InventoryUser } from '@/interfaces/InventoryUser';
 import { InventoryInfo } from './inventoryInfo/InventoryInfo';
 import { Inventory } from '@/interfaces/Inventory';
+import { InventoryAccess } from './inventoryAccess/InventoryAccess';
 
 interface TabItem {
   key: string;
@@ -60,7 +61,7 @@ export const getTabs = (
         Access
       </span>
     ),
-    children: <div>Inventory Access</div>,
+    children: <InventoryAccess inventory={inventory} currentInventoryUser={currentInventoryUser} />,
   },
   {
     key: '5',

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoryItem } from '@/interfaces/InventoryItem';
 import { getInventoryItemsColumns } from './columns';
-import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
+import { Button, Empty, Input, message, Popconfirm, Spin, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { IoIosAddCircle } from 'react-icons/io';
 import { useParams } from 'next/navigation';
@@ -16,6 +16,8 @@ import api from '../../../../../../axiosConfig';
 import './inventoryItems.css';
 import { LikesListModal } from './likesListModal/LikesListModal';
 import { InventoryItemLike } from '@/interfaces/InventoryItemLike';
+import { useLocale } from '@/contexts/localeContext/LocaleContext';
+import { useSocket } from '@/contexts/socketContext/SocketContext';
 
 const { Title } = Typography;
 const limit: number = 10;
@@ -27,11 +29,14 @@ interface Props {
 export const InventoryItems = ({ currentInventoryUser }: Props) => {
   const { user } = useAuth();
   const { inventoryId } = useParams();
+  const { locale } = useLocale();
+  const { socket } = useSocket();
   const t = useTranslations();
 
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const [searchValue, setSearchValue] = useState<string>('');
   const [offset, setOffset] = useState<number>(0);
@@ -40,6 +45,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
   const [showCreateItemModal, setShowCreateItemModal] = useState<boolean>(false);
   const [showLikesListModal, setShowLikesListModal] = useState<boolean>(false);
   const [selectedLikes, setSelectedLikes] = useState<InventoryItemLike[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -61,6 +67,32 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     fetchInitial();
   }, [inventoryId, searchValue, messageApi]);
 
+  useEffect(() => {
+    if (!socket || !inventoryId) return;
+
+    const handleItemAdded = (data: { item: InventoryItem; addedBy: string }) => {
+      setItems((prevItems) => {
+        const exists = prevItems.some((i) => i.id === data.item.id);
+        if (exists) return prevItems;
+        return [data.item, ...prevItems];
+      });
+    };
+
+    const handleItemsDeleted = (data: { itemIds: number[]; deletedBy: string }) => {
+      console.log(`itemIds`, data.itemIds);
+      
+      setItems((prevItems) => prevItems.filter((item) => !data.itemIds.includes(item.id)));
+    };
+
+    socket.on('item-added', handleItemAdded);
+    socket.on('items-deleted', handleItemsDeleted);
+
+    return () => {
+      socket.off('item-added', handleItemAdded);
+      socket.off('items-deleted', handleItemsDeleted);
+    };
+  }, [socket, inventoryId]);
+
   const loadMore = async () => {
     if (isLoading || !hasMore) return;
 
@@ -79,6 +111,11 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOpenLikesModal = (likes: InventoryItemLike[]) => {
+    setSelectedLikes(likes);
+    setShowLikesListModal(true);
   };
 
   const handleToggleLike = async (itemId: number, likeId?: number) => {
@@ -111,9 +148,19 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     }
   };
 
-  const handleOpenLikesModal = (likes: InventoryItemLike[]) => {
-    setSelectedLikes(likes);
-    setShowLikesListModal(true);
+  const deleteManyItemsHandler = async () => {
+    if (!canModifyInventory(currentInventoryUser, user) || !selectedRowKeys.length) return;
+
+    try {
+      await api.delete(`/inventory_items`, {
+        data: { itemIds: selectedRowKeys },
+      });
+
+      setSelectedRowKeys([]);
+      messageApi.success(t('inventory.items.delete_success'));
+    } catch {
+      messageApi.error(t('inventory.items.delete_failed'));
+    }
   };
 
   const filteredItems = useMemo(() => {
@@ -143,9 +190,32 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
           />
 
           {canModifyInventory(currentInventoryUser, user) ? (
-            <Button onClick={() => setShowCreateItemModal(true)} type='primary' icon={<IoIosAddCircle style={{ fontSize: '20px' }} />}>
-              {t('inventory.items.create_item')}
-            </Button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Button onClick={() => setShowCreateItemModal(true)} type='primary' icon={<IoIosAddCircle style={{ fontSize: '20px' }} />}>
+                {t('inventory.items.create_item')}
+              </Button>
+
+              <Popconfirm
+                title={
+                  locale === 'en'
+                    ? 'This action is irreversible. Are you sure you want to delete?'
+                    : 'Это действие необратимо. Вы уверены, что хотите удалить?'
+                }
+                onConfirm={deleteManyItemsHandler}
+                open={isDeleting}
+                onOpenChange={(visible) => setIsDeleting(visible)}
+                okText={locale === 'en' ? 'Yes, delete!' : 'Да, удалить!'}
+                cancelText={locale === 'en' ? 'Cancel' : 'Отмена'}
+                placement='topRight'
+                getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                okButtonProps={{ danger: true, style: { backgroundColor: 'red', borderColor: 'red' } }}
+                cancelButtonProps={{ style: { backgroundColor: 'var(--secondary-text-color)', color: '#FFFFFF' } }}
+              >
+                <Button className='inventory_items_delete_button' type='primary' danger disabled={!selectedRowKeys.length}>
+                  {t('inventory.items.delete_selected')}
+                </Button>
+              </Popconfirm>
+            </div>
           ) : null}
         </div>
 
@@ -168,10 +238,14 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
               dataSource={filteredItems}
               rowKey='id'
               pagination={false}
+              rowSelection={{
+                type: 'checkbox',
+                onChange: (keys) => setSelectedRowKeys(keys),
+              }}
               locale={{
                 emptyText: (
                   <div style={{ textAlign: 'center' }}>
-                    <Empty description={<span style={{ color: 'var(--red-color)' }}>No data</span>} />
+                    <Empty description={<span style={{ color: 'var(--red-color)' }}>No items</span>} />
                   </div>
                 ),
               }}

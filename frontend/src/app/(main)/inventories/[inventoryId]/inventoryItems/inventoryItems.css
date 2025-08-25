@@ -90,3 +90,8 @@
 .item_like_button:hover  {
   background-color: var(--hover-color) !important;
 }
+
+.inventory_items_delete_button:disabled {
+  background-color: gray !important;
+  border-color: gray !important;
+}
