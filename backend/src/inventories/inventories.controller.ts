@@ -27,6 +27,25 @@ export class InventoriesController {
     return await this.inventoriesService.getAllInventories();
   }
 
+  @UseGuards(AuthGuard)
+  @Get('/user')
+  async getInventoriesForUser(
+    @Req() req: Request,
+    @Query('searchValue') searchValue?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('status') status?: InventoryStatuses | 'ALL',
+  ): Promise<Inventory[]> {
+    const parsedQuery = {
+      offset: offset ? Number(offset) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      status: status ?? 'ALL',
+      searchValue,
+    };
+
+    return await this.inventoriesService.getInventoriesForUser(req.user.id, parsedQuery);
+  }
+
   @UseGuards(OptionalAuthGuard)
   @Get('/public')
   async getAllPublicInventories(

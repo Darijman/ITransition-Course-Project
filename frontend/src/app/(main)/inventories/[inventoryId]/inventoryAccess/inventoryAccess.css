@@ -1,0 +1,4 @@
+.inventory_status_button:disabled {
+  background-color: var(--submit-button-color);
+  border: 1px solid var(--submit-button-color);
+}

@@ -10,6 +10,7 @@ import { useSocket } from '@/contexts/socketContext/SocketContext';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { UserRoles } from '@/interfaces/UserRoles.enum';
 import api from '../../../../../../axiosConfig';
+import './inventoryAccess.css';
 
 const { Title } = Typography;
 
@@ -62,11 +63,13 @@ export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory 
         {t('inventory.access.title')}
       </Title>
 
-      <div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Space.Compact>
           <Tooltip title={t('inventories_new.status_tooltip_private')}>
             <Button
+              className='inventory_status_button'
               type={inventory?.status === InventoryStatuses.PRIVATE ? 'primary' : 'default'}
+              disabled={inventory?.status === InventoryStatuses.PRIVATE}
               style={{
                 maxWidth: '250px',
                 width: '100%',
@@ -79,7 +82,9 @@ export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory 
           </Tooltip>
           <Tooltip title={t('inventories_new.status_tooltip_public')}>
             <Button
+              className='inventory_status_button'
               type={inventory?.status === InventoryStatuses.PUBLIC ? 'primary' : 'default'}
+              disabled={inventory?.status === InventoryStatuses.PUBLIC}
               style={{
                 maxWidth: '250px',
                 width: '100%',

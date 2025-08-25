@@ -40,6 +40,34 @@ export class InventoriesService {
     return await this.inventoriesRepository.find();
   }
 
+  async getInventoriesForUser(userId: number, query: Query = {}): Promise<Inventory[]> {
+    const { offset = 0, limit = 10, status = 'ALL', searchValue } = query;
+
+    const qb = this.inventoryUsersRepository
+      .createQueryBuilder('iu')
+      .leftJoinAndSelect('iu.inventory', 'inventory')
+      .leftJoinAndSelect('inventory.creator', 'creator')
+      .leftJoinAndSelect('inventory.items', 'items')
+      .leftJoinAndSelect('inventory.tags', 'tags')
+      .leftJoinAndSelect('inventory.category', 'category')
+      .where('iu.userId = :userId', { userId });
+
+    if (status !== 'ALL') {
+      qb.andWhere('inventory.status = :status', { status });
+    }
+
+    if (searchValue) {
+      const search = `%${searchValue.toLowerCase()}%`;
+      qb.andWhere(`(LOWER(inventory.title) LIKE :search OR LOWER(creator.name) LIKE :search OR LOWER(category.title) LIKE :search)`, {
+        search,
+      });
+    }
+
+    qb.take(limit).skip(offset).orderBy('inventory.createdAt', 'DESC');
+    const userInventories = await qb.getMany();
+    return userInventories.map((iu) => iu.inventory);
+  }
+
   async getAllPublicInventories(user?: ReqUser, query: Query = {}): Promise<Inventory[]> {
     const { limit = 10, offset = 0, status = 'ALL', searchValue } = query;
 

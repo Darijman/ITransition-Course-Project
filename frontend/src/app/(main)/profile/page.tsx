@@ -14,6 +14,7 @@ import { UserRoles } from '@/interfaces/UserRoles.enum';
 import api from '../../../../axiosConfig';
 import './profile.css';
 import './responsive.css';
+import { UserInventories } from './userInventories/UserInventories';
 
 const { Title } = Typography;
 const { Item } = Descriptions;
@@ -142,6 +143,8 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      <UserInventories />
 
       <DeleteModal
         open={showDeleteAccountModal}
