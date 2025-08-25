@@ -79,8 +79,6 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     };
 
     const handleItemsDeleted = (data: { itemIds: number[]; deletedBy: string }) => {
-      console.log(`itemIds`, data.itemIds);
-      
       setItems((prevItems) => prevItems.filter((item) => !data.itemIds.includes(item.id)));
     };
 

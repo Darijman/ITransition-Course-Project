@@ -1,12 +1,5 @@
-// tabs.tsx
 import { ReactNode } from 'react';
-import {
-  AppstoreOutlined,
-  CommentOutlined,
-  SettingOutlined,
-  UnlockOutlined,
-  InfoCircleOutlined,
-} from '@ant-design/icons';
+import { AppstoreOutlined, CommentOutlined, SettingOutlined, UnlockOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { InventoryItems } from './inventoryItems/InventoryItems';
 import { InventoryUser } from '@/interfaces/InventoryUser';
 import { InventoryInfo } from './inventoryInfo/InventoryInfo';
@@ -21,7 +14,8 @@ interface TabItem {
 
 export const getTabs = (
   currentInventoryUser: InventoryUser | null,
-  inventory: Inventory | null, 
+  inventory: Inventory | null,
+  setInventory: React.Dispatch<React.SetStateAction<Inventory | null>>,
 ): TabItem[] => [
   {
     key: '1',
@@ -61,7 +55,7 @@ export const getTabs = (
         Access
       </span>
     ),
-    children: <InventoryAccess inventory={inventory} currentInventoryUser={currentInventoryUser} />,
+    children: <InventoryAccess inventory={inventory} setInventory={setInventory} currentInventoryUser={currentInventoryUser} />,
   },
   {
     key: '5',

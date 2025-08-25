@@ -174,7 +174,6 @@ export class InventoryItemsService {
       });
 
       if (!inventoryUser) {
-        // Если админ, разрешаем
         if (user.role === UserRoles.ADMIN) continue;
         throw new ForbiddenException({ error: `No access to inventory ${item.inventoryId}` });
       }
@@ -188,7 +187,6 @@ export class InventoryItemsService {
       }
     }
 
-    // Удаляем картинки (для всех ролей, если есть)
     for (const item of items) {
       if (item.imageUrl) {
         const publicId = extractPublicIdFromUrl(item.imageUrl);
@@ -198,10 +196,8 @@ export class InventoryItemsService {
       }
     }
 
-    // Удаляем элементы из базы
     await this.inventoryItemsRepository.delete(itemIds);
 
-    // WebSocket уведомление
     const inventoryIds = [...new Set(items.map((i) => i.inventoryId.toString()))];
     inventoryIds.forEach((invId) => {
       this.inventoriesGateway.server.to(invId).emit('items-deleted', {

@@ -11,6 +11,7 @@ import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 import { UserRoles } from 'src/users/userRoles.enum';
 import { ReqUser } from 'src/interfaces/ReqUser';
 import { InventoryStatuses } from './inventoryStatuses.enum';
+import { InventoriesGateway } from './inventories.gateway';
 
 interface Query {
   limit?: number;
@@ -31,6 +32,8 @@ export class InventoriesService {
 
     @InjectRepository(InventoryUser)
     private readonly inventoryUsersRepository: Repository<InventoryUser>,
+
+    private readonly inventoriesGateway: InventoriesGateway,
   ) {}
 
   async getAllInventories(): Promise<Inventory[]> {
@@ -186,34 +189,24 @@ export class InventoriesService {
   }
 
   async updateInventoryStatus(inventoryId: number, status: InventoryStatuses, user: ReqUser) {
-    if (!inventoryId || isNaN(inventoryId)) {
-      throw new BadRequestException({ error: 'Invalid Inventory ID!' });
-    }
-
     const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
-    if (!inventory) {
-      throw new NotFoundException({ error: 'Inventory not found!' });
-    }
+    if (!inventory) throw new NotFoundException({ error: 'Inventory not found!' });
 
-    if (user.role === UserRoles.ADMIN) {
-      await this.inventoriesRepository.update(inventoryId, { status });
-      return { success: true };
-    }
+    const isAdmin = user.role === UserRoles.ADMIN;
+    const isCreator = (await this.inventoryUsersRepository.findOneBy({ userId: user.id, inventoryId }))?.role === InventoryUserRoles.CREATOR;
 
-    const inventoryUser = await this.inventoryUsersRepository.findOneBy({
-      userId: user.id,
-      inventoryId: inventory.id,
-    });
-
-    if (!inventoryUser) {
-      throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
-    }
-
-    if (inventoryUser.role !== InventoryUserRoles.CREATOR) {
+    if (!isAdmin && !isCreator) {
       throw new ForbiddenException({ error: 'You do not have permission to change visibility!' });
     }
 
     await this.inventoriesRepository.update(inventoryId, { status });
+
+    this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-status-updated', {
+      inventoryId,
+      status,
+      updatedBy: user.name,
+    });
+
     return { success: true };
   }
 

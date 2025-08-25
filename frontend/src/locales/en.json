@@ -51,7 +51,9 @@
       "table_search_placeholder": "Search users.."
     },
     "access": {
-      "title": "Inventory Access"
+      "title": "Inventory Access",
+      "status_error": "Failed to update inventory status. Try again later..",
+      "status_updated": "Inventory status updated to {status} by {updatedBy}"
     }
   },
   "profile": {
