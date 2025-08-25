@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Inventory, InventoryStatuses } from '@/interfaces/Inventory';
 import { InventoryUser } from '@/interfaces/InventoryUser';
 import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
@@ -41,7 +41,7 @@ export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory 
     return () => {
       socket.off('inventory-status-updated', handleStatusUpdated);
     };
-  }, [socket, inventory, setInventory]);
+  }, [socket, inventory, setInventory, messageApi, t]);
 
   const updateInventoryStatusHandler = async (newStatus: InventoryStatuses) => {
     if (!inventory) return;

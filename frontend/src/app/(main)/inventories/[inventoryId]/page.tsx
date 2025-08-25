@@ -76,7 +76,6 @@ const InventoryPage = () => {
       });
       socket.emit('get-users', { inventoryId });
       console.log(`socket connected!`);
-      
     };
 
     socket.on('connect', handleConnect);
@@ -102,7 +101,11 @@ const InventoryPage = () => {
             </Title>
           </div>
 
-          {isLoading ? <Loader /> : <Tabs defaultActiveKey='1' items={getTabs(currentInventoryUser, inventory, setInventory)} tabBarGutter={25} />}
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <Tabs defaultActiveKey='1' items={getTabs(currentInventoryUser, inventory, setInventory, user.role, t)} tabBarGutter={25} />
+          )}
         </>
       )}
     </div>
