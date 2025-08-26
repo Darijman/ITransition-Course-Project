@@ -61,6 +61,11 @@
       "title": "Inventory Access",
       "status_error": "Failed to update inventory status. Try again later..",
       "status_updated": "Inventory status updated to {status} by {updatedBy}"
+    },
+    "discussion": {
+      "title": "Inventory Discussion",
+      "add_comment_textfield_placeholder": "Add a comment...",
+      "post_button": "Post"
     }
   },
   "profile": {
@@ -79,7 +84,8 @@
     "delete_account_confirm_button_text": "Yes, delete my account",
     "delete_account_cancel_button_text": "Cancel",
     "account_deleted_text": "Account deleted successfully. Taking you to the Home page..",
-    "account_deleted_error_text": "Failed to delete your account! Try again later.."
+    "account_deleted_error_text": "Failed to delete your account! Try again later..",
+    "user_inventories_title": "Inventories you are part of"
   },
   "profile_settings": {
     "title": "Profile settings",

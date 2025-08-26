@@ -1,0 +1,13 @@
+.add_inventory_comment_form {
+  background-color: var(--foreground-color);
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 100%;
+  justify-self: center;
+}
+
+.inventory_comment_form_post_button:disabled {
+  background-color: gray;
+  border: 1px solid gray;
+}

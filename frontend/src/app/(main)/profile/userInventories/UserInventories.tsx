@@ -89,7 +89,6 @@ export const UserInventories = () => {
 
   const filteredInventories = useMemo(() => {
     return inventories.filter((inventory) => {
-      // Фильтр по статусу
       if (statusFilter !== 'ALL') {
         if (
           (statusFilter === 'PUBLIC' && inventory.status !== InventoryStatuses.PUBLIC) ||
@@ -99,7 +98,6 @@ export const UserInventories = () => {
         }
       }
 
-      // Фильтр по поиску
       if (searchValue) {
         const lowerSearch = searchValue.toLowerCase();
         const matchesTitle = inventory.title?.toLowerCase().includes(lowerSearch);
@@ -121,7 +119,7 @@ export const UserInventories = () => {
       {contextHolder}
       <div className='inventories_table_header'>
         <Title level={3} style={{ margin: 0 }}>
-          Inventories
+         {t('profile.user_inventories_title')}
         </Title>
 
         <Input.Search

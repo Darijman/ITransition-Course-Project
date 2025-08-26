@@ -62,6 +62,11 @@
       "title": "Доступ в инвентаре",
       "status_error": "Не удалось обновить статус инвентаря. Попробуйте позже..",
       "status_updated": "Статус инвентаря изменён на {status} пользователем {updatedBy}"
+    },
+    "discussion": {
+      "title": "Обсуждение инвентаря",
+      "add_comment_textfield_placeholder": "Добавьте комментарий...",
+      "post_button": "Добавить"
     }
   },
   "profile": {
@@ -81,7 +86,8 @@
     "delete_account_confirm_button_text": "Да, удалить мой аккаунт",
     "delete_account_cancel_button_text": "Отмена",
     "account_deleted_text": "Аккаунт успешно удален. Перенаправляем на главную страницу!",
-    "account_deleted_error_text": "Не удалось удалить аккаунт. Попробуйте позже!"
+    "account_deleted_error_text": "Не удалось удалить аккаунт. Попробуйте позже!",
+    "user_inventories_title": "Инвентари, в которых вы участвуете"
   },
   "profile_settings": {
     "title": "Настройки профиля",

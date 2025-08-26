@@ -7,6 +7,7 @@ import { InventoryAccess } from './inventoryAccess/InventoryAccess';
 import { UserRoles } from '@/interfaces/UserRoles.enum';
 import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
 import { InventoryInfo } from './inventoryInfo/InventoryInfo';
+import { InventoryDiscussion } from './inventoryDiscussion/InventoryDiscussion';
 
 interface TabItem {
   key: string;
@@ -39,9 +40,9 @@ export const getTabs = (
           {t('inventory.tabs.discussion')}
         </span>
       ),
-      children: <div>Inventory Discussion</div>,
+      children: <InventoryDiscussion currentInventoryUser={currentInventoryUser} inventory={inventory} setInventory={setInventory} />,
     },
-        {
+    {
       key: 'info',
       label: (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

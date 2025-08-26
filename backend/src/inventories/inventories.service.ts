@@ -192,7 +192,17 @@ export class InventoriesService {
 
     const inventory = await this.inventoriesRepository.findOne({
       where: { id: inventoryId },
-      relations: ['tags', 'inventoryUsers', 'inventoryUsers.user', 'comments', 'comments.author', 'items', 'category', 'creator'],
+      relations: [
+        'tags',
+        'inventoryUsers',
+        'inventoryUsers.user',
+        'comments',
+        'comments.author',
+        'comments.author.user',
+        'items',
+        'category',
+        'creator',
+      ],
     });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });

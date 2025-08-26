@@ -89,6 +89,9 @@ const InventoryPage = () => {
     };
   }, [inventoryId, socket, accessDenied, currentInventoryUser]);
 
+  console.log(`inventory`, inventory);
+  
+
   return (
     <div>
       {contextHolder}

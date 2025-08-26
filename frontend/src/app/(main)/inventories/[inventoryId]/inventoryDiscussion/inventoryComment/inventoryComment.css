@@ -1,0 +1,38 @@
+.inventory_comment {
+  padding: 20px;
+  background-color: var(--foreground-color);
+  border-radius: 10px;
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.inventory_comment_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.comment_avatar {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  &:hover {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}
+
+.comment_avatar_no_image {
+  border: 1px solid black;
+}
+
+[data-theme='dark'] {
+  .comment_avatar_no_image {
+    border: 1px solid #ffffff;
+  }
+}
