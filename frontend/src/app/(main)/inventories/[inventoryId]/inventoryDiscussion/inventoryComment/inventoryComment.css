@@ -1,4 +1,5 @@
 .inventory_comment {
+  position: relative;
   padding: 20px;
   background-color: var(--foreground-color);
   border-radius: 10px;
@@ -7,6 +8,9 @@
   display: flex;
   align-items: flex-start;
   margin-bottom: 20px;
+  &:hover {
+    background-color: var(--hover-color);
+  }
 }
 
 .inventory_comment_header {
@@ -29,6 +33,34 @@
 
 .comment_avatar_no_image {
   border: 1px solid black;
+}
+
+.inventory_comment_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.inventory_comment_buttons {
+  position: absolute;
+  top: 15px;
+  right: 100px;
+  display: flex;
+  gap: 6px;
+}
+
+.inventory_comment_delete_button,
+.inventory_comment_edit_button {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.inventory_comment:hover .inventory_comment_delete_button,
+.inventory_comment:hover .inventory_comment_edit_button {
+  display: inline-flex;
+  opacity: 1;
 }
 
 [data-theme='dark'] {

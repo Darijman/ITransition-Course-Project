@@ -65,7 +65,8 @@
     "discussion": {
       "title": "Inventory Discussion",
       "add_comment_textfield_placeholder": "Add a comment...",
-      "post_button": "Post"
+      "post_button": "Post",
+      "failed_to_post_comment": "Failed to post a comment. Try again later.."
     }
   },
   "profile": {

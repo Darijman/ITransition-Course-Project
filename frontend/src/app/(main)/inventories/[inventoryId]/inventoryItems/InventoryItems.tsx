@@ -11,13 +11,13 @@ import { useParams } from 'next/navigation';
 import { CreateItemModal } from './createItemModal/CreateItemModal';
 import { InventoryUser } from '@/interfaces/InventoryUser';
 import { canModifyInventory } from '@/helpers/canModifyInventory';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import api from '../../../../../../axiosConfig';
-import './inventoryItems.css';
 import { LikesListModal } from './likesListModal/LikesListModal';
 import { InventoryItemLike } from '@/interfaces/InventoryItemLike';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import api from '../../../../../../axiosConfig';
+import './inventoryItems.css';
 
 const { Title } = Typography;
 const limit: number = 10;

@@ -8,6 +8,7 @@ import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { UserRoles } from 'src/users/userRoles.enum';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 import { ReqUser } from 'src/interfaces/ReqUser';
+import { InventoriesGateway } from 'src/inventories/inventories.gateway';
 
 @Injectable()
 export class InventoryCommentsService {
@@ -20,6 +21,8 @@ export class InventoryCommentsService {
 
     @InjectRepository(InventoryUser)
     private readonly inventoryUsersRepository: Repository<InventoryUser>,
+
+    private readonly inventoriesGateway: InventoriesGateway,
   ) {}
 
   async getAllInventoryComments(): Promise<InventoryComment[]> {
@@ -51,6 +54,8 @@ export class InventoryCommentsService {
       throw new NotFoundException({ error: 'Inventory not found!' });
     }
 
+    const { inventoryId } = createInventoryCommentDto;
+
     let inventoryUser = await this.inventoryUsersRepository.findOne({
       where: { userId: user.id, inventoryId: inventory.id },
     });
@@ -69,11 +74,16 @@ export class InventoryCommentsService {
       throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
     }
 
-    const inventoryComment = this.inventoryCommentsRepository.create({
-      ...createInventoryCommentDto,
-      authorId: inventoryUser.id,
+    const inventoryComment = this.inventoryCommentsRepository.create({ ...createInventoryCommentDto, authorId: inventoryUser.id });
+    const savedComment = await this.inventoryCommentsRepository.save(inventoryComment);
+
+    const fullComment = await this.inventoryCommentsRepository.findOne({
+      where: { id: savedComment.id },
+      relations: ['author', 'author.user'],
     });
-    return await this.inventoryCommentsRepository.save(inventoryComment);
+
+    this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-comment-created', fullComment);
+    return savedComment;
   }
 
   async getInventoryCommentByID(commentId: number): Promise<InventoryComment> {

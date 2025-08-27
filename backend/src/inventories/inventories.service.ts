@@ -203,6 +203,11 @@ export class InventoriesService {
         'category',
         'creator',
       ],
+      order: {
+        comments: {
+          createdAt: 'ASC',
+        },
+      },
     });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
