@@ -9,6 +9,8 @@ import { InventoryComment } from './inventoryComment/InventoryComment';
 import { AddInventoryCommentForm } from './addInventoryCommentForm/AddInventoryCommentForm';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
 import './inventoryDiscussion.css';
+import { canModifyInventory } from '@/helpers/canModifyInventory';
+import { useAuth } from '@/contexts/authContext/AuthContext';
 
 const { Title } = Typography;
 
@@ -19,6 +21,7 @@ interface Props {
 }
 
 export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInventory }: Props) => {
+  const { user } = useAuth();
   const { socket } = useSocket();
   const t = useTranslations();
 
@@ -45,8 +48,20 @@ export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInvent
       });
     });
 
+    socket.on('inventory-comment-deleted', ({ commentId }: { commentId: number }) => {
+      setInventory((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          comments: prev.comments?.filter((c) => c.id !== commentId) ?? [],
+        };
+      });
+    });
+
     return () => {
       socket.off('inventory-comment-created');
+      socket.off('inventory-comment-deleted');
     };
   }, [socket, inventory?.id, setInventory]);
 
@@ -89,9 +104,11 @@ export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInvent
         <hr style={{ border: '1px solid var(--hover-color)', width: '100%' }} />
       </div>
 
-      <div style={{ marginTop: 20 }}>
-        <AddInventoryCommentForm inventory={inventory} currentInventoryUser={currentInventoryUser} />
-      </div>
+      {canModifyInventory(currentInventoryUser, user) ? (
+        <div style={{ marginTop: 20 }}>
+          <AddInventoryCommentForm inventory={inventory} currentInventoryUser={currentInventoryUser} />
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -108,8 +108,11 @@ export class InventoryCommentsService {
       throw new NotFoundException({ error: 'Inventory Comment not found!' });
     }
 
+    const { inventoryId } = inventoryComment;
+
     if (user.role === UserRoles.ADMIN) {
       await this.inventoryCommentsRepository.delete(commentId);
+      this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-comment-deleted', { commentId });
       return { success: true };
     }
 
@@ -118,11 +121,14 @@ export class InventoryCommentsService {
       throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
     }
 
-    if (inventoryUser.role !== InventoryUserRoles.CREATOR && inventoryUser.role !== InventoryUserRoles.EDITOR) {
+    const isCommentOwner = inventoryComment.authorId === inventoryUser.userId;
+    const hasInventoryRights = inventoryUser.role === InventoryUserRoles.CREATOR || inventoryUser.role === InventoryUserRoles.EDITOR;
+    if (!isCommentOwner && !hasInventoryRights) {
       throw new ForbiddenException({ error: 'You do not have permission to delete this comment!' });
     }
 
     await this.inventoryCommentsRepository.delete(commentId);
+    this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-comment-deleted', { commentId });
     return { success: true };
   }
 }

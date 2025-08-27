@@ -4,7 +4,7 @@
   border-radius: 10px;
   max-width: 600px;
   width: 100%;
-  justify-self: center;
+  margin: 0 auto;
 }
 
 .inventory_comment_form_post_button:disabled {
