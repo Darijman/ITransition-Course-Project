@@ -10,11 +10,12 @@ import { useRouter } from 'next/navigation';
 import { UpdatePasswordForm } from './updatePasswordForm/UpdatePasswordForm';
 import { UpdateNameForm } from './updateNameForm/UpdateNameForm';
 import { Loader } from '@/ui/loader/Loader';
+import { DeleteModal } from '@/components/deleteModal/DeleteModal';
+import { SetPasswordForm } from './setPasswordForm/SetPasswordForm';
 import type { UploadProps, RcFile, UploadFile } from 'antd/es/upload/interface';
 import api from '../../../../../axiosConfig';
 import './profileSettings.css';
 import './responsive.css';
-import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 
 const { Title, Text } = Typography;
 
@@ -23,6 +24,7 @@ interface ProfileSettingsForm {
   oldPassword?: string;
   newPassword?: string;
   avatar?: UploadFile[];
+  password?: string;
 }
 
 const ProfileSettingsPage = () => {
@@ -30,6 +32,8 @@ const ProfileSettingsPage = () => {
   const [form] = Form.useForm<ProfileSettingsForm>();
   const t = useTranslations();
   const router = useRouter();
+
+  console.log(`user`, user);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -96,7 +100,9 @@ const ProfileSettingsPage = () => {
         formData.append('name', values.name.trim());
       }
 
-      if (values.oldPassword && values.newPassword) {
+      if (!user.hasPassword && values.password) {
+        formData.append('password', values.password.trim());
+      } else if (values.oldPassword && values.newPassword) {
         formData.append('oldPassword', values.oldPassword.trim());
         formData.append('newPassword', values.newPassword.trim());
       }
@@ -108,14 +114,16 @@ const ProfileSettingsPage = () => {
       }
 
       const { data } = await api.put(`/users/${user.id}`, formData);
-      const { id, name, role, avatarUrl } = data;
+      console.log(`data`, data);
+      
+      const { id, name, role, avatarUrl, hasPassword } = data;
 
       setUser({
         id,
         name,
         role,
         avatarUrl: avatarUrl ?? user.avatarUrl,
-        hasPassword: user.hasPassword,
+        hasPassword,
       });
 
       messageApi.success(t('profile_settings.update_success'));
@@ -227,7 +235,8 @@ const ProfileSettingsPage = () => {
               <div style={{ marginBottom: 20 }}>
                 <UpdateNameForm userData={userData} />
               </div>
-              <UpdatePasswordForm userData={userData} />
+
+              {!user.hasPassword ? <SetPasswordForm /> : <UpdatePasswordForm userData={userData} />}
             </div>
 
             <div className='profile_settings_footer'>

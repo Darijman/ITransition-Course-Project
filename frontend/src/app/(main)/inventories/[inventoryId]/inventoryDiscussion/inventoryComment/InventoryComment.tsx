@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, useState } from 'react';
+import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import { Avatar, Button, Typography, Popconfirm, message } from 'antd';
 import { InventoryComment as IInventoryComment } from '@/interfaces/InventoryComment';
 import { formatDate } from '@/helpers/formatDate';
@@ -10,9 +11,8 @@ import { UserRoles } from '@/interfaces/UserRoles.enum';
 import { InventoryUser } from '@/interfaces/InventoryUser';
 import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
 import Link from 'next/link';
-import './inventoryComment.css';
-import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import api from '../../../../../../../axiosConfig';
+import './inventoryComment.css';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -33,11 +33,11 @@ export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryCo
   const avatarUrl = author?.user?.avatarUrl || '';
   const authorName = author?.name || author?.user?.name || '?';
 
-  const canEditComment: boolean =
+  const canModifyComment: boolean =
     user.role === UserRoles.ADMIN || currentInventoryUser?.role === InventoryUserRoles.CREATOR || currentInventoryUser?.id === authorId;
 
   const deleteCommentHandler = async () => {
-    if (!canEditComment || !inventoryComment.id) return;
+    if (!canModifyComment || !inventoryComment.id) return;
 
     try {
       await api.delete(`/inventory_comments/${id}`);
@@ -52,9 +52,9 @@ export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryCo
     <div ref={ref} className='inventory_comment'>
       {contextHolder}
 
-      <Link href={`/users/${author?.user?.id || ''}`}>
+      <Link style={{ marginRight: 20 }} href={`/users/${author?.user?.id || ''}`}>
         <Avatar
-          style={{ marginRight: '20px', flexShrink: 0 }}
+          style={{ flexShrink: 0 }}
           className={`comment_avatar ${!avatarUrl ? 'comment_avatar_no_image' : ''}`}
           size={50}
           src={avatarUrl || '/no-avatar.svg'}
@@ -69,7 +69,7 @@ export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryCo
             {authorName}
           </Title>
           <div>
-            {canEditComment ? (
+            {canModifyComment ? (
               <div className='inventory_comment_buttons'>
                 <Popconfirm
                   title={

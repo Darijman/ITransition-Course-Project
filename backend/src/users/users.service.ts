@@ -82,8 +82,15 @@ export class UsersService {
       if (updateUserDto.name === user.name) {
         throw new BadRequestException({ error: 'You did not change your name!', type: 'name' });
       }
-
       user.name = updateUserDto.name;
+    }
+
+    if (updateUserDto.password) {
+      if (user.password) {
+        throw new BadRequestException({ error: 'Password already set. Use oldPassword/newPassword to update.' });
+      }
+      user.password = updateUserDto.password;
+      user.passwordUpdatedAt = new Date();
     }
 
     if (updateUserDto.oldPassword || updateUserDto.newPassword) {
@@ -121,7 +128,10 @@ export class UsersService {
 
     await this.usersRepository.save(user);
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword as Omit<User, 'password'>;
+    return {
+      ...userWithoutPassword,
+      hasPassword: !!user.password,
+    } as Omit<User, 'password'> & { hasPassword: boolean };
   }
 
   async deleteUserAvatar(userId: number): Promise<{ success: boolean }> {

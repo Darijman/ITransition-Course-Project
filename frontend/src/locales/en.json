@@ -113,7 +113,8 @@
     "delete_avatar_title": "Are you sure?",
     "delete_avatar_text": "This will permanently remove your profile picture.",
     "delete_avatar_success": "Your profile picture has been successfully deleted.",
-    "delete_avatar_fail": "Failed to delete your profile picture. Please try again later."
+    "delete_avatar_fail": "Failed to delete your profile picture. Please try again later.",
+    "set_password": "Set your password"
   },
   "inventories_new": {
     "upload_image": "Upload inventory image",
