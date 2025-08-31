@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { SwitchTheme } from './switchThemes/SwitchTheme';
 import { useEffect, useState } from 'react';
+import { useNotifications } from '@/contexts/notificationContext/NotificationContext';
 import { useRouter } from 'next/navigation';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { IoLanguageOutline } from 'react-icons/io5';
@@ -16,7 +17,6 @@ import { HeaderAvatar } from './headerAvatar/HeaderAvatar';
 import api from '../../../axiosConfig';
 import './header.css';
 import './responsive.css';
-import { useNotifications } from '@/contexts/notificationContext/NotificationContext';
 
 const { Title } = Typography;
 

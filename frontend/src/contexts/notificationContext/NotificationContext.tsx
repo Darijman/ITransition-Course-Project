@@ -11,7 +11,7 @@ import api from '../../../axiosConfig';
 interface NotificationsContextType {
   notifications: Notification[];
   unreadCounts: Record<Notifications, number> & { TOTAL: number };
-  fetchNotifications: () => Promise<void>;
+  getNotifications: () => Promise<void>;
   markAsRead: (notificationId: number) => Promise<void>;
 }
 
@@ -33,7 +33,7 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
     TOTAL: 0,
   });
 
-  const fetchNotifications = useCallback(async () => {
+  const getNotifications = useCallback(async () => {
     if (!user.id) return;
 
     try {
@@ -41,9 +41,6 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
         api.get<Notification[]>(`/notifications/user`),
         api.get<Record<Notifications, number> & { TOTAL: number }>(`/notifications/user/count`),
       ]);
-
-      console.log(`notificationsRes`, notificationsRes);
-      console.log(`countsRes`, countsRes);
 
       setNotifications(notificationsRes.data);
       setUnreadCounts(countsRes.data);
@@ -53,8 +50,11 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
   }, [user.id]);
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    getNotifications();
+  }, [getNotifications]);
+
+  console.log(`notifications`, notifications);
+  console.log(`unreadCounts`, unreadCounts);
 
   useEffect(() => {
     if (!socket || !user.email) return;
@@ -102,7 +102,7 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
       value={{
         notifications,
         unreadCounts,
-        fetchNotifications,
+        getNotifications,
         markAsRead,
       }}
     >

@@ -86,7 +86,23 @@
     "delete_account_cancel_button_text": "Cancel",
     "account_deleted_text": "Account deleted successfully. Taking you to the Home page..",
     "account_deleted_error_text": "Failed to delete your account! Try again later..",
-    "user_inventories_title": "Inventories you are part of"
+    "user_inventories": {
+      "title": "Inventories you are part of",
+      "failed_to_load": "Failed to load inventories you're participating in!",
+      "failed_to_leave_inventories": "Failed to leave inventories. Try again later.",
+      "successfully_left_inventories": "You have left the selected inventories!"
+    },
+    "user_invitations": {
+      "title": "Invitations",
+      "accept_tooltip": "Accepting invite you will be added to these inventories",
+      "reject_tooltip": "Rejecting invite you will need to ask the creator to send you invitation again",
+      "statuses": {
+        "pending": "PENDING",
+        "accepted": "ACCEPTED",
+        "rejected": "REJECTED",
+        "expired": "EXPIRED"
+      }
+    }
   },
   "profile_settings": {
     "title": "Profile settings",

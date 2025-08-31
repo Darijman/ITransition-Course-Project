@@ -1,14 +1,16 @@
 'use client';
 
-import { Empty, Input, message, Spin, Table, Typography } from 'antd';
+import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
 import { useEffect, useMemo, useState } from 'react';
 import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { useTranslations } from 'next-intl';
+import { LogoutOutlined } from '@ant-design/icons';
 import { columns } from './columns';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../axiosConfig';
 import './userInventories.css';
+import { useAuth } from '@/contexts/authContext/AuthContext';
 
 const { Title } = Typography;
 
@@ -20,16 +22,20 @@ interface Query {
 }
 
 export const UserInventories = () => {
+  const { user } = useAuth();
   const t = useTranslations();
 
   const [inventories, setInventories] = useState<Inventory[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLeavingInventories, setIsLeavingInventories] = useState<boolean>(false);
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   const [searchValue, setSearchValue] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | InventoryStatuses>('ALL');
+  const [errorText, setErrorText] = useState<string>('');
 
   const [query, setQuery] = useState<Query>({
     offset: 0,
@@ -51,21 +57,19 @@ export const UserInventories = () => {
   useEffect(() => {
     const fetchInitial = async () => {
       setIsLoading(true);
-
       try {
-        const { data } = await api.get(`/inventories/user`, { params: query });
+        const { data } = await api.get(`/inventories/user`, { params: { ...query, offset: 0 } });
         setInventories(data);
         setHasMore(data.length === (query.limit ?? 10));
-        setQuery((prev) => ({ ...prev, offset: 0 }));
       } catch {
-        messageApi.open({ type: 'error', content: 'Failed to load data!' });
+        setErrorText(t('profile.user_inventories.failed_to_load'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchInitial();
-  }, [messageApi, query]);
+  }, [query, t]);
 
   const loadMore = async () => {
     if (isLoading || !hasMore) return;
@@ -81,9 +85,26 @@ export const UserInventories = () => {
       setHasMore(data.length === (query.limit ?? 10));
       setQuery((prev) => ({ ...prev, offset: nextOffset }));
     } catch {
-      messageApi.open({ type: 'error', content: 'Failed to load more data!' });
+      setErrorText(t('profile.user_inventories.failed_to_load'));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const leaveManyInventoriesHandler = async () => {
+    if (!user.id || !selectedRowKeys.length) return;
+    setIsLeavingInventories(true);
+
+    try {
+      await api.post('/inventory_users/leave', { inventoryIds: selectedRowKeys });
+      messageApi.success(t('profile.user_inventories.successfully_left_inventories'));
+
+      setInventories((prev) => prev.filter((inv) => !selectedRowKeys.includes(inv.id)));
+      setSelectedRowKeys([]);
+    } catch {
+      messageApi.success(t('profile.user_inventories.failed_to_leave_inventories'));
+    } finally {
+      setIsLeavingInventories(false);
     }
   };
 
@@ -114,12 +135,14 @@ export const UserInventories = () => {
     });
   }, [inventories, statusFilter, searchValue]);
 
+  console.log(`selectedRowkKeys`, selectedRowKeys);
+
   return (
     <div className='inventories_table'>
       {contextHolder}
       <div className='inventories_table_header'>
         <Title level={3} style={{ margin: 0 }}>
-         {t('profile.user_inventories_title')}
+          {t('profile.user_inventories.title')}
         </Title>
 
         <Input.Search
@@ -129,6 +152,18 @@ export const UserInventories = () => {
           value={searchValue}
           onChange={(e) => handleSearchChange(e.target.value)}
         />
+
+        <Button
+          className='user_inventories_leave_button'
+          disabled={!selectedRowKeys.length}
+          danger
+          type='primary'
+          icon={<LogoutOutlined style={{ fontSize: '20px' }} />}
+          onClick={leaveManyInventoriesHandler}
+          loading={isLeavingInventories}
+        >
+          Leave inventories
+        </Button>
 
         <Select
           options={[
@@ -159,6 +194,14 @@ export const UserInventories = () => {
           <Table
             className='table'
             columns={columns}
+            rowSelection={{
+              type: 'checkbox',
+              selectedRowKeys,
+              onChange: (keys) => setSelectedRowKeys(keys),
+              getCheckboxProps: (record) => ({
+                disabled: record.creator?.id === user?.id,
+              }),
+            }}
             dataSource={filteredInventories}
             rowKey='id'
             pagination={false}

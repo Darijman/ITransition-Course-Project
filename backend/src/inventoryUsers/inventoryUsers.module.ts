@@ -5,9 +5,10 @@ import { InventoryUsersController } from './inventoryUsers.controller';
 import { InventoryUsersService } from './inventoryUsers.service';
 import { InventoriesModule } from 'src/inventories/inventories.module';
 import { UsersModule } from 'src/users/users.module';
+import { Inventory } from 'src/inventories/inventory.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InventoryUser]), InventoriesModule, UsersModule],
+  imports: [TypeOrmModule.forFeature([InventoryUser, Inventory]), InventoriesModule, UsersModule],
   controllers: [InventoryUsersController],
   providers: [InventoryUsersService],
   exports: [InventoryUsersService],

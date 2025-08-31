@@ -25,7 +25,7 @@ export class OptionalAuthGuard implements CanActivate {
         secret: jwtConstants.secret,
       });
       const user = await this.usersService.getUserById(payload.id);
-      request.user = { id: user.id, name: user.name, role: user.role, hasPassword: !!user.password };
+      request.user = { id: user.id, name: user.name, email: user.email, role: user.role, hasPassword: !!user.password };
     } catch {
       return true;
     }

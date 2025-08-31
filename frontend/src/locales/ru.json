@@ -88,7 +88,23 @@
     "delete_account_cancel_button_text": "Отмена",
     "account_deleted_text": "Аккаунт успешно удален. Перенаправляем на главную страницу!",
     "account_deleted_error_text": "Не удалось удалить аккаунт. Попробуйте позже!",
-    "user_inventories_title": "Инвентари, в которых вы участвуете"
+    "user_inventories": {
+      "title": "Inventories you are part of",
+      "failed_to_load": "Не удалось загрузить инвентари, в которых вы участвуете!",
+      "failed_to_leave_inventories": "Не удалось покинуть инвентари. Попробуйте позже.",
+      "successfully_left_inventories": "Вы покинули выбранные инвентари!"
+    },
+    "user_invitations": {
+      "title": "Invitations",
+      "accept_tooltip": "Приняв приглашение, вы будете добавлены в эти инвентари",
+      "reject_tooltip": "Отклонив приглашение, вам нужно будет попросить создателя отправить приглашение снова",
+      "statuses": {
+        "pending": "В ожидании",
+        "accepted": "Принято",
+        "rejected": "Отклонено",
+        "expired": "Истёкло"
+      }
+    }
   },
   "profile_settings": {
     "title": "Настройки профиля",

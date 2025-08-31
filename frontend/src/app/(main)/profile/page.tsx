@@ -11,10 +11,11 @@ import { Loader } from '@/ui/loader/Loader';
 import { useRouter } from 'next/navigation';
 import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
+import { UserInventories } from './userInventories/UserInventories';
 import api from '../../../../axiosConfig';
 import './profile.css';
 import './responsive.css';
-import { UserInventories } from './userInventories/UserInventories';
+import { UserInvitations } from './userInvitations/UserInvitations';
 
 const { Title } = Typography;
 const { Item } = Descriptions;
@@ -144,6 +145,9 @@ const Profile = () => {
         </div>
       )}
 
+      <div style={{ marginBottom: 20 }}>
+        <UserInvitations />
+      </div>
       <UserInventories />
 
       <DeleteModal

@@ -227,7 +227,6 @@ export class InventoriesService {
         return inventory;
       }
     }
-
     throw new ForbiddenException({ error: 'You do not have permission to access this inventory!' });
   }
 

@@ -15,7 +15,7 @@ export const columns: ColumnsType<Inventory> = [
     key: 'image',
     render: (url: string, record: Inventory) => (
       <Link href={`/inventories/${record.id}`} scroll={false}>
-        <Image src={url || '/image-placeholder.svg'} alt={record.title} width={50} height={50} className='inventories_table_columns_image' />
+        <Image src={url || '/image-placeholder.svg'} alt={record.title} width={50} height={50} className='user_inventories_table_columns_image' />
       </Link>
     ),
   },
@@ -25,7 +25,7 @@ export const columns: ColumnsType<Inventory> = [
     key: 'title',
     render: (text: string, record: Inventory) => (
       <Link href={`/inventories/${record.id}`}>
-        <Text className='inventories_table_columns_title' ellipsis={{ tooltip: text }}>
+        <Text className='user_inventories_table_columns_title' ellipsis={{ tooltip: text }}>
           {text}
         </Text>
       </Link>
@@ -37,7 +37,7 @@ export const columns: ColumnsType<Inventory> = [
     key: 'creator',
     render: (_: any, record: Inventory) => (
       <Link href={`/users/${record?.creator?.id}`}>
-        <Text className='inventories_table_columns_creator_name'>{record?.creator?.name}</Text>
+        <Text className='user_inventories_table_columns_creator_name'>{record?.creator?.name}</Text>
       </Link>
     ),
   },

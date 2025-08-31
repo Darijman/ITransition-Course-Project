@@ -7,7 +7,7 @@ export interface ReqUser {
   role: UserRoles;
   provider?: Providers;
   providerId?: string;
-  email?: string;
+  email: string;
   avatarUrl?: string;
   hasPassword: boolean;
 }

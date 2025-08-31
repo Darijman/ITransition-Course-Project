@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InventoryInvite } from './inventoryInvite.entity';
 import { CreateInventoryInviteDto } from './createInventoryInvite.dto';
 import { InventoriesService } from 'src/inventories/inventories.service';
@@ -13,6 +13,13 @@ import { InventoryUsersService } from 'src/inventoryUsers/inventoryUsers.service
 import { InventoriesGateway } from 'src/inventories/inventories.gateway';
 import { Notifications } from 'src/notifications/notification.entity';
 import { NotificationsService } from 'src/notifications/notifications.service';
+
+interface Query {
+  limit?: number;
+  offset?: number;
+  status?: InventoryInviteStatuses | 'ALL';
+  searchValue?: string;
+}
 
 @Injectable()
 export class InventoryInvitesService {
@@ -34,6 +41,34 @@ export class InventoryInvitesService {
     return await this.inventoryInvitesRepository.find();
   }
 
+  async getUserInvitesByEmail(inviteeEmail: string, query: Query): Promise<InventoryInvite[]> {
+    if (!inviteeEmail) {
+      throw new BadRequestException({ error: 'Invalid email!' });
+    }
+
+    const { offset = 0, limit = 10, status = 'ALL', searchValue } = query;
+    const qb = this.inventoryInvitesRepository
+      .createQueryBuilder('invite')
+      .leftJoinAndSelect('invite.inventory', 'inventory')
+      .leftJoinAndSelect('inventory.category', 'category') // категория
+      .leftJoinAndSelect('inventory.tags', 'tags')
+      .leftJoinAndSelect('invite.inviter', 'inviter')
+      .leftJoinAndSelect('inventory.creator', 'creator')
+      .where('invite.inviteeEmail = :inviteeEmail', { inviteeEmail });
+
+    if (status && status !== 'ALL') {
+      qb.andWhere('invite.status = :status', { status });
+    }
+
+    if (searchValue) {
+      qb.andWhere('inventory.title LIKE :search', { search: `%${searchValue}%` });
+    }
+
+    qb.orderBy('invite.createdAt', 'DESC').skip(offset).take(limit);
+
+    return await qb.getMany();
+  }
+
   async getInvitesByInventoryId(inventoryId: number): Promise<InventoryInvite[]> {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
@@ -51,11 +86,7 @@ export class InventoryInvitesService {
   async createNewInventoryInvite(createInventoryInviteDto: CreateInventoryInviteDto, reqUser: ReqUser): Promise<InventoryInvite> {
     const { inventoryId, inviterInventoryUserId, inviteeEmail, role, expiresAt } = createInventoryInviteDto;
 
-    const inventory = await this.inventoriesService.getInventoryById(inventoryId);
-    if (!inventory) {
-      throw new NotFoundException({ error: 'Inventory not found!' });
-    }
-
+    const inventory = await this.inventoriesService.getInventoryById(inventoryId, reqUser);
     const inviter = inventory.inventoryUsers.find((u) => u.id === inviterInventoryUserId);
     if (!inviter) {
       throw new BadRequestException({ error: 'Inviter is not part of this inventory!' });
@@ -106,49 +137,70 @@ export class InventoryInvitesService {
     return savedInvite;
   }
 
-  async acceptInventoryInvite(inviteId: number, reqUser: ReqUser): Promise<InventoryInvite> {
-    const invite = await this.getInventoryInviteById(inviteId);
-
-    if (invite.status !== InventoryInviteStatuses.PENDING) {
-      throw new BadRequestException({ error: 'Invite is not pending!' });
+  async acceptInventoryInvites(inviteIds: number[], reqUser: ReqUser): Promise<InventoryInvite[]> {
+    const invites = await this.inventoryInvitesRepository.findBy({ id: In(inviteIds) });
+    if (!invites.length) {
+      throw new NotFoundException({ error: 'Invites not found!' });
     }
 
-    if (invite.expiresAt && invite.expiresAt < new Date()) {
-      invite.status = InventoryInviteStatuses.EXPIRED;
+    const acceptedInvites: InventoryInvite[] = [];
+
+    for (const invite of invites) {
+      if (invite.status !== InventoryInviteStatuses.PENDING) {
+        throw new BadRequestException({ error: `Invite ${invite.id} is not pending!` });
+      }
+
+      if (invite.expiresAt && invite.expiresAt < new Date()) {
+        invite.status = InventoryInviteStatuses.EXPIRED;
+        await this.inventoryInvitesRepository.save(invite);
+        throw new BadRequestException({ error: `Invite ${invite.id} has expired!` });
+      }
+
+      if (reqUser.email !== invite.inviteeEmail) {
+        throw new ForbiddenException({ error: `Invite ${invite.id} is not for you!` });
+      }
+
+      const newInventoryUser = {
+        inventoryId: invite.inventoryId,
+        userId: reqUser.id,
+        role: invite.role,
+      };
+
+      const inventoryUser = await this.inventoryUsersService.createNewInventoryUser(newInventoryUser);
+      invite.status = InventoryInviteStatuses.ACCEPTED;
+      invite.inviteeInventoryUserId = inventoryUser.id;
+
       await this.inventoryInvitesRepository.save(invite);
-      throw new BadRequestException({ error: 'Invite has expired!' });
+      acceptedInvites.push(invite);
     }
 
-    if (reqUser.email !== invite.inviteeEmail) {
-      throw new ForbiddenException({ error: 'This invite is not for you!' });
-    }
-
-    const newInventoryUser = {
-      inventoryId: invite.inventoryId,
-      userId: reqUser.id,
-      role: invite.role,
-    };
-
-    const inventoryUser = await this.inventoryUsersService.createNewInventoryUser(newInventoryUser);
-    invite.status = InventoryInviteStatuses.ACCEPTED;
-    invite.inviteeInventoryUserId = inventoryUser.id;
-
-    return await this.inventoryInvitesRepository.save(invite);
+    return acceptedInvites;
   }
 
-  async rejectInventoryInvite(inviteId: number, reqUser: ReqUser): Promise<InventoryInvite> {
-    const invite = await this.getInventoryInviteById(inviteId);
-
-    if (invite.status !== InventoryInviteStatuses.PENDING) {
-      throw new BadRequestException({ error: 'Invite is not pending!' });
+  async rejectInventoryInvites(inviteIds: number[], reqUser: ReqUser): Promise<InventoryInvite[]> {
+    const invites = await this.inventoryInvitesRepository.findBy({ id: In(inviteIds) });
+    if (!invites.length) {
+      throw new NotFoundException({ error: 'Invites not found!' });
     }
 
-    if (reqUser.email !== invite.inviteeEmail) {
-      throw new ForbiddenException({ error: 'This invite is not for you!' });
+    const rejectedInvites: InventoryInvite[] = [];
+
+    for (const invite of invites) {
+      if (invite.status !== InventoryInviteStatuses.PENDING) {
+        throw new BadRequestException({ error: `Invite ${invite.id} is not pending!` });
+      }
+
+      if (reqUser.email !== invite.inviteeEmail) {
+        throw new ForbiddenException({ error: `Invite ${invite.id} is not for you!` });
+      }
+
+      invite.status = InventoryInviteStatuses.REJECTED;
+      await this.inventoryInvitesRepository.save(invite);
+
+      rejectedInvites.push(invite);
     }
 
-    invite.status = InventoryInviteStatuses.REJECTED;
-    return await this.inventoryInvitesRepository.save(invite);
+    return rejectedInvites;
   }
 
   async getInventoryInviteById(inviteId: number): Promise<InventoryInvite> {

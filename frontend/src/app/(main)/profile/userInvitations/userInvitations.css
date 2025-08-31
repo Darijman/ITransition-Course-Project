@@ -11,14 +11,14 @@
   margin-bottom: 10px;
 }
 
-.table {
+.invites_table {
   background-color: var(--background-color);
   color: var(--primary-text-color);
   border: 1px solid var(--foreground-color);
   border-radius: 10px;
 }
 
-.table .ant-table-thead > tr > th {
+.invites_table .ant-table-thead > tr > th {
   background-color: var(--hover-color);
   color: var(--secondary-text-color);
   font-weight: 600;
@@ -26,30 +26,35 @@
   padding: 12px;
 }
 
-.table .ant-table-tbody > tr > td {
+.invites_table .ant-table-tbody > tr > td {
   background-color: var(--background-color);
   color: var(--primary-text-color);
   border-bottom: 1px solid var(--foreground-color);
   padding: 12px;
 }
 
-.table .ant-table-tbody > tr:not(.ant-table-row-selected):hover > td {
+.invites_table .ant-table-tbody > tr:not(.ant-table-row-selected):hover > td {
   background-color: var(--foreground-color) !important;
   transition: background-color 0.2s ease !important;
 }
 
-.table .ant-table-row-selected > td {
+.invites_table .ant-table-row-selected > td {
   background-color: var(--submit-button-color) !important;
   color: #fff;
 }
 
-.table .ant-table-row-selected:hover > td {
+.invites_table .ant-table-row-selected:hover > td {
   background-color: var(--submit-button-color) !important;
 }
 
-.table .ant-table-tbody > tr.ant-table-row-error > td {
+.invites_table .ant-table-tbody > tr.ant-table-row-error > td {
   background-color: var(--red-color);
   color: #fff;
+}
+
+.invites_table .ant-checkbox-disabled .ant-checkbox-inner {
+  background-color: gray !important;
+  border-color: gray !important;
 }
 
 .custom_search .ant-input-search-button {
@@ -65,11 +70,6 @@
   opacity: 0.7 !important;
 }
 
-.table .ant-checkbox-disabled .ant-checkbox-inner {
-  background-color: gray !important;
-  border-color: gray !important;
-}
-
 .custom_search .ant-input {
   color: black !important;
 }
@@ -83,7 +83,24 @@
   cursor: pointer;
 }
 
-.user_inventories_table_columns_image {
+.user_invitations_buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user_invitations_accept_button,
+.user_invitations_reject_button {
+  width: 130px;
+}
+
+.user_invitations_accept_button.ant-btn:disabled,
+.user_invitations_reject_button.ant-btn:disabled {
+  background-color: gray !important;
+  border: 1px solid gray !important;
+}
+
+.inventations_table_columns_image {
   cursor: pointer;
   transition:
     transform 0.2s ease,
@@ -94,15 +111,15 @@
   }
 }
 
-.user_inventories_table_columns_title,
-.user_inventories_table_columns_creator_name {
+.inventations_table_columns_title,
+.inventations_table_columns_creator_name {
   cursor: pointer;
   &:hover {
     text-decoration: underline;
   }
 }
 
-.user_inventories_leave_button:disabled.ant-btn:disabled {
-  background-color: gray !important;
-  border: 1px solid gray !important;
+.invites_table .ant-table-tbody > tr.row-pending > td {
+  background-color: rgba(255, 240, 200, 0.8) !important;
+  font-weight: 600;
 }
