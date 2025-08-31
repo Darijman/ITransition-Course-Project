@@ -9,6 +9,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'ITransition-Course-Project',
+  icons: ['icon.png'],
 };
 
 export default function RootLayout({

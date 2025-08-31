@@ -1,7 +1,7 @@
 import { ColumnsType } from 'antd/es/table';
 import { Typography, Image, Tag } from 'antd';
 import { formatDate } from '@/helpers/formatDate';
-import { InventoryUser } from '@/interfaces/InventoryUser';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import React from 'react';
 import Link from 'next/link';
 

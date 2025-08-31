@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { BasicUser } from '@/interfaces/BasicUser';
-import { UserRoles } from '@/interfaces/UserRoles.enum';
+import { BasicUser } from '@/interfaces/users/BasicUser';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import api from '../../../axiosConfig';
 
 interface AuthContextType {
@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<BasicUser>({
     id: 0,
     name: '',
+    email: '',
     role: UserRoles.USER,
     avatarUrl: '',
     hasPassword: false,
@@ -28,7 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error: any) {
       console.log(`error`, error);
 
-      setUser({ id: 0, name: '', role: UserRoles.USER, avatarUrl: '', hasPassword: false });
+      setUser({ id: 0, name: '', email: '', role: UserRoles.USER, avatarUrl: '', hasPassword: false });
     }
   };
 

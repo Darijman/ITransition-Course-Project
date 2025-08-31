@@ -17,6 +17,7 @@ import {
   JoinTable,
 } from 'typeorm';
 import { InventoryStatuses } from './inventoryStatuses.enum';
+import { InventoryInvite } from 'src/inventoryInvites/inventoryInvite.entity';
 
 @Entity('inventories')
 export class Inventory {
@@ -65,6 +66,9 @@ export class Inventory {
 
   @OneToMany(() => InventoryUser, (invUser) => invUser.inventory)
   inventoryUsers: InventoryUser[];
+
+  @OneToMany(() => InventoryInvite, (invite) => invite.inventory)
+  invites: InventoryInvite[];
 
   @CreateDateColumn()
   createdAt: Date;

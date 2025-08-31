@@ -6,8 +6,10 @@ import { InventoryCategory } from './inventoryCategories/inventoryCategory.entit
 import { InventoryTag } from './inventoryTags/inventoryTag.entity';
 import { InventoryUser } from './inventoryUsers/inventoryUser.entity';
 import { InventoryComment } from './inventoryComments/inventoryComment.entity';
-import * as dotenv from 'dotenv';
 import { InventoryItemLike } from './inventoryItemLikes/inventoryItemLike.entity';
+import { InventoryInvite } from './inventoryInvites/inventoryInvite.entity';
+import * as dotenv from 'dotenv';
+import { Notification } from './notifications/notification.entity';
 
 dotenv.config();
 
@@ -18,7 +20,18 @@ export const AppDataSource = new DataSource({
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [User, Inventory, InventoryItem, InventoryCategory, InventoryTag, InventoryUser, InventoryComment, InventoryItemLike],
+  entities: [
+    User,
+    Inventory,
+    InventoryItem,
+    InventoryCategory,
+    InventoryTag,
+    InventoryUser,
+    InventoryComment,
+    InventoryItemLike,
+    InventoryInvite,
+    Notification,
+  ],
   synchronize: false,
   timezone: 'Z',
 });

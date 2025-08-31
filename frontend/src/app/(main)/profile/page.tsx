@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { User } from '@/interfaces/User';
+import { User } from '@/interfaces/users/User';
 import { Image, message, Typography, Descriptions, Button } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
@@ -10,7 +10,7 @@ import { MdDelete } from 'react-icons/md';
 import { Loader } from '@/ui/loader/Loader';
 import { useRouter } from 'next/navigation';
 import { DeleteModal } from '@/components/deleteModal/DeleteModal';
-import { UserRoles } from '@/interfaces/UserRoles.enum';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import api from '../../../../axiosConfig';
 import './profile.css';
 import './responsive.css';
@@ -55,7 +55,7 @@ const Profile = () => {
     try {
       await api.delete(`/users/${user.id}`);
       await api.post(`/auth/logout`);
-      setUser({ id: 0, name: '', role: UserRoles.USER, avatarUrl: '', hasPassword: false });
+      setUser({ id: 0, name: '', email: '', role: UserRoles.USER, avatarUrl: '', hasPassword: false });
       setUserData(null);
 
       messageApi.info({

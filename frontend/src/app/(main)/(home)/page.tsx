@@ -3,7 +3,7 @@
 import { Button, notification, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
-import { Inventory } from '@/interfaces/Inventory';
+import { Inventory } from '@/interfaces/inventories/Inventory';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoriesTable } from '@/components/inventoriesTable/InventoriesTable';
 import { useRouter } from 'next/navigation';

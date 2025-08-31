@@ -2,10 +2,10 @@
 
 import { Form, Typography } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
-import './updatePasswordForm.css';
 import { useTranslations } from 'next-intl';
-import { User } from '@/interfaces/User';
+import { User } from '@/interfaces/users/User';
 import { formatDate } from '@/helpers/formatDate';
+import './updatePasswordForm.css';
 
 const { Title } = Typography;
 

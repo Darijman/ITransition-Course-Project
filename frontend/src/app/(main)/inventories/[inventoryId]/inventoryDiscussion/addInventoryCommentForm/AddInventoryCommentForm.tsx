@@ -6,8 +6,8 @@ import { Button, Form, message } from 'antd';
 import { useTranslations } from 'next-intl';
 import { canModifyInventory } from '@/helpers/canModifyInventory';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { InventoryUser } from '@/interfaces/InventoryUser';
-import { Inventory } from '@/interfaces/Inventory';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
+import { Inventory } from '@/interfaces/inventories/Inventory';
 import api from '../../../../../../../axiosConfig';
 import './addInventoryCommentForm.css';
 

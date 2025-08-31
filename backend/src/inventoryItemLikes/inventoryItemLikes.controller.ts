@@ -14,6 +14,7 @@ export class InventoryItemLikesController {
   constructor(private readonly inventoryItemLikesService: InventoryItemLikesService) {}
 
   @Admin()
+  @UseGuards(AuthGuard)
   @Get()
   async getAllLikes(): Promise<InventoryItemLike[]> {
     return await this.inventoryItemLikesService.getAllLikes();
@@ -29,6 +30,7 @@ export class InventoryItemLikesController {
   }
 
   @Admin()
+  @UseGuards(AuthGuard)
   @Get(':inventoryItemLikeId')
   async getLikeById(
     @Param('inventoryItemLikeId', new CustomParseIntPipe('Like ID')) inventoryItemLikeId: number,

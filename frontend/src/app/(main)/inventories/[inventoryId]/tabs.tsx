@@ -1,11 +1,11 @@
 import { ReactNode } from 'react';
 import { AppstoreOutlined, CommentOutlined, SettingOutlined, UnlockOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { InventoryItems } from './inventoryItems/InventoryItems';
-import { InventoryUser } from '@/interfaces/InventoryUser';
-import { Inventory } from '@/interfaces/Inventory';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
+import { Inventory } from '@/interfaces/inventories/Inventory';
 import { InventoryAccess } from './inventoryAccess/InventoryAccess';
-import { UserRoles } from '@/interfaces/UserRoles.enum';
-import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import { InventoryInfo } from './inventoryInfo/InventoryInfo';
 import { InventoryDiscussion } from './inventoryDiscussion/InventoryDiscussion';
 

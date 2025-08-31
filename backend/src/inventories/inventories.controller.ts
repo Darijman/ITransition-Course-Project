@@ -22,6 +22,7 @@ export class InventoriesController {
   ) {}
 
   @Admin()
+  @UseGuards(AuthGuard)
   @Get()
   async getAllInventories(): Promise<Inventory[]> {
     return await this.inventoriesService.getAllInventories();

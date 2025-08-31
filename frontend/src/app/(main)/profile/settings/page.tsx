@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { User } from '@/interfaces/User';
+import { User } from '@/interfaces/users/User';
 import { Typography, Avatar, message, Button, Upload, Form } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
@@ -116,11 +116,12 @@ const ProfileSettingsPage = () => {
       const { data } = await api.put(`/users/${user.id}`, formData);
       console.log(`data`, data);
       
-      const { id, name, role, avatarUrl, hasPassword } = data;
+      const { id, name, role, email, avatarUrl, hasPassword } = data;
 
       setUser({
         id,
         name,
+        email,
         role,
         avatarUrl: avatarUrl ?? user.avatarUrl,
         hasPassword,

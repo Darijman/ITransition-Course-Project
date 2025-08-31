@@ -1,7 +1,7 @@
 'use client';
 
 import { InputField } from '@/components/inputField/InputField';
-import { User } from '@/interfaces/User';
+import { User } from '@/interfaces/users/User';
 import { Typography, Form } from 'antd';
 import { useTranslations } from 'next-intl';
 import './updateNameForm.css';

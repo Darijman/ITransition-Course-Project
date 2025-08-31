@@ -8,8 +8,6 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Inventory } from './inventory.entity';
-import { InventoryStatuses } from './inventoryStatuses.enum';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 
 interface InventoryUserLocale {
@@ -56,6 +54,13 @@ export class InventoriesGateway implements OnGatewayConnection, OnGatewayDisconn
     }
 
     console.log(`Client disconnected: ${socket.id}`);
+  }
+
+  @SubscribeMessage('join-room')
+  handleJoinRoom(@MessageBody() email: string, @ConnectedSocket() client: Socket) {
+    if (!email) return;
+    client.join(email);
+    console.log(`User joined room: ${email}`);
   }
 
   @SubscribeMessage('join-inventory')

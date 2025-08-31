@@ -1,7 +1,7 @@
 'use client';
 
 import { Flex, Tag, Typography } from 'antd';
-import { InventoryTag } from '@/interfaces/InventoryTag';
+import { InventoryTag } from '@/interfaces/inventories/InventoryTag';
 import { useTranslations } from 'next-intl';
 
 const { Title } = Typography;
@@ -38,7 +38,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({ value = [], onChange, 
         padding: '20px',
         borderRadius: '10px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-        border: hasError ? '1px solid var(--red-color)' : 'none'
+        border: hasError ? '1px solid var(--red-color)' : 'none',
       }}
     >
       <Flex gap={12} wrap align='center'>

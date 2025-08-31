@@ -8,6 +8,7 @@ import { Header } from '@/ui/header/Header';
 import api from '../../../axiosConfig';
 import './layout.css';
 import { SocketProvider } from '@/contexts/socketContext/SocketContext';
+import { NotificationsProvider } from '@/contexts/notificationContext/NotificationContext';
 // import { SocketProvider } from '@/contexts/socketContext/SocketContext';
 
 export default function MainLayout({ children }: { children: ReactNode }) {
@@ -26,8 +27,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
       <SocketProvider>
-        <Header />
-        <main className='main'>{children}</main>
+        <NotificationsProvider>
+          <Header />
+          <main className='main'>{children}</main>
+        </NotificationsProvider>
       </SocketProvider>
     </AuthProvider>
   );

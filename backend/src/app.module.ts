@@ -19,6 +19,10 @@ import { InventoryUsersModule } from './inventoryUsers/inventoryUsers.module';
 import { InventoryCommentsModule } from './inventoryComments/inventoryComments.module';
 import { InventoryItemLikesModule } from './inventoryItemLikes/inventoryItemLikes.module';
 import { InventoryItemLike } from './inventoryItemLikes/inventoryItemLike.entity';
+import { InventoryInvite } from './inventoryInvites/inventoryInvite.entity';
+import { InventoryInvitesModule } from './inventoryInvites/inventoryInvites.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { Notification } from './notifications/notification.entity';
 
 @Module({
   imports: [
@@ -33,7 +37,18 @@ import { InventoryItemLike } from './inventoryItemLikes/inventoryItemLike.entity
         username: config.get('DATABASE_USER'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
-        entities: [User, Inventory, InventoryItem, InventoryCategory, InventoryTag, InventoryUser, InventoryComment, InventoryItemLike],
+        entities: [
+          User,
+          Inventory,
+          InventoryItem,
+          InventoryCategory,
+          InventoryTag,
+          InventoryUser,
+          InventoryComment,
+          InventoryItemLike,
+          InventoryInvite,
+          Notification,
+        ],
         synchronize: false,
         timezone: 'Z',
       }),
@@ -48,6 +63,8 @@ import { InventoryItemLike } from './inventoryItemLikes/inventoryItemLike.entity
     InventoryUsersModule,
     InventoryCommentsModule,
     InventoryItemLikesModule,
+    InventoryInvitesModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

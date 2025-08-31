@@ -1,0 +1,179 @@
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InventoryInvite } from './inventoryInvite.entity';
+import { CreateInventoryInviteDto } from './createInventoryInvite.dto';
+import { InventoriesService } from 'src/inventories/inventories.service';
+import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
+import { ReqUser } from 'src/interfaces/ReqUser';
+import { UserRoles } from 'src/users/userRoles.enum';
+import { User } from 'src/users/user.entity';
+import { InventoryInviteStatuses } from './inventoryInviteStatuses.enum';
+import { InventoryUsersService } from 'src/inventoryUsers/inventoryUsers.service';
+import { InventoriesGateway } from 'src/inventories/inventories.gateway';
+import { Notifications } from 'src/notifications/notification.entity';
+import { NotificationsService } from 'src/notifications/notifications.service';
+
+@Injectable()
+export class InventoryInvitesService {
+  constructor(
+    @InjectRepository(InventoryInvite)
+    private readonly inventoryInvitesRepository: Repository<InventoryInvite>,
+
+    private readonly inventoriesService: InventoriesService,
+    private readonly inventoryUsersService: InventoryUsersService,
+    private readonly notificationsService: NotificationsService,
+
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+
+    private readonly inventoriesGateway: InventoriesGateway,
+  ) {}
+
+  async getAllInventoryInvites(): Promise<InventoryInvite[]> {
+    return await this.inventoryInvitesRepository.find();
+  }
+
+  async getInvitesByInventoryId(inventoryId: number): Promise<InventoryInvite[]> {
+    if (!inventoryId || isNaN(inventoryId)) {
+      throw new BadRequestException({ error: 'Invalid Inventory ID!' });
+    }
+
+    const inventory = await this.inventoriesService.getInventoryById(inventoryId);
+    if (!inventory) {
+      throw new NotFoundException({ error: 'Inventory not found!' });
+    }
+
+    const invites = await this.inventoryInvitesRepository.find({ where: { inventoryId } });
+    return invites;
+  }
+
+  async createNewInventoryInvite(createInventoryInviteDto: CreateInventoryInviteDto, reqUser: ReqUser): Promise<InventoryInvite> {
+    const { inventoryId, inviterInventoryUserId, inviteeEmail, role, expiresAt } = createInventoryInviteDto;
+
+    const inventory = await this.inventoriesService.getInventoryById(inventoryId);
+    if (!inventory) {
+      throw new NotFoundException({ error: 'Inventory not found!' });
+    }
+
+    const inviter = inventory.inventoryUsers.find((u) => u.id === inviterInventoryUserId);
+    if (!inviter) {
+      throw new BadRequestException({ error: 'Inviter is not part of this inventory!' });
+    }
+
+    if (reqUser.role !== UserRoles.ADMIN) {
+      if (inviter.role !== InventoryUserRoles.CREATOR) {
+        throw new ForbiddenException({ error: 'You do not have rights to invite users!' });
+      }
+    }
+
+    const user = await this.usersRepository.findOne({ where: { email: inviteeEmail } });
+    if (!user) {
+      throw new NotFoundException({ error: 'User with this email does not exist!' });
+    }
+
+    const existingInvite = await this.inventoryInvitesRepository.findOne({ where: { inventoryId, inviteeEmail } });
+    if (existingInvite) {
+      if (existingInvite.status === InventoryInviteStatuses.PENDING) {
+        if (existingInvite.expiresAt && existingInvite.expiresAt < new Date()) {
+          existingInvite.status = InventoryInviteStatuses.EXPIRED;
+          await this.inventoryInvitesRepository.save(existingInvite);
+        } else {
+          throw new ConflictException({ error: 'Invite already exists and is pending!' });
+        }
+      }
+      if (existingInvite.status === InventoryInviteStatuses.ACCEPTED) {
+        throw new ConflictException({ error: 'User already accepted an invite to this inventory!' });
+      }
+    }
+
+    const newInvite = this.inventoryInvitesRepository.create({
+      inventoryId,
+      inviterInventoryUserId,
+      inviteeEmail,
+      role,
+      expiresAt: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // default: 7days
+    });
+
+    const savedInvite = await this.inventoryInvitesRepository.save(newInvite);
+    const notification = await this.notificationsService.createNotification({
+      userId: user.id,
+      type: Notifications.INVITE,
+      data: savedInvite,
+    });
+
+    this.inventoriesGateway.server.to(inviteeEmail).emit('notification', notification);
+    return savedInvite;
+  }
+
+  async acceptInventoryInvite(inviteId: number, reqUser: ReqUser): Promise<InventoryInvite> {
+    const invite = await this.getInventoryInviteById(inviteId);
+
+    if (invite.status !== InventoryInviteStatuses.PENDING) {
+      throw new BadRequestException({ error: 'Invite is not pending!' });
+    }
+
+    if (invite.expiresAt && invite.expiresAt < new Date()) {
+      invite.status = InventoryInviteStatuses.EXPIRED;
+      await this.inventoryInvitesRepository.save(invite);
+      throw new BadRequestException({ error: 'Invite has expired!' });
+    }
+
+    if (reqUser.email !== invite.inviteeEmail) {
+      throw new ForbiddenException({ error: 'This invite is not for you!' });
+    }
+
+    const newInventoryUser = {
+      inventoryId: invite.inventoryId,
+      userId: reqUser.id,
+      role: invite.role,
+    };
+
+    const inventoryUser = await this.inventoryUsersService.createNewInventoryUser(newInventoryUser);
+    invite.status = InventoryInviteStatuses.ACCEPTED;
+    invite.inviteeInventoryUserId = inventoryUser.id;
+
+    return await this.inventoryInvitesRepository.save(invite);
+  }
+
+  async rejectInventoryInvite(inviteId: number, reqUser: ReqUser): Promise<InventoryInvite> {
+    const invite = await this.getInventoryInviteById(inviteId);
+
+    if (invite.status !== InventoryInviteStatuses.PENDING) {
+      throw new BadRequestException({ error: 'Invite is not pending!' });
+    }
+
+    if (reqUser.email !== invite.inviteeEmail) {
+      throw new ForbiddenException({ error: 'This invite is not for you!' });
+    }
+
+    invite.status = InventoryInviteStatuses.REJECTED;
+    return await this.inventoryInvitesRepository.save(invite);
+  }
+
+  async getInventoryInviteById(inviteId: number): Promise<InventoryInvite> {
+    if (!inviteId || isNaN(inviteId)) {
+      throw new BadRequestException({ error: 'Invalid Inventory Invite ID!' });
+    }
+
+    const inventoryInvite = await this.inventoryInvitesRepository.findOne({ where: { id: inviteId } });
+    if (!inventoryInvite) {
+      throw new NotFoundException({ error: 'Inventory Invite not found!' });
+    }
+    return inventoryInvite;
+  }
+
+  async deleteInventoryInviteById(inviteId: number): Promise<{ success: boolean }> {
+    if (!inviteId || isNaN(inviteId)) {
+      throw new BadRequestException({ error: 'Invalid Inventory Invite ID!' });
+    }
+
+    const inventoryInvite = await this.inventoryInvitesRepository.findOne({ where: { id: inviteId } });
+    if (!inventoryInvite) {
+      throw new NotFoundException({ error: 'Inventory Invite not found!' });
+    }
+
+    await this.inventoryInvitesRepository.delete(inviteId);
+    return { success: true };
+  }
+}

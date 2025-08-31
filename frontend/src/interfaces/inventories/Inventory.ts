@@ -3,7 +3,7 @@ import { InventoryComment } from './InventoryComment';
 import { InventoryItem } from './InventoryItem';
 import { InventoryTag } from './InventoryTag';
 import { InventoryUser } from './InventoryUser';
-import { User } from './User';
+import { User } from '../users/User';
 
 export enum InventoryStatuses {
   PUBLIC = 'PUBLIC',

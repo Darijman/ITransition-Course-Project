@@ -3,14 +3,14 @@
 import { useEffect, useRef } from 'react';
 import { Typography } from 'antd';
 import { useTranslations } from 'next-intl';
-import { Inventory } from '@/interfaces/Inventory';
-import { InventoryUser } from '@/interfaces/InventoryUser';
+import { Inventory } from '@/interfaces/inventories/Inventory';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import { InventoryComment } from './inventoryComment/InventoryComment';
 import { AddInventoryCommentForm } from './addInventoryCommentForm/AddInventoryCommentForm';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
-import './inventoryDiscussion.css';
 import { canModifyInventory } from '@/helpers/canModifyInventory';
 import { useAuth } from '@/contexts/authContext/AuthContext';
+import './inventoryDiscussion.css';
 
 const { Title } = Typography;
 

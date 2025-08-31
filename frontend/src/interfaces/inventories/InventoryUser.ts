@@ -2,7 +2,7 @@ import { Inventory } from './Inventory';
 import { InventoryComment } from './InventoryComment';
 import { InventoryItem } from './InventoryItem';
 import { InventoryUserRoles } from './InventoryUserRoles';
-import { User } from './User';
+import { User } from '../users/User';
 
 export interface InventoryUser {
   id: number;

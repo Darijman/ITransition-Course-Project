@@ -3,13 +3,13 @@
 import { forwardRef, useState } from 'react';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import { Avatar, Button, Typography, Popconfirm, message } from 'antd';
-import { InventoryComment as IInventoryComment } from '@/interfaces/InventoryComment';
+import { InventoryComment as IInventoryComment } from '@/interfaces/inventories/InventoryComment';
 import { formatDate } from '@/helpers/formatDate';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { UserRoles } from '@/interfaces/UserRoles.enum';
-import { InventoryUser } from '@/interfaces/InventoryUser';
-import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import Link from 'next/link';
 import api from '../../../../../../../axiosConfig';
 import './inventoryComment.css';

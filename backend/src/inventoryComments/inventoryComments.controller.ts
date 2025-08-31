@@ -14,6 +14,7 @@ export class InventoryCommentsController {
   constructor(private readonly inventoryCommentsService: InventoryCommentsService) {}
 
   @Admin()
+  @UseGuards(AuthGuard)
   @Get()
   async getAllInventoryComments(): Promise<InventoryComment[]> {
     return await this.inventoryCommentsService.getAllInventoryComments();
@@ -29,6 +30,7 @@ export class InventoryCommentsController {
   }
 
   @Admin()
+  @UseGuards(AuthGuard)
   @Get(':commentId')
   async getInventoryCommentByID(
     @Param('commentId', new CustomParseIntPipe('Inventory Comment ID')) commentId: number,

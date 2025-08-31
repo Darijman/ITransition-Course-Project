@@ -2,17 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { InventoryItem } from '@/interfaces/InventoryItem';
+import { InventoryItem } from '@/interfaces/inventories/InventoryItem';
 import { getInventoryItemsColumns } from './columns';
 import { Button, Empty, Input, message, Popconfirm, Spin, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { IoIosAddCircle } from 'react-icons/io';
 import { useParams } from 'next/navigation';
 import { CreateItemModal } from './createItemModal/CreateItemModal';
-import { InventoryUser } from '@/interfaces/InventoryUser';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import { canModifyInventory } from '@/helpers/canModifyInventory';
 import { LikesListModal } from './likesListModal/LikesListModal';
-import { InventoryItemLike } from '@/interfaces/InventoryItemLike';
+import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
 import InfiniteScroll from 'react-infinite-scroll-component';

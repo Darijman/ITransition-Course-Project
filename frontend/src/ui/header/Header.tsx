@@ -1,6 +1,6 @@
 'use client';
 
-import { Typography, Avatar, MenuProps, Dropdown, Button } from 'antd';
+import { Typography, MenuProps, Dropdown, Button, Badge } from 'antd';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { SwitchTheme } from './switchThemes/SwitchTheme';
@@ -12,14 +12,17 @@ import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import { MdBackpack } from 'react-icons/md';
+import { HeaderAvatar } from './headerAvatar/HeaderAvatar';
 import api from '../../../axiosConfig';
 import './header.css';
 import './responsive.css';
+import { useNotifications } from '@/contexts/notificationContext/NotificationContext';
 
 const { Title } = Typography;
 
 export const Header = () => {
   const { user } = useAuth();
+  const { unreadCounts } = useNotifications();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -37,7 +40,12 @@ export const Header = () => {
           {
             key: 'profile',
             icon: <UserOutlined style={{ fontSize: 20 }} />,
-            label: t('header.profile'),
+            label: (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {t('header.profile')}
+                {unreadCounts.TOTAL > 0 && <Badge count={unreadCounts.TOTAL} />}
+              </div>
+            ),
             style: pathname === '/profile' ? { fontWeight: 'bold', backgroundColor: 'var(--background-color)' } : {},
             onClick: () => router.push('/profile'),
           },
@@ -135,13 +143,9 @@ export const Header = () => {
               arrow
               trigger={['click']}
             >
-              <Avatar
-                className={`header_avatar ${!user?.avatarUrl ? 'header_avatar_no_image' : ''}`}
-                size={40}
-                src={user?.avatarUrl || '/no-avatar.svg'}
-              >
-                {!user?.avatarUrl && user?.name?.[0]?.toUpperCase()}
-              </Avatar>
+              <span style={{ cursor: 'pointer', display: 'inline-block' }}>
+                <HeaderAvatar />
+              </span>
             </Dropdown>
           </div>
         </div>

@@ -1,12 +1,12 @@
 'use client';
 
-import { Inventory } from '@/interfaces/Inventory';
+import { Inventory } from '@/interfaces/inventories/Inventory';
 import { Empty, Input, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { inventoryUsersColumns } from './columns';
 import { useMemo, useState } from 'react';
-import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
-import { InventoryUser } from '@/interfaces/InventoryUser';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import './inventoryInfo.css';
 
 const { Title, Paragraph } = Typography;

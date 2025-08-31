@@ -15,6 +15,7 @@ export class InventoryUsersController {
   constructor(private readonly inventoryUsersService: InventoryUsersService) {}
 
   @Admin()
+  @UseGuards(AuthGuard)
   @Get()
   async getAllInventoriesUsers(): Promise<InventoryUser[]> {
     return await this.inventoryUsersService.getAllInventoriesUsers();

@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@/contexts/authContext/AuthContext';
 import { Table, Typography, Spin, Empty, message, Input, Button } from 'antd';
 import { useTranslations } from 'next-intl';
 import { Select } from '../select/Select';
-import { InventoryStatuses } from '@/interfaces/Inventory';
+import { InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { ColumnsType } from 'antd/es/table';
 import { MdBackpack } from 'react-icons/md';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../axiosConfig';
 import './inventoriesTable.css';
-import { useAuth } from '@/contexts/authContext/AuthContext';
 
 const { Title } = Typography;
 

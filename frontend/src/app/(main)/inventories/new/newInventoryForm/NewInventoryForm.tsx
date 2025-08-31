@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Form, UploadFile, Upload, Button, Image, Space, Tooltip, UploadProps, message, Spin } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
-import { InventoryStatuses } from '@/interfaces/Inventory';
+import { InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { UploadOutlined } from '@ant-design/icons';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { useTranslations } from 'next-intl';
 import { TextField } from '@/components/textField/TextField';
-import { InventoryTag } from '@/interfaces/InventoryTag';
-import { InventoryCategory } from '@/interfaces/InventoryCategory';
+import { InventoryTag } from '@/interfaces/inventories/InventoryTag';
+import { InventoryCategory } from '@/interfaces/inventories/InventoryCategory';
 import { Select } from '@/components/select/Select';
 import { TagSelector } from './tagsSelector/TagsSelector';
 import { RcFile } from 'antd/es/upload';

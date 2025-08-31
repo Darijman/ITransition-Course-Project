@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/authContext/AuthContext';
 import { message, Spin, Typography, Tabs, Tag } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { Inventory } from '@/interfaces/Inventory';
+import { Inventory } from '@/interfaces/inventories/Inventory';
 import { Loader } from '@/ui/loader/Loader';
 import { getTabs } from './tabs';
 import api from '../../../../../axiosConfig';

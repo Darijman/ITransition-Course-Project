@@ -1,4 +1,4 @@
-import { Providers } from './Providers.enum';
+import { Providers } from '../providers/Providers.enum';
 import { UserRoles } from './UserRoles.enum';
 
 export interface User {

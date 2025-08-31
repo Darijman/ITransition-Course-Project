@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Inventory, InventoryStatuses } from '@/interfaces/Inventory';
-import { InventoryUser } from '@/interfaces/InventoryUser';
-import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
+import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import { Button, Space, Tooltip, Typography, message } from 'antd';
 import { useTranslations } from 'next-intl';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { UserRoles } from '@/interfaces/UserRoles.enum';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import api from '../../../../../../axiosConfig';
 import './inventoryAccess.css';
 

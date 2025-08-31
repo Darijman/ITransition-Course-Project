@@ -2,7 +2,7 @@
 
 import { Button } from 'antd';
 import { HeartFilled, HeartOutlined } from '@ant-design/icons';
-import { InventoryItemLike } from '@/interfaces/InventoryItemLike';
+import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import { motion } from 'framer-motion';
 
 type Props = {

@@ -1,5 +1,5 @@
 import { ColumnsType } from 'antd/es/table';
-import { Inventory, InventoryStatuses } from '@/interfaces/Inventory';
+import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { Tag, Typography } from 'antd';
 import Image from 'next/image';
 import React from 'react';
@@ -15,13 +15,7 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     key: 'image',
     render: (url: string, record: Inventory) => (
       <Link href={`/inventories/${record.id}`} scroll={false}>
-        <Image
-          src={url || '/image-placeholder.svg'}
-          alt={record.title}
-          width={50}
-          height={50}
-          className='inventories_table_columns_image'
-        />
+        <Image src={url || '/image-placeholder.svg'} alt={record.title} width={50} height={50} className='inventories_table_columns_image' />
       </Link>
     ),
   },

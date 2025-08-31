@@ -1,12 +1,12 @@
 'use client';
 
 import { Empty, Input, message, Spin, Table, Typography } from 'antd';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { Select } from '@/components/select/Select';
 import { useEffect, useMemo, useState } from 'react';
-import { Inventory, InventoryStatuses } from '@/interfaces/Inventory';
+import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { useTranslations } from 'next-intl';
 import { columns } from './columns';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../axiosConfig';
 import './userInventories.css';
 

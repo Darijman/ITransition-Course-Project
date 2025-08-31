@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal, List, Avatar, Typography } from 'antd';
-import { InventoryItemLike } from '@/interfaces/InventoryItemLike';
+import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import './likesListModal.css';

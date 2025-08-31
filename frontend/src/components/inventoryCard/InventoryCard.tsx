@@ -2,7 +2,7 @@
 
 import { Card, Tag, Avatar, Typography, Space, Tooltip } from 'antd';
 import { AppstoreOutlined } from '@ant-design/icons';
-import { Inventory, InventoryStatuses } from '@/interfaces/Inventory';
+import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';

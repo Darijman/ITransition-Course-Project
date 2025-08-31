@@ -1,7 +1,7 @@
-import { BasicUser } from '@/interfaces/BasicUser';
-import { InventoryUser } from '@/interfaces/InventoryUser';
-import { InventoryUserRoles } from '@/interfaces/InventoryUserRoles';
-import { UserRoles } from '@/interfaces/UserRoles.enum';
+import { BasicUser } from '@/interfaces/users/BasicUser';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 
 export const canModifyInventory = (inventoryUser: InventoryUser | null, authUser: BasicUser): boolean => {
   if (!authUser) return false;
