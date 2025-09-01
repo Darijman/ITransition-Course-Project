@@ -65,7 +65,18 @@ export const AddInventoryCommentForm = ({ currentInventoryUser, inventory }: Pro
           style={{ flex: 1 }}
           validateStatus=''
         >
-          <TextField placeHolder={t('inventory.discussion.add_comment_textfield_placeholder')} showCount maxLength={255} minLength={1} />
+          <TextField
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.submit();
+              }
+            }}
+            placeHolder={t('inventory.discussion.add_comment_textfield_placeholder')}
+            showCount
+            maxLength={255}
+            minLength={1}
+          />
         </Form.Item>
 
         <Form.Item>

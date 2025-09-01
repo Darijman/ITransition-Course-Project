@@ -85,7 +85,8 @@ export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInvent
       <div
         style={{
           overflowY: 'scroll',
-          height: '500px',
+          maxHeight: '500px',
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -101,7 +102,7 @@ export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInvent
             currentInventoryUser={currentInventoryUser}
           />
         ))}
-        <hr style={{ border: '1px solid var(--hover-color)', width: '100%' }} />
+        {inventory?.comments?.length ? <hr style={{ border: '1px solid var(--hover-color)', width: '100%' }} /> : null}
       </div>
 
       {canModifyInventory(currentInventoryUser, user) ? (

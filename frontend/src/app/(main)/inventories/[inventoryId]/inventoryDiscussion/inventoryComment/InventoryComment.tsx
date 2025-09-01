@@ -83,7 +83,7 @@ export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryCo
                   okText={locale === 'en' ? 'Yes, delete!' : 'Да, удалить!'}
                   cancelText={locale === 'en' ? 'Cancel' : 'Отмена'}
                   placement='topLeft'
-                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                  getPopupContainer={() => document.body}
                   okButtonProps={{ danger: true, style: { backgroundColor: 'red', borderColor: 'red' } }}
                   cancelButtonProps={{ style: { backgroundColor: 'var(--secondary-text-color)', color: '#FFFFFF' } }}
                 >

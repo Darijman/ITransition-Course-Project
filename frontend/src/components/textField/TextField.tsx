@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, KeyboardEventHandler } from 'react';
 import { Input, ConfigProvider } from 'antd';
 import './textField.css';
 
@@ -17,9 +17,10 @@ interface Props {
   className?: string;
   maxLength?: number;
   minLength?: number;
-  rows?: number; 
+  rows?: number;
   autoFocus?: boolean;
   onChange?: React.ChangeEventHandler;
+  onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement>;
 }
 
 export const TextField = ({
@@ -36,6 +37,7 @@ export const TextField = ({
   rows,
   autoFocus,
   onChange,
+  onKeyDown,
 }: Props) => {
   return (
     <ConfigProvider
@@ -86,6 +88,7 @@ export const TextField = ({
         maxLength={maxLength}
         minLength={minLength}
         onChange={onChange}
+        onKeyDown={onKeyDown}
         autoSize={false}
         rows={rows}
         autoFocus={autoFocus}
