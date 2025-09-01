@@ -5,7 +5,7 @@ import { Select } from '@/components/select/Select';
 import { useEffect, useMemo, useState } from 'react';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useTranslations } from 'next-intl';
-import { columns } from './columns';
+import { getInvitationColumns } from './columns';
 import { InventoryInvite, InventoryInviteStatuses } from '@/interfaces/inventories/InventoryInvite';
 import { useNotifications } from '@/contexts/notificationContext/NotificationContext';
 import { NotificationStatuses } from '@/interfaces/notifications/NotificationStatuses.enum';
@@ -154,7 +154,7 @@ export const UserInvitations = () => {
         />
 
         <div className='user_invitations_buttons'>
-          <Tooltip title={t('profile.user_invitations.accept_tooltip')}>
+          <Tooltip mouseEnterDelay={1} title={t('profile.user_invitations.accept_tooltip')}>
             <Button
               className='user_invitations_accept_button'
               onClick={handleAccept}
@@ -162,12 +162,12 @@ export const UserInvitations = () => {
               type='primary'
               icon={<CheckOutlined />}
             >
-              Accept
+              {t('profile.user_invitations.accept')}
             </Button>
           </Tooltip>
-          <Tooltip className='user_invitations_reject_button' title={t('profile.user_invitations.reject_tooltip')}>
+          <Tooltip mouseEnterDelay={1} className='user_invitations_reject_button' title={t('profile.user_invitations.reject_tooltip')}>
             <Button onClick={handleReject} disabled={!selectedRowKeys.length} type='primary' danger icon={<CloseOutlined />}>
-              Reject
+              {t('profile.user_invitations.reject')}
             </Button>
           </Tooltip>
         </div>
@@ -213,7 +213,7 @@ export const UserInvitations = () => {
                 onChange: setSelectedRowKeys,
                 getCheckboxProps: (record) => ({ disabled: record.status !== InventoryInviteStatuses.PENDING }),
               }}
-              columns={columns}
+              columns={getInvitationColumns(t)}
               dataSource={filteredInvites}
               rowKey='id'
               pagination={false}

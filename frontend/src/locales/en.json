@@ -91,7 +91,9 @@
       "failed_to_load": "Failed to load inventories you're participating in!",
       "failed_to_load_more": "Failed to load more inventories! Try again later..",
       "failed_to_leave_inventories": "Failed to leave inventories. Try again later.",
-      "successfully_left_inventories": "You have left the selected inventories!"
+      "successfully_left_inventories": "You have left the selected inventories!",
+      "leave_inventories": "Leave inventories",
+      "leave_inventories_tooltip": "You will permanently leave these inventories and lose access to them."
     },
     "user_invitations": {
       "title": "Invitations",
@@ -103,6 +105,8 @@
       "invitations_rejected": "You rejected selected invitations!",
       "failed_to_reject_invitations": "Failed to reject selected invitations! Try again later!",
       "failed_to_accept_invitations": "Failed to accept selected invitations! Try again later!",
+      "accept": "Accept",
+      "reject": "Reject",
       "statuses": {
         "pending": "PENDING",
         "accepted": "ACCEPTED",
@@ -155,5 +159,19 @@
     "creating_error": "An error occurred while creating the inventory. Please try again later.",
     "public": "Public",
     "private": "Private"
+  },
+  "tables": {
+    "image": "Image",
+    "title": "Title",
+    "description": "Description",
+    "creator": "Creator",
+    "category": "Category",
+    "invited_as": "Invited as",
+    "expires": "Expires",
+    "status": "Status",
+    "joined": "Joined",
+    "tags": "Tags",
+    "items": "Items",
+    "created": "Created"
   }
 }

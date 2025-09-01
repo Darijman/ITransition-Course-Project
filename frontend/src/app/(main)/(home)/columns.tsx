@@ -1,16 +1,16 @@
 import { ColumnsType } from 'antd/es/table';
 import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { Tag, Typography } from 'antd';
+import { formatDate } from '@/helpers/formatDate';
 import Image from 'next/image';
 import React from 'react';
-import { formatDate } from '@/helpers/formatDate';
 import Link from 'next/link';
 
 const { Text } = Typography;
 
-export const inventoryTableColumns: ColumnsType<Inventory> = [
+export const getInventoryColumns = (t: (key: string) => string): ColumnsType<Inventory> => [
   {
-    title: 'Image',
+    title: t('tables.image'),
     dataIndex: 'imageUrl',
     key: 'image',
     render: (url: string, record: Inventory) => (
@@ -20,7 +20,7 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     ),
   },
   {
-    title: 'Title',
+    title: t('tables.title'),
     dataIndex: 'title',
     key: 'title',
     render: (text: string, record: Inventory) => (
@@ -32,7 +32,7 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     ),
   },
   {
-    title: 'Creator',
+    title: t('tables.creator'),
     dataIndex: ['creator', 'name'],
     key: 'creator',
     render: (_: any, record: Inventory) => (
@@ -42,53 +42,49 @@ export const inventoryTableColumns: ColumnsType<Inventory> = [
     ),
   },
   {
-    title: 'Items',
+    title: t('tables.items'),
     dataIndex: 'items',
     key: 'items',
     render: (_: any, record: Inventory) => record.items?.length ?? 0,
   },
   {
-    title: 'Category',
+    title: t('tables.category'),
     dataIndex: ['category', 'title'],
     key: 'category',
-    render: (_, record: Inventory) => {
-      return (
-        <Tag color='var(--category-color)' key={record?.category?.id}>
-          {record?.category?.title}
-        </Tag>
-      );
-    },
+    render: (_, record: Inventory) => (
+      <Tag color='var(--category-color)' key={record?.category?.id}>
+        {record?.category?.title}
+      </Tag>
+    ),
   },
   {
-    title: 'Tags',
+    title: t('tables.tags'),
     key: 'tags',
     dataIndex: 'tags',
     render: (_, record: Inventory) => (
       <>
-        {record?.tags?.map((tag) => {
-          return (
-            <Tag color='var(--tag-color)' key={tag.id}>
-              {tag.title.toUpperCase()}
-            </Tag>
-          );
-        })}
+        {record?.tags?.map((tag) => (
+          <Tag color='var(--tag-color)' key={tag.id}>
+            {tag.title.toUpperCase()}
+          </Tag>
+        ))}
       </>
     ),
   },
   {
-    title: 'Created',
+    title: t('tables.created'),
     key: 'created',
     dataIndex: 'createdAt',
-    render: (_, record) => {
-      return formatDate(record.createdAt);
-    },
+    render: (_, record) => formatDate(record.createdAt),
   },
   {
-    title: 'Status',
+    title: t('tables.status'),
     key: 'status',
     dataIndex: 'status',
     render: (status: InventoryStatuses) => (
-      <Tag color='var(--status-color)'>{status === InventoryStatuses.PUBLIC ? 'Public' : 'Private'}</Tag>
+      <Tag color='var(--status-color)'>
+        {status === InventoryStatuses.PUBLIC ? t('inventories_new.public') : t('inventories_new.private')}
+      </Tag>
     ),
   },
 ];

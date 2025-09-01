@@ -1,12 +1,12 @@
 'use client';
 
-import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
+import { Button, Empty, Input, message, Spin, Table, Tooltip, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
 import { useEffect, useMemo, useState } from 'react';
 import { InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { useTranslations } from 'next-intl';
 import { LogoutOutlined } from '@ant-design/icons';
-import { columns, ExtendedInventory } from './columns';
+import { getColumns, ExtendedInventory } from './columns';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -146,17 +146,19 @@ export const UserInventories = () => {
               onChange={(e) => handleSearchChange(e.target.value)}
             />
 
-            <Button
-              className='user_inventories_leave_button'
-              disabled={!selectedRowKeys.length}
-              danger
-              type='primary'
-              icon={<LogoutOutlined style={{ fontSize: '20px' }} />}
-              onClick={leaveManyInventoriesHandler}
-              loading={isLeavingInventories}
-            >
-              Leave inventories
-            </Button>
+            <Tooltip mouseEnterDelay={1} title={t('profile.user_inventories.leave_inventories_tooltip')}>
+              <Button
+                className='user_inventories_leave_button'
+                disabled={!selectedRowKeys.length}
+                danger
+                type='primary'
+                icon={<LogoutOutlined style={{ fontSize: '20px' }} />}
+                onClick={leaveManyInventoriesHandler}
+                loading={isLeavingInventories}
+              >
+                {t('profile.user_inventories.leave_inventories')}
+              </Button>
+            </Tooltip>
 
             <Select
               options={[
@@ -193,7 +195,7 @@ export const UserInventories = () => {
           >
             <Table
               className='table'
-              columns={columns}
+              columns={getColumns(t)}
               rowSelection={{
                 type: 'checkbox',
                 selectedRowKeys,

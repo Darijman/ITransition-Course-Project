@@ -8,9 +8,9 @@ import Link from 'next/link';
 
 const { Text } = Typography;
 
-export const columns: ColumnsType<InventoryInvite> = [
+export const getInvitationColumns = (t: (key: string) => string): ColumnsType<InventoryInvite> => [
   {
-    title: 'Image',
+    title: t('tables.image'),
     dataIndex: ['inventory', 'imageUrl'],
     key: 'image',
     render: (url: string, record: InventoryInvite) => (
@@ -20,7 +20,7 @@ export const columns: ColumnsType<InventoryInvite> = [
     ),
   },
   {
-    title: 'Title',
+    title: t('tables.title'),
     dataIndex: ['inventory', 'title'],
     key: 'title',
     render: (text: string, record: InventoryInvite) => (
@@ -32,7 +32,7 @@ export const columns: ColumnsType<InventoryInvite> = [
     ),
   },
   {
-    title: 'Creator',
+    title: t('tables.creator'),
     key: 'creator',
     render: (_: any, record: InventoryInvite) => (
       <Link href={`/users/${record.inventory?.creator?.id}`}>
@@ -41,29 +41,27 @@ export const columns: ColumnsType<InventoryInvite> = [
     ),
   },
   {
-    title: 'Category',
+    title: t('tables.category'),
     key: 'category',
-    render: (_, record: InventoryInvite) => {
-      return (
-        <Tag color='var(--category-color)' key={record.inventory?.category?.id}>
-          {record.inventory?.category?.title || '-'}
-        </Tag>
-      );
-    },
+    render: (_, record: InventoryInvite) => (
+      <Tag color='var(--category-color)' key={record.inventory?.category?.id}>
+        {record.inventory?.category?.title || '-'}
+      </Tag>
+    ),
   },
   {
-    title: 'Invited as',
+    title: t('tables.invited_as'),
     key: 'role',
     render: (_, record: InventoryInvite) => <Tag color='var(--tag-color)'>{record.role}</Tag>,
   },
   {
-    title: 'Expires',
+    title: t('tables.expires'),
     key: 'expires',
     dataIndex: 'expiresAt',
     render: (_, record: InventoryInvite) => formatDate(record.expiresAt),
   },
   {
-    title: 'Status',
+    title: t('tables.status'),
     key: 'status',
     dataIndex: 'status',
     render: (status: string) => {

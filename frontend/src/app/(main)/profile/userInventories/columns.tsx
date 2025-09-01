@@ -12,9 +12,9 @@ export interface ExtendedInventory extends Inventory {
 
 const { Text } = Typography;
 
-export const columns: ColumnsType<ExtendedInventory> = [
+export const getColumns = (t: (key: string) => string): ColumnsType<ExtendedInventory> => [
   {
-    title: 'Image',
+    title: t('tables.image'),
     dataIndex: 'imageUrl',
     key: 'image',
     render: (url: string, record: Inventory) => (
@@ -30,7 +30,7 @@ export const columns: ColumnsType<ExtendedInventory> = [
     ),
   },
   {
-    title: 'Title',
+    title: t('tables.title'),
     dataIndex: 'title',
     key: 'title',
     render: (text: string, record: Inventory) => (
@@ -42,7 +42,7 @@ export const columns: ColumnsType<ExtendedInventory> = [
     ),
   },
   {
-    title: 'Creator',
+    title: t('tables.creator'),
     dataIndex: ['creator', 'name'],
     key: 'creator',
     render: (_: any, record: Inventory) => (
@@ -52,53 +52,49 @@ export const columns: ColumnsType<ExtendedInventory> = [
     ),
   },
   {
-    title: 'Items',
+    title: t('tables.items'),
     dataIndex: 'items',
     key: 'items',
     render: (_: any, record: Inventory) => record.items?.length ?? 0,
   },
   {
-    title: 'Category',
+    title: t('tables.category'),
     dataIndex: ['category', 'title'],
     key: 'category',
-    render: (_, record: Inventory) => {
-      return (
-        <Tag color='var(--category-color)' key={record?.category?.id}>
-          {record?.category?.title}
-        </Tag>
-      );
-    },
+    render: (_, record: Inventory) => (
+      <Tag color='var(--category-color)' key={record?.category?.id}>
+        {record?.category?.title}
+      </Tag>
+    ),
   },
   {
-    title: 'Tags',
+    title: t('tables.tags'),
     key: 'tags',
     dataIndex: 'tags',
     render: (_, record: Inventory) => (
       <>
-        {record?.tags?.map((tag) => {
-          return (
-            <Tag color='var(--tag-color)' key={tag.id}>
-              {tag.title.toUpperCase()}
-            </Tag>
-          );
-        })}
+        {record?.tags?.map((tag) => (
+          <Tag color='var(--tag-color)' key={tag.id}>
+            {tag.title.toUpperCase()}
+          </Tag>
+        ))}
       </>
     ),
   },
   {
-    title: 'Joined',
+    title: t('tables.joined'),
     key: 'joinedAt',
     dataIndex: 'joinedAt',
-    render: (_, record: Inventory & { joinedAt: string }) => {
-      return formatDate(record.joinedAt);
-    },
+    render: (_, record: Inventory & { joinedAt: string }) => formatDate(record.joinedAt),
   },
   {
-    title: 'Status',
+    title: t('tables.status'),
     key: 'status',
     dataIndex: 'status',
     render: (status: InventoryStatuses) => (
-      <Tag color='var(--status-color)'>{status === InventoryStatuses.PUBLIC ? 'Public' : 'Private'}</Tag>
+      <Tag color='var(--status-color)'>
+        {status === InventoryStatuses.PUBLIC ? t('inventories_new.public') : t('inventories_new.private')}
+      </Tag>
     ),
   },
 ];

@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoriesTable } from '@/components/inventoriesTable/InventoriesTable';
 import { useRouter } from 'next/navigation';
 import { ArrowRightOutlined } from '@ant-design/icons';
-import { inventoryTableColumns } from './inventoriesTable.columns';
+import { getInventoryColumns } from './columns';
 import api from '../../../../axiosConfig';
 import InventoryCard from '@/components/inventoryCard/InventoryCard';
 import './home.css';
@@ -67,7 +67,6 @@ export default function Home() {
   }, [user, notificationApi, t, router]);
 
   console.log(`topFiveInventories`, topFiveInventories);
-  
 
   return (
     <div>
@@ -97,7 +96,7 @@ export default function Home() {
 
       <div>
         <InventoriesTable<Inventory>
-          columns={inventoryTableColumns}
+          columns={getInventoryColumns(t)}
           rowKey='id'
           title={t('home.inventories_table_title')}
           pageLimit={20}
