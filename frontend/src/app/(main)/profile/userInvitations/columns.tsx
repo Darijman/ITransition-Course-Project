@@ -52,7 +52,7 @@ export const columns: ColumnsType<InventoryInvite> = [
     },
   },
   {
-    title: 'Your role',
+    title: 'Invited as',
     key: 'role',
     render: (_, record: InventoryInvite) => <Tag color='var(--tag-color)'>{record.role}</Tag>,
   },

@@ -53,9 +53,6 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
     getNotifications();
   }, [getNotifications]);
 
-  console.log(`notifications`, notifications);
-  console.log(`unreadCounts`, unreadCounts);
-
   useEffect(() => {
     if (!socket || !user.email) return;
 

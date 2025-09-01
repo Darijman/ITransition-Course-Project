@@ -29,9 +29,10 @@ export class InventoriesController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('/user')
-  async getInventoriesForUser(
+  @Get('/user/:userId')
+  async getUserInventories(
     @Req() req: Request,
+    @Param('userId', new CustomParseIntPipe('User ID')) userId: number,
     @Query('searchValue') searchValue?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
@@ -44,7 +45,7 @@ export class InventoriesController {
       searchValue,
     };
 
-    return await this.inventoriesService.getInventoriesForUser(req.user.id, parsedQuery);
+    return await this.inventoriesService.getUserInventories(userId, parsedQuery, req.user);
   }
 
   @UseGuards(OptionalAuthGuard)

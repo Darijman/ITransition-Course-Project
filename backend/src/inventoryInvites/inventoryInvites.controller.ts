@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   Req,
-  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,10 +18,8 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { Admin } from 'src/auth/auth.decorators';
 import { Request } from 'express';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
-import { InventoryInviteDublicateFilter } from 'src/common/filters/inventoryInvite-duplicate.filter';
 import { InventoryInviteStatuses } from './inventoryInviteStatuses.enum';
 
-@UseFilters(InventoryInviteDublicateFilter)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inventory_invites')
 export class InventoryInvitesController {
@@ -35,7 +32,7 @@ export class InventoryInvitesController {
     @Query('status') status?: InventoryInviteStatuses | 'ALL',
     @Query('offset') offset?: string,
     @Query('limit') limit?: string,
-    @Query('search') searchValue?: string,
+    @Query('searchValue') searchValue?: string,
   ): Promise<InventoryInvite[]> {
     const parsedQuery = {
       offset: offset ? Number(offset) : undefined,
@@ -55,7 +52,7 @@ export class InventoryInvitesController {
 
   @UseGuards(AuthGuard)
   @Post('/reject')
-  async rejectInventoryInvites(@Body('ids') inviteIds: number[], @Req() req: Request): Promise<InventoryInvite[]> {
+  async rejectInventoryInvites(@Body('inviteIds') inviteIds: number[], @Req() req: Request): Promise<InventoryInvite[]> {
     return await this.inventoryInvitesService.rejectInventoryInvites(inviteIds, req.user);
   }
 

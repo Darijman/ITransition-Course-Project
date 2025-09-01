@@ -1,11 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Inventory } from 'src/inventories/inventory.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { InventoryInviteStatuses } from './inventoryInviteStatuses.enum';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 
 @Entity('inventory_invites')
-@Unique(['inventoryId', 'inviteeEmail'])
 export class InventoryInvite {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;

@@ -88,14 +88,10 @@ export class InventoryInvitesService {
 
     const inventory = await this.inventoriesService.getInventoryById(inventoryId, reqUser);
     const inviter = inventory.inventoryUsers.find((u) => u.id === inviterInventoryUserId);
-    if (!inviter) {
-      throw new BadRequestException({ error: 'Inviter is not part of this inventory!' });
-    }
+    if (!inviter) throw new BadRequestException({ error: 'Inviter is not part of this inventory!' });
 
-    if (reqUser.role !== UserRoles.ADMIN) {
-      if (inviter.role !== InventoryUserRoles.CREATOR) {
-        throw new ForbiddenException({ error: 'You do not have rights to invite users!' });
-      }
+    if (reqUser.role !== UserRoles.ADMIN && inviter.role !== InventoryUserRoles.CREATOR) {
+      throw new ForbiddenException({ error: 'You do not have rights to invite users!' });
     }
 
     const user = await this.usersRepository.findOne({ where: { email: inviteeEmail } });
@@ -103,18 +99,15 @@ export class InventoryInvitesService {
       throw new NotFoundException({ error: 'User with this email does not exist!' });
     }
 
+    const isUserInInventory = inventory.inventoryUsers.some((u) => u.userId === user.id);
+    if (isUserInInventory) {
+      throw new ConflictException({ error: 'User is already a member of this inventory!' });
+    }
+
     const existingInvite = await this.inventoryInvitesRepository.findOne({ where: { inventoryId, inviteeEmail } });
     if (existingInvite) {
-      if (existingInvite.status === InventoryInviteStatuses.PENDING) {
-        if (existingInvite.expiresAt && existingInvite.expiresAt < new Date()) {
-          existingInvite.status = InventoryInviteStatuses.EXPIRED;
-          await this.inventoryInvitesRepository.save(existingInvite);
-        } else {
-          throw new ConflictException({ error: 'Invite already exists and is pending!' });
-        }
-      }
-      if (existingInvite.status === InventoryInviteStatuses.ACCEPTED) {
-        throw new ConflictException({ error: 'User already accepted an invite to this inventory!' });
+      if (existingInvite.status === InventoryInviteStatuses.PENDING || existingInvite.status === InventoryInviteStatuses.ACCEPTED) {
+        throw new ConflictException({ error: 'Invite already exists and cannot be sent!' });
       }
     }
 
@@ -123,10 +116,16 @@ export class InventoryInvitesService {
       inviterInventoryUserId,
       inviteeEmail,
       role,
-      expiresAt: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // default: 7days
+      expiresAt: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7days default
+      status: InventoryInviteStatuses.PENDING,
     });
 
     const savedInvite = await this.inventoryInvitesRepository.save(newInvite);
+    const inviteWithRelations = await this.inventoryInvitesRepository.findOne({
+      where: { id: savedInvite.id },
+      relations: ['inventory', 'inviter', 'inventory.creator', 'inventory.category'],
+    });
+
     const notification = await this.notificationsService.createNotification({
       userId: user.id,
       type: Notifications.INVITE,
@@ -134,6 +133,7 @@ export class InventoryInvitesService {
     });
 
     this.inventoriesGateway.server.to(inviteeEmail).emit('notification', notification);
+    this.inventoriesGateway.server.to(inviteeEmail).emit('inventory-invite', inviteWithRelations);
     return savedInvite;
   }
 

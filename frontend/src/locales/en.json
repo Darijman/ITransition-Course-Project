@@ -89,6 +89,7 @@
     "user_inventories": {
       "title": "Inventories you are part of",
       "failed_to_load": "Failed to load inventories you're participating in!",
+      "failed_to_load_more": "Failed to load more inventories! Try again later..",
       "failed_to_leave_inventories": "Failed to leave inventories. Try again later.",
       "successfully_left_inventories": "You have left the selected inventories!"
     },
@@ -96,6 +97,12 @@
       "title": "Invitations",
       "accept_tooltip": "Accepting invite you will be added to these inventories",
       "reject_tooltip": "Rejecting invite you will need to ask the creator to send you invitation again",
+      "failed_to_load": "Failed to load invitations!",
+      "failed_to_load_more": "Failed to load more invitations!",
+      "invitations_accepted": "You accepted selected invitations!",
+      "invitations_rejected": "You rejected selected invitations!",
+      "failed_to_reject_invitations": "Failed to reject selected invitations! Try again later!",
+      "failed_to_accept_invitations": "Failed to accept selected invitations! Try again later!",
       "statuses": {
         "pending": "PENDING",
         "accepted": "ACCEPTED",

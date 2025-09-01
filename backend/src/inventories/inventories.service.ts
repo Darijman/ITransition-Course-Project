@@ -40,7 +40,10 @@ export class InventoriesService {
     return await this.inventoriesRepository.find();
   }
 
-  async getInventoriesForUser(userId: number, query: Query = {}): Promise<Inventory[]> {
+  async getUserInventories(userId: number, query: Query = {}, reqUser: ReqUser): Promise<Inventory[]> {
+    if (userId !== reqUser.id && reqUser.role !== UserRoles.ADMIN) {
+      throw new ForbiddenException({ error: 'You do not have permission!' });
+    }
     const { offset = 0, limit = 10, status = 'ALL', searchValue } = query;
 
     const qb = this.inventoryUsersRepository

@@ -12,10 +12,10 @@ import { useRouter } from 'next/navigation';
 import { DeleteModal } from '@/components/deleteModal/DeleteModal';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import { UserInventories } from './userInventories/UserInventories';
+import { UserInvitations } from './userInvitations/UserInvitations';
 import api from '../../../../axiosConfig';
 import './profile.css';
 import './responsive.css';
-import { UserInvitations } from './userInvitations/UserInvitations';
 
 const { Title } = Typography;
 const { Item } = Descriptions;

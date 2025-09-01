@@ -7,60 +7,57 @@ import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory
 import { useTranslations } from 'next-intl';
 import { LogoutOutlined } from '@ant-design/icons';
 import { columns } from './columns';
+import { useAuth } from '@/contexts/authContext/AuthContext';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../axiosConfig';
 import './userInventories.css';
-import { useAuth } from '@/contexts/authContext/AuthContext';
 
 const { Title } = Typography;
-
-interface Query {
-  offset?: number;
-  limit?: number;
-  status?: 'ALL' | InventoryStatuses;
-  searchValue?: string;
-}
+const limit = 10;
 
 export const UserInventories = () => {
   const { user } = useAuth();
   const t = useTranslations();
 
   const [inventories, setInventories] = useState<Inventory[]>([]);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isLeavingInventories, setIsLeavingInventories] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLeavingInventories, setIsLeavingInventories] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [errorText, setErrorText] = useState('');
 
-  const [searchValue, setSearchValue] = useState<string>('');
+  const [offset, setOffset] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | InventoryStatuses>('ALL');
-  const [errorText, setErrorText] = useState<string>('');
 
-  const [query, setQuery] = useState<Query>({
-    offset: 0,
-    limit: 10,
-    status: 'ALL',
-    searchValue: '',
-  });
-
+  // === handlers ===
   const handleSearchChange = (val: string) => {
     setSearchValue(val);
-    setQuery((prev) => ({ ...prev, searchValue: val, offset: 0 }));
+    setOffset(0);
+    setInventories([]);
   };
 
   const handleStatusChange = (val: 'ALL' | InventoryStatuses) => {
     setStatusFilter(val);
-    setQuery((prev) => ({ ...prev, status: val, offset: 0 }));
+    setOffset(0);
+    setInventories([]);
   };
 
+  // === fetch initial or filtered data ===
   useEffect(() => {
+    if (!user.id) return;
+
     const fetchInitial = async () => {
       setIsLoading(true);
       try {
-        const { data } = await api.get(`/inventories/user`, { params: { ...query, offset: 0 } });
+        const { data } = await api.get(`/inventories/user/${user.id}`, {
+          params: { offset: 0, limit, status: statusFilter, searchValue },
+        });
         setInventories(data);
-        setHasMore(data.length === (query.limit ?? 10));
+        setHasMore(data.length === limit);
+        setOffset(data.length);
       } catch {
         setErrorText(t('profile.user_inventories.failed_to_load'));
       } finally {
@@ -69,23 +66,22 @@ export const UserInventories = () => {
     };
 
     fetchInitial();
-  }, [query, t]);
+  }, [user.id, statusFilter, searchValue, t]);
 
+  // === load more ===
   const loadMore = async () => {
-    if (isLoading || !hasMore) return;
+    if (isLoading || !hasMore || !user.id) return;
 
     setIsLoading(true);
     try {
-      const nextOffset = (query.offset ?? 0) + (query.limit ?? 10);
-      const { data } = await api.get(`/inventories/user`, {
-        params: { ...query, offset: nextOffset },
+      const { data } = await api.get(`/inventories/user/${user.id}`, {
+        params: { offset, limit, status: statusFilter, searchValue },
       });
-
       setInventories((prev) => [...prev, ...data]);
-      setHasMore(data.length === (query.limit ?? 10));
-      setQuery((prev) => ({ ...prev, offset: nextOffset }));
+      setHasMore(data.length === limit);
+      setOffset((prev) => prev + data.length);
     } catch {
-      setErrorText(t('profile.user_inventories.failed_to_load'));
+      messageApi.error(t('profile.user_inventories.failed_to_load_more'));
     } finally {
       setIsLoading(false);
     }
@@ -102,22 +98,16 @@ export const UserInventories = () => {
       setInventories((prev) => prev.filter((inv) => !selectedRowKeys.includes(inv.id)));
       setSelectedRowKeys([]);
     } catch {
-      messageApi.success(t('profile.user_inventories.failed_to_leave_inventories'));
+      messageApi.error(t('profile.user_inventories.failed_to_leave_inventories'));
     } finally {
       setIsLeavingInventories(false);
     }
   };
 
+  // === filtered inventories for table search ===
   const filteredInventories = useMemo(() => {
     return inventories.filter((inventory) => {
-      if (statusFilter !== 'ALL') {
-        if (
-          (statusFilter === 'PUBLIC' && inventory.status !== InventoryStatuses.PUBLIC) ||
-          (statusFilter === 'PRIVATE' && inventory.status !== InventoryStatuses.PRIVATE)
-        ) {
-          return false;
-        }
-      }
+      if (statusFilter !== 'ALL' && inventory.status !== statusFilter) return false;
 
       if (searchValue) {
         const lowerSearch = searchValue.toLowerCase();
@@ -125,17 +115,12 @@ export const UserInventories = () => {
         const matchesCreator = inventory.creator?.name?.toLowerCase().includes(lowerSearch);
         const matchesCategory = inventory.category?.title?.toLowerCase().includes(lowerSearch);
         const matchesTags = inventory.tags?.some((tag) => tag.title.toLowerCase().includes(lowerSearch));
-
-        if (!matchesTitle && !matchesCreator && !matchesCategory && !matchesTags) {
-          return false;
-        }
+        if (!matchesTitle && !matchesCreator && !matchesCategory && !matchesTags) return false;
       }
 
       return true;
     });
   }, [inventories, statusFilter, searchValue]);
-
-  console.log(`selectedRowkKeys`, selectedRowKeys);
 
   return (
     <div className='inventories_table'>
@@ -145,76 +130,86 @@ export const UserInventories = () => {
           {t('profile.user_inventories.title')}
         </Title>
 
-        <Input.Search
-          className='custom_search'
-          style={{ width: 200 }}
-          placeholder={t('home.inventories_table_search_placeholder')}
-          value={searchValue}
-          onChange={(e) => handleSearchChange(e.target.value)}
-        />
+        {errorText ? null : (
+          <>
+            <Input.Search
+              className='custom_search'
+              style={{ width: 200 }}
+              placeholder={t('home.inventories_table_search_placeholder')}
+              value={searchValue}
+              onChange={(e) => handleSearchChange(e.target.value)}
+            />
 
-        <Button
-          className='user_inventories_leave_button'
-          disabled={!selectedRowKeys.length}
-          danger
-          type='primary'
-          icon={<LogoutOutlined style={{ fontSize: '20px' }} />}
-          onClick={leaveManyInventoriesHandler}
-          loading={isLeavingInventories}
-        >
-          Leave inventories
-        </Button>
+            <Button
+              className='user_inventories_leave_button'
+              disabled={!selectedRowKeys.length}
+              danger
+              type='primary'
+              icon={<LogoutOutlined style={{ fontSize: '20px' }} />}
+              onClick={leaveManyInventoriesHandler}
+              loading={isLeavingInventories}
+            >
+              Leave inventories
+            </Button>
 
-        <Select
-          options={[
-            { label: t('home.select_status_all'), value: 'ALL' },
-            { label: t('home.select_status_public'), value: 'PUBLIC' },
-            { label: t('home.select_status_private'), value: 'PRIVATE' },
-          ]}
-          placeholder='Select a status'
-          value={statusFilter}
-          style={{ width: 200 }}
-          onChange={handleStatusChange}
-        />
+            <Select
+              options={[
+                { label: t('home.select_status_all'), value: 'ALL' },
+                { label: t('home.select_status_public'), value: 'PUBLIC' },
+                { label: t('home.select_status_private'), value: 'PRIVATE' },
+              ]}
+              placeholder='Select a status'
+              value={statusFilter}
+              style={{ width: 200 }}
+              onChange={handleStatusChange}
+            />
+          </>
+        )}
       </div>
 
-      <div id='scrollable-table-body' style={{ height: 500, overflow: 'auto' }}>
-        <InfiniteScroll
-          dataLength={filteredInventories.length}
-          next={loadMore}
-          hasMore={hasMore}
-          loader={
-            <div style={{ textAlign: 'center', padding: 16 }}>
-              <Spin size='large' />
-            </div>
-          }
-          scrollableTarget='scrollable-table-body'
-          scrollThreshold='100px'
-        >
-          <Table
-            className='table'
-            columns={columns}
-            rowSelection={{
-              type: 'checkbox',
-              selectedRowKeys,
-              onChange: (keys) => setSelectedRowKeys(keys),
-              getCheckboxProps: (record) => ({
-                disabled: record.creator?.id === user?.id,
-              }),
-            }}
-            dataSource={filteredInventories}
-            rowKey='id'
-            pagination={false}
-            locale={{
-              emptyText: (
-                <div style={{ textAlign: 'center' }}>
-                  <Empty description={<span style={{ color: 'var(--red-color)' }}>No inventories</span>} />
-                </div>
-              ),
-            }}
-          />
-        </InfiniteScroll>
-      </div>
+      {errorText ? (
+        <Title level={4} style={{ textAlign: 'center', color: 'var(--red-color)' }}>
+          {errorText}
+        </Title>
+      ) : (
+        <div id='user_inventories' style={{ height: 500, overflow: 'auto' }}>
+          <InfiniteScroll
+            dataLength={inventories.length}
+            next={loadMore}
+            hasMore={hasMore}
+            loader={
+              <div style={{ textAlign: 'center', padding: 16 }}>
+                <Spin size='large' />
+              </div>
+            }
+            scrollableTarget='user_inventories'
+            scrollThreshold='100px'
+          >
+            <Table
+              className='table'
+              columns={columns}
+              rowSelection={{
+                type: 'checkbox',
+                selectedRowKeys,
+                onChange: (keys) => setSelectedRowKeys(keys),
+                getCheckboxProps: (record) => ({
+                  disabled: record.creator?.id === user?.id,
+                }),
+              }}
+              dataSource={filteredInventories}
+              rowKey='id'
+              pagination={false}
+              locale={{
+                emptyText: (
+                  <div style={{ textAlign: 'center' }}>
+                    <Empty description={<span style={{ color: 'var(--red-color)' }}>No inventories</span>} />
+                  </div>
+                ),
+              }}
+            />
+          </InfiniteScroll>
+        </div>
+      )}
     </div>
   );
 };
