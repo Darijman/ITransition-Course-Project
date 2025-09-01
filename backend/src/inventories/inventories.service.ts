@@ -40,10 +40,11 @@ export class InventoriesService {
     return await this.inventoriesRepository.find();
   }
 
-  async getUserInventories(userId: number, query: Query = {}, reqUser: ReqUser): Promise<Inventory[]> {
+  async getUserInventories(userId: number, query: Query = {}, reqUser: ReqUser): Promise<(Inventory & { joinedAt: Date })[]> {
     if (userId !== reqUser.id && reqUser.role !== UserRoles.ADMIN) {
       throw new ForbiddenException({ error: 'You do not have permission!' });
     }
+
     const { offset = 0, limit = 10, status = 'ALL', searchValue } = query;
 
     const qb = this.inventoryUsersRepository
@@ -66,9 +67,13 @@ export class InventoriesService {
       });
     }
 
-    qb.take(limit).skip(offset).orderBy('inventory.createdAt', 'DESC');
+    qb.take(limit).skip(offset).orderBy('iu.createdAt', 'DESC');
+
     const userInventories = await qb.getMany();
-    return userInventories.map((iu) => iu.inventory);
+    return userInventories.map((iu) => ({
+      ...iu.inventory,
+      joinedAt: iu.createdAt,
+    }));
   }
 
   async getAllPublicInventories(user?: ReqUser, query: Query = {}): Promise<Inventory[]> {

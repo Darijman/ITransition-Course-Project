@@ -8,9 +8,16 @@ import { UsersModule } from 'src/users/users.module';
 import { User } from 'src/users/user.entity';
 import { InventoryUsersModule } from 'src/inventoryUsers/inventoryUsers.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
+import { Inventory } from 'src/inventories/inventory.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InventoryInvite, User]), InventoriesModule, UsersModule, InventoryUsersModule, NotificationsModule],
+  imports: [
+    TypeOrmModule.forFeature([InventoryInvite, User, Inventory]),
+    InventoriesModule,
+    UsersModule,
+    InventoryUsersModule,
+    NotificationsModule,
+  ],
   controllers: [InventoryInvitesController],
   providers: [InventoryInvitesService],
 })

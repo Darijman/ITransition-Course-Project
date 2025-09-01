@@ -6,16 +6,26 @@ import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
 
+export interface ExtendedInventory extends Inventory {
+  joinedAt: string;
+}
+
 const { Text } = Typography;
 
-export const columns: ColumnsType<Inventory> = [
+export const columns: ColumnsType<ExtendedInventory> = [
   {
     title: 'Image',
     dataIndex: 'imageUrl',
     key: 'image',
     render: (url: string, record: Inventory) => (
       <Link href={`/inventories/${record.id}`} scroll={false}>
-        <Image src={url || '/image-placeholder.svg'} alt={record.title} width={50} height={50} className='user_inventories_table_columns_image' />
+        <Image
+          src={url || '/image-placeholder.svg'}
+          alt={record.title}
+          width={50}
+          height={50}
+          className='user_inventories_table_columns_image'
+        />
       </Link>
     ),
   },
@@ -76,11 +86,11 @@ export const columns: ColumnsType<Inventory> = [
     ),
   },
   {
-    title: 'Created',
-    key: 'created',
-    dataIndex: 'createdAt',
-    render: (_, record) => {
-      return formatDate(record.createdAt);
+    title: 'Joined',
+    key: 'joinedAt',
+    dataIndex: 'joinedAt',
+    render: (_, record: Inventory & { joinedAt: string }) => {
+      return formatDate(record.joinedAt);
     },
   },
   {

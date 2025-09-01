@@ -3,49 +3,57 @@
 import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
 import { useEffect, useMemo, useState } from 'react';
-import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
+import { InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { useTranslations } from 'next-intl';
 import { LogoutOutlined } from '@ant-design/icons';
-import { columns } from './columns';
+import { columns, ExtendedInventory } from './columns';
 import { useAuth } from '@/contexts/authContext/AuthContext';
+import { useSocket } from '@/contexts/socketContext/SocketContext';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../axiosConfig';
 import './userInventories.css';
 
 const { Title } = Typography;
-const limit = 10;
+const limit: number = 10;
 
 export const UserInventories = () => {
   const { user } = useAuth();
+  const { socket } = useSocket();
   const t = useTranslations();
 
-  const [inventories, setInventories] = useState<Inventory[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLeavingInventories, setIsLeavingInventories] = useState(false);
+  const [inventories, setInventories] = useState<ExtendedInventory[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLeavingInventories, setIsLeavingInventories] = useState<boolean>(false);
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [errorText, setErrorText] = useState('');
+  const [errorText, setErrorText] = useState<string>('');
 
-  const [offset, setOffset] = useState(0);
-  const [searchValue, setSearchValue] = useState('');
+  const [offset, setOffset] = useState<number>(0);
+  const [searchValue, setSearchValue] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | InventoryStatuses>('ALL');
 
-  // === handlers ===
   const handleSearchChange = (val: string) => {
     setSearchValue(val);
     setOffset(0);
-    setInventories([]);
   };
 
   const handleStatusChange = (val: 'ALL' | InventoryStatuses) => {
     setStatusFilter(val);
     setOffset(0);
-    setInventories([]);
   };
 
-  // === fetch initial or filtered data ===
+  useEffect(() => {
+    if (!socket || !user?.email) return;
+    const handleNewInventory = (inventory: ExtendedInventory) => setInventories((prev) => [inventory, ...prev]);
+    socket.on('inventory-invite-accepted', handleNewInventory);
+
+    return () => {
+      socket.off('inventory-invite-accepted', handleNewInventory);
+    };
+  }, [socket, user?.email]);
+
   useEffect(() => {
     if (!user.id) return;
 
@@ -68,7 +76,6 @@ export const UserInventories = () => {
     fetchInitial();
   }, [user.id, statusFilter, searchValue, t]);
 
-  // === load more ===
   const loadMore = async () => {
     if (isLoading || !hasMore || !user.id) return;
 
@@ -104,7 +111,6 @@ export const UserInventories = () => {
     }
   };
 
-  // === filtered inventories for table search ===
   const filteredInventories = useMemo(() => {
     return inventories.filter((inventory) => {
       if (statusFilter !== 'ALL' && inventory.status !== statusFilter) return false;
@@ -174,7 +180,7 @@ export const UserInventories = () => {
       ) : (
         <div id='user_inventories' style={{ height: 500, overflow: 'auto' }}>
           <InfiniteScroll
-            dataLength={inventories.length}
+            dataLength={filteredInventories.length}
             next={loadMore}
             hasMore={hasMore}
             loader={

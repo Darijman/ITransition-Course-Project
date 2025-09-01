@@ -64,8 +64,6 @@ export const UserInvitations = () => {
       setIsLoading(true);
       try {
         const { data } = await api.get('/inventory_invites/user', { params: { ...filters, offset: 0, limit } });
-        console.log(`data`, data);
-        
         setInvites(data);
         setHasMore(data.length === limit);
         setOffset(data.length);
@@ -134,10 +132,6 @@ export const UserInvitations = () => {
       return true;
     });
   }, [invites, filters]);
-
-  console.log(`hasmore`, hasMore);
-  
-  
 
   return (
     <div className='inventories_table'>

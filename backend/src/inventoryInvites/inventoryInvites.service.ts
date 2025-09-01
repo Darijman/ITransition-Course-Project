@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { InventoryInvite } from './inventoryInvite.entity';
 import { CreateInventoryInviteDto } from './createInventoryInvite.dto';
-import { InventoriesService } from 'src/inventories/inventories.service';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 import { ReqUser } from 'src/interfaces/ReqUser';
 import { UserRoles } from 'src/users/userRoles.enum';
@@ -13,6 +12,7 @@ import { InventoryUsersService } from 'src/inventoryUsers/inventoryUsers.service
 import { InventoriesGateway } from 'src/inventories/inventories.gateway';
 import { Notifications } from 'src/notifications/notification.entity';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { Inventory } from 'src/inventories/inventory.entity';
 
 interface Query {
   limit?: number;
@@ -27,13 +27,14 @@ export class InventoryInvitesService {
     @InjectRepository(InventoryInvite)
     private readonly inventoryInvitesRepository: Repository<InventoryInvite>,
 
-    private readonly inventoriesService: InventoriesService,
-    private readonly inventoryUsersService: InventoryUsersService,
-    private readonly notificationsService: NotificationsService,
+    @InjectRepository(Inventory)
+    private readonly inventoriesRepository: Repository<Inventory>,
 
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
 
+    private readonly inventoryUsersService: InventoryUsersService,
+    private readonly notificationsService: NotificationsService,
     private readonly inventoriesGateway: InventoriesGateway,
   ) {}
 
@@ -50,7 +51,7 @@ export class InventoryInvitesService {
     const qb = this.inventoryInvitesRepository
       .createQueryBuilder('invite')
       .leftJoinAndSelect('invite.inventory', 'inventory')
-      .leftJoinAndSelect('inventory.category', 'category') // категория
+      .leftJoinAndSelect('inventory.category', 'category')
       .leftJoinAndSelect('inventory.tags', 'tags')
       .leftJoinAndSelect('invite.inviter', 'inviter')
       .leftJoinAndSelect('inventory.creator', 'creator')
@@ -74,7 +75,7 @@ export class InventoryInvitesService {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
 
-    const inventory = await this.inventoriesService.getInventoryById(inventoryId);
+    const inventory = await this.inventoriesRepository.findOneBy({ id: inventoryId });
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
     }
@@ -86,9 +87,18 @@ export class InventoryInvitesService {
   async createNewInventoryInvite(createInventoryInviteDto: CreateInventoryInviteDto, reqUser: ReqUser): Promise<InventoryInvite> {
     const { inventoryId, inviterInventoryUserId, inviteeEmail, role, expiresAt } = createInventoryInviteDto;
 
-    const inventory = await this.inventoriesService.getInventoryById(inventoryId, reqUser);
+    const inventory = await this.inventoriesRepository.findOne({
+      where: { id: inventoryId },
+      relations: ['inventoryUsers'],
+    });
+    if (!inventory) {
+      throw new BadRequestException({ error: 'Inventory not found!' });
+    }
+
     const inviter = inventory.inventoryUsers.find((u) => u.id === inviterInventoryUserId);
-    if (!inviter) throw new BadRequestException({ error: 'Inviter is not part of this inventory!' });
+    if (!inviter) {
+      throw new BadRequestException({ error: 'Inviter is not part of this inventory!' });
+    }
 
     if (reqUser.role !== UserRoles.ADMIN && inviter.role !== InventoryUserRoles.CREATOR) {
       throw new ForbiddenException({ error: 'You do not have rights to invite users!' });
@@ -167,11 +177,25 @@ export class InventoryInvitesService {
       };
 
       const inventoryUser = await this.inventoryUsersService.createNewInventoryUser(newInventoryUser);
+
       invite.status = InventoryInviteStatuses.ACCEPTED;
       invite.inviteeInventoryUserId = inventoryUser.id;
-
       await this.inventoryInvitesRepository.save(invite);
       acceptedInvites.push(invite);
+
+      const inventoryWithRelations = await this.inventoriesRepository.findOne({
+        where: { id: invite.inventoryId },
+        relations: ['creator', 'category', 'tags', 'items'],
+      });
+
+      if (inventoryWithRelations) {
+        const extendedInventory = {
+          ...inventoryWithRelations,
+          joinedAt: inventoryUser.createdAt,
+        };
+
+        this.inventoriesGateway.server.to(reqUser.email).emit('inventory-invite-accepted', extendedInventory);
+      }
     }
 
     return acceptedInvites;
