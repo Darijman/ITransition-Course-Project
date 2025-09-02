@@ -2,6 +2,7 @@ import { ColumnsType } from 'antd/es/table';
 import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { Tag, Typography } from 'antd';
 import { formatDate } from '@/helpers/formatDate';
+import { BasicUser } from '@/interfaces/users/BasicUser';
 import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
@@ -12,7 +13,7 @@ export interface ExtendedInventory extends Inventory {
 
 const { Text } = Typography;
 
-export const getColumns = (t: (key: string) => string): ColumnsType<ExtendedInventory> => [
+export const getColumns = (t: (key: string) => string, user: BasicUser): ColumnsType<ExtendedInventory> => [
   {
     title: t('tables.image'),
     dataIndex: 'imageUrl',
@@ -45,11 +46,14 @@ export const getColumns = (t: (key: string) => string): ColumnsType<ExtendedInve
     title: t('tables.creator'),
     dataIndex: ['creator', 'name'],
     key: 'creator',
-    render: (_: any, record: Inventory) => (
-      <Link href={`/users/${record?.creator?.id}`}>
-        <Text className='user_inventories_table_columns_creator_name'>{record?.creator?.name}</Text>
-      </Link>
-    ),
+    render: (_: any, record: Inventory) => {
+      const creatorName = user.id === record?.creator?.id ? `${record?.creator.name} (${t('tables.you')})` : record?.creator?.name;
+      return (
+        <Link href={`/users/${record?.creator?.id}`}>
+          <Text className='user_inventories_table_columns_creator_name'>{creatorName}</Text>
+        </Link>
+      );
+    },
   },
   {
     title: t('tables.items'),

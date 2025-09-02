@@ -96,7 +96,7 @@ export default function Home() {
 
       <div>
         <InventoriesTable<Inventory>
-          columns={getInventoryColumns(t)}
+          columns={getInventoryColumns(t, user)}
           rowKey='id'
           title={t('home.inventories_table_title')}
           pageLimit={20}

@@ -195,7 +195,7 @@ export const UserInventories = () => {
           >
             <Table
               className='table'
-              columns={getColumns(t)}
+              columns={getColumns(t, user)}
               rowSelection={{
                 type: 'checkbox',
                 selectedRowKeys,

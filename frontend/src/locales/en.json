@@ -162,6 +162,9 @@
   },
   "tables": {
     "image": "Image",
+    "avatar": "Avatar",
+    "name": "Name",
+    "role": "Role",
     "title": "Title",
     "description": "Description",
     "creator": "Creator",
@@ -172,6 +175,7 @@
     "joined": "Joined",
     "tags": "Tags",
     "items": "Items",
-    "created": "Created"
+    "created": "Created",
+    "you": "You"
   }
 }

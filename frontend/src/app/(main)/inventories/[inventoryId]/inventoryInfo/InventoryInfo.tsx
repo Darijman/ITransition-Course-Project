@@ -3,11 +3,12 @@
 import { Inventory } from '@/interfaces/inventories/Inventory';
 import { Empty, Input, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
-import { inventoryUsersColumns } from './columns';
+import { getInventoryUsersColumns } from './columns';
 import { useMemo, useState } from 'react';
 import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import './inventoryInfo.css';
+import { useAuth } from '@/contexts/authContext/AuthContext';
 
 const { Title, Paragraph } = Typography;
 
@@ -23,7 +24,9 @@ interface Props {
 }
 
 export const InventoryInfo = ({ inventory }: Props) => {
+  const { user } = useAuth();
   const t = useTranslations();
+
   const [searchValue, setSearchValue] = useState<string>('');
 
   const filteredUsers = useMemo(() => {
@@ -66,7 +69,7 @@ export const InventoryInfo = ({ inventory }: Props) => {
           </div>
           <Table
             className='inventory_users_table'
-            columns={inventoryUsersColumns}
+            columns={getInventoryUsersColumns(t, user)}
             dataSource={filteredUsers}
             rowKey='id'
             pagination={false}
