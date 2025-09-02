@@ -9,8 +9,10 @@ import { useTranslations } from 'next-intl';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
+import { InventoryInvitations } from './inventoryInvitations/InventoryInvitations';
 import api from '../../../../../../axiosConfig';
 import './inventoryAccess.css';
+import { SearchUsersToInvite } from './searchUsersToInvite/SearchUsersToInvite';
 
 const { Title } = Typography;
 
@@ -63,7 +65,7 @@ export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory 
         {t('inventory.access.title')}
       </Title>
 
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 30 }}>
         <Space.Compact>
           <Tooltip title={t('inventories_new.status_tooltip_private')}>
             <Button
@@ -96,6 +98,11 @@ export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory 
             </Button>
           </Tooltip>
         </Space.Compact>
+      </div>
+
+      <div className='inventory_access_table_and_search'>
+        <SearchUsersToInvite />
+        <InventoryInvitations setInventory={setInventory} currentInventoryUser={currentInventoryUser} inventory={inventory} />
       </div>
     </div>
   );

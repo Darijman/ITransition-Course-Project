@@ -61,7 +61,10 @@
     "access": {
       "title": "Доступ в инвентаре",
       "status_error": "Не удалось обновить статус инвентаря. Попробуйте позже..",
-      "status_updated": "Статус инвентаря изменён на {status} пользователем {updatedBy}"
+      "status_updated": "Статус инвентаря изменён на {status} пользователем {updatedBy}",
+      "search_invite_placeholder": "Искать приглашение..",
+      "search": "Искать",
+      "search_users_placeholder": "Искать пользователя для приглашения.."
     },
     "discussion": {
       "title": "Обсуждение инвентаря",

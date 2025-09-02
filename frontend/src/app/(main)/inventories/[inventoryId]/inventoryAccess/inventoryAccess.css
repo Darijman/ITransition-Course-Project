@@ -2,3 +2,10 @@
   background-color: var(--submit-button-color);
   border: 1px solid var(--submit-button-color);
 }
+
+.inventory_access_table_and_search {
+  display: flex;
+  align-items: flex-start;
+  gap: 50px;
+  width: 100%;
+}

@@ -69,8 +69,17 @@ export class InventoryInvitesService {
 
     return await qb.getMany();
   }
+  async getInvitesByInventoryId(
+    inventoryId: number,
+    options: {
+      limit?: number;
+      offset?: number;
+      status?: string;
+      searchValue?: string;
+    } = {},
+  ): Promise<InventoryInvite[]> {
+    const { limit = 10, offset = 0, status, searchValue } = options;
 
-  async getInvitesByInventoryId(inventoryId: number): Promise<InventoryInvite[]> {
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
@@ -80,8 +89,35 @@ export class InventoryInvitesService {
       throw new NotFoundException({ error: 'Inventory not found!' });
     }
 
-    const invites = await this.inventoryInvitesRepository.find({ where: { inventoryId } });
-    return invites;
+    const query = this.inventoryInvitesRepository
+      .createQueryBuilder('invite')
+      .leftJoinAndSelect('invite.inviter', 'inviter')
+      .leftJoinAndSelect('inviter.user', 'inviterUser')
+      .leftJoinAndSelect('invite.invitee', 'invitee')
+      .leftJoinAndSelect('invitee.user', 'inviteeUser')
+      .leftJoinAndSelect('invite.inviteeUser', 'directInvitee')
+      .where('invite.inventoryId = :inventoryId', { inventoryId });
+
+    if (status && status !== 'ALL') {
+      query.andWhere('invite.status = :status', { status });
+    }
+
+    if (searchValue) {
+      const likeSearch = `%${searchValue.toLowerCase()}%`;
+
+      query.andWhere(
+        `(LOWER(invite.inviteeEmail) LIKE :search
+        OR LOWER(inviterUser.name) LIKE :search
+        OR LOWER(inviterUser.email) LIKE :search
+        OR LOWER(inviteeUser.name) LIKE :search
+        OR LOWER(inviteeUser.email) LIKE :search
+        OR LOWER(directInvitee.name) LIKE :search
+        OR LOWER(directInvitee.email) LIKE :search)`,
+        { search: likeSearch },
+      );
+    }
+
+    return query.skip(offset).take(limit).orderBy('invite.createdAt', 'DESC').getMany();
   }
 
   async createNewInventoryInvite(createInventoryInviteDto: CreateInventoryInviteDto, reqUser: ReqUser): Promise<InventoryInvite> {
@@ -125,6 +161,7 @@ export class InventoryInvitesService {
       inventoryId,
       inviterInventoryUserId,
       inviteeEmail,
+      inviteeUserId: user.id,
       role,
       expiresAt: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7days default
       status: InventoryInviteStatuses.PENDING,
@@ -143,7 +180,7 @@ export class InventoryInvitesService {
     });
 
     this.inventoriesGateway.server.to(inviteeEmail).emit('notification', notification);
-    this.inventoriesGateway.server.to(inviteeEmail).emit('inventory-invite', inviteWithRelations);
+    this.inventoriesGateway.server.to(inviteeEmail).emit('user-inventory-invite', inviteWithRelations);
     return savedInvite;
   }
 

@@ -60,7 +60,10 @@
     "access": {
       "title": "Inventory Access",
       "status_error": "Failed to update inventory status. Try again later..",
-      "status_updated": "Inventory status updated to {status} by {updatedBy}"
+      "status_updated": "Inventory status updated to {status} by {updatedBy}",
+      "search_invite_placeholder": "Search invite..",
+      "search": "Search",
+      "search_users_placeholder": "Search to invite.."
     },
     "discussion": {
       "title": "Inventory Discussion",

@@ -11,6 +11,7 @@ import {
   Body,
   BadRequestException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
@@ -19,7 +20,6 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Express } from 'express';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
-import { Admin, Public } from 'src/auth/auth.decorators';
 import { UserRoles } from './userRoles.enum';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
 import { UpdateUserDto } from './updateUser.dto';
@@ -32,10 +32,10 @@ export class UsersController {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  @Public()
+  @UseGuards(AuthGuard)
   @Get()
-  async getAllUsers(): Promise<User[]> {
-    return await this.usersService.getAllUsers();
+  async getAllUsers(@Query('name') name?: string): Promise<User[]> {
+    return await this.usersService.getAllUsers(name);
   }
 
   @UseGuards(AuthGuard)
@@ -44,7 +44,6 @@ export class UsersController {
     return await this.usersService.getAllNonAdminUsers();
   }
 
-  // @Public()
   @UseGuards(AuthGuard)
   @Get(':userId')
   async getUserById(@Param('userId', new CustomParseIntPipe('User ID')) userId: number): Promise<User> {

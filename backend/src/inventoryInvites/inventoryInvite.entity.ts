@@ -3,6 +3,7 @@ import { Inventory } from 'src/inventories/inventory.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { InventoryInviteStatuses } from './inventoryInviteStatuses.enum';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
+import { User } from 'src/users/user.entity';
 
 @Entity('inventory_invites')
 export class InventoryInvite {
@@ -29,6 +30,13 @@ export class InventoryInvite {
 
   @Column({ nullable: true })
   inviteeInventoryUserId?: number;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'inviteeUserId' })
+  inviteeUser?: User;
+
+  @Column({ nullable: true })
+  inviteeUserId?: number;
 
   @Column({ type: 'varchar', length: 255 })
   inviteeEmail: string;

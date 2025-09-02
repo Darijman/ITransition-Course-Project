@@ -1,31 +1,33 @@
 'use client';
 
-import { Badge, Button, Empty, Input, message, Spin, Table, Tooltip, Typography } from 'antd';
+import { Empty, Input, message, Spin, Table, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
 import { useEffect, useState } from 'react';
-import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useTranslations } from 'next-intl';
-import { getInvitationColumns } from './columns';
+import { getInventoryInvitationColumns } from './columns';
 import { InventoryInvite, InventoryInviteStatuses } from '@/interfaces/inventories/InventoryInvite';
-import { useNotifications } from '@/contexts/notificationContext/NotificationContext';
-import { NotificationStatuses } from '@/interfaces/notifications/NotificationStatuses.enum';
-import { Notifications } from '@/interfaces/notifications/Notifications.enum';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
 import { useAuth } from '@/contexts/authContext/AuthContext';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
+import { Inventory } from '@/interfaces/inventories/Inventory';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import api from '../../../../../axiosConfig';
-import './userInvitations.css';
+import api from '../../../../../../../axiosConfig';
+import './inventoryInvitations.css';
 
 const { Title } = Typography;
 const limit: number = 10;
 
-export const UserInvitations = () => {
+interface Props {
+  currentInventoryUser: InventoryUser | null;
+  inventory: Inventory | null;
+  setInventory: React.Dispatch<React.SetStateAction<Inventory | null>>;
+}
+
+export const InventoryInvitations = ({ currentInventoryUser, inventory, setInventory }: Props) => {
   const t = useTranslations();
 
-  const { unreadCounts } = useNotifications();
   const { user } = useAuth();
   const { socket } = useSocket();
-  const { markAsRead, notifications } = useNotifications();
 
   const [invites, setInvites] = useState<InventoryInvite[]>([]);
   const [filters, setFilters] = useState({ status: 'ALL', searchValue: '' });
@@ -52,10 +54,10 @@ export const UserInvitations = () => {
     if (!socket || !user.id) return;
 
     const handler = (invite: InventoryInvite) => setInvites((prev) => [invite, ...prev]);
-    socket.on('user-inventory-invite', handler);
+    socket.on('inventory-invite', handler);
 
     return () => {
-      socket.off('user-inventory-invite', handler);
+      socket.off('inventory-invite', handler);
     };
   }, [socket, user.id]);
 
@@ -63,7 +65,7 @@ export const UserInvitations = () => {
     const fetchInitial = async () => {
       setIsLoading(true);
       try {
-        const { data } = await api.get('/inventory_invites/user', { params: { ...filters, offset: 0, limit } });
+        const { data } = await api.get(`/inventory_invites/inventory/${inventory?.id}`, { params: { ...filters, offset: 0, limit } });
         setInvites(data);
         setHasMore(data.length === limit);
         setOffset(data.length);
@@ -74,13 +76,14 @@ export const UserInvitations = () => {
       }
     };
     fetchInitial();
-  }, [filters, t]);
+  }, [filters, t, inventory?.id]);
 
   const loadMore = async () => {
-    if (isLoading || !hasMore) return;
+    if (isLoading || !hasMore || !inventory?.id) return;
     setIsLoading(true);
+
     try {
-      const { data } = await api.get('/inventory_invites/user', { params: { ...filters, offset, limit } });
+      const { data } = await api.get(`/inventory_invites/inventory/${inventory.id}`, { params: { ...filters, offset, limit } });
       setInvites((prev) => [...prev, ...data]);
       setHasMore(data.length === limit);
       setOffset((prev) => prev + data.length);
@@ -91,78 +94,22 @@ export const UserInvitations = () => {
     }
   };
 
-  const handleAccept = async () => {
-    try {
-      await api.post('/inventory_invites/accept', { inviteIds: selectedRowKeys });
-      setInvites((prev) =>
-        prev.map((invite) => (selectedRowKeys.includes(invite.id) ? { ...invite, status: InventoryInviteStatuses.ACCEPTED } : invite)),
-      );
-      selectedRowKeys.forEach((id) => {
-        const notif = notifications.find((n) => n.type === Notifications.INVITE && n.data?.id === id);
-        if (notif && notif.status === NotificationStatuses.UNREAD) markAsRead(notif.id);
-      });
-      setSelectedRowKeys([]);
-      messageApi.success(t('profile.user_invitations.invitations_accepted'));
-    } catch {
-      messageApi.error(t('profile.user_invitations.failed_to_accept_invitations'));
-    }
-  };
-
-  const handleReject = async () => {
-    try {
-      await api.post('/inventory_invites/reject', { inviteIds: selectedRowKeys });
-      setInvites((prev) =>
-        prev.map((invite) => (selectedRowKeys.includes(invite.id) ? { ...invite, status: InventoryInviteStatuses.REJECTED } : invite)),
-      );
-      selectedRowKeys.forEach((id) => {
-        const notif = notifications.find((n) => n.type === Notifications.INVITE && n.data?.id === id);
-        if (notif && notif.status === NotificationStatuses.UNREAD) markAsRead(notif.id);
-      });
-      setSelectedRowKeys([]);
-      messageApi.success(t('profile.user_invitations.invitations_rejected'));
-    } catch {
-      messageApi.error(t('profile.user_invitations.failed_to_reject_invitations'));
-    }
-  };
-
   return (
-    <div className='inventories_table'>
+    <div className='inventory_invites_table'>
       {contextHolder}
 
       <div className='invites_table_header'>
         <Title level={3} style={{ margin: 0 }}>
           {t('profile.user_invitations.title')}
-          <span style={{ marginLeft: 10 }}>
-            <Badge count={unreadCounts.INVITE} overflowCount={99} />
-          </span>
         </Title>
 
         <Input.Search
           className='custom_search'
           style={{ width: 200 }}
-          placeholder={t('home.inventories_table_search_placeholder')}
+          placeholder={t('inventory.access.search_invite_placeholder')}
           value={filters.searchValue}
           onChange={(e) => handleSearchChange(e.target.value)}
         />
-
-        <div className='user_invitations_buttons'>
-          <Tooltip mouseEnterDelay={1} title={t('profile.user_invitations.accept_tooltip')}>
-            <Button
-              className='user_invitations_accept_button'
-              onClick={handleAccept}
-              disabled={!selectedRowKeys.length}
-              type='primary'
-              icon={<CheckOutlined />}
-            >
-              {t('profile.user_invitations.accept')}
-            </Button>
-          </Tooltip>
-          <Tooltip mouseEnterDelay={1} className='user_invitations_reject_button' title={t('profile.user_invitations.reject_tooltip')}>
-            <Button onClick={handleReject} disabled={!selectedRowKeys.length} type='primary' danger icon={<CloseOutlined />}>
-              {t('profile.user_invitations.reject')}
-            </Button>
-          </Tooltip>
-        </div>
 
         <Select
           options={[
@@ -183,7 +130,7 @@ export const UserInvitations = () => {
           {errorText}
         </Title>
       ) : (
-        <div id='user_invitations_table' style={{ height: 500, overflow: 'auto' }}>
+        <div id='inventory_invitations_table' style={{ height: 500, overflow: 'auto' }}>
           <InfiniteScroll
             dataLength={invites.length}
             next={loadMore}
@@ -193,7 +140,7 @@ export const UserInvitations = () => {
                 <Spin size='large' />
               </div>
             }
-            scrollableTarget='user_invitations_table'
+            scrollableTarget='inventory_invitations_table'
             scrollThreshold='100px'
           >
             <Table
@@ -205,7 +152,7 @@ export const UserInvitations = () => {
                 onChange: setSelectedRowKeys,
                 getCheckboxProps: (record) => ({ disabled: record.status !== InventoryInviteStatuses.PENDING }),
               }}
-              columns={getInvitationColumns(t)}
+              columns={getInventoryInvitationColumns(t)}
               dataSource={invites}
               rowKey='id'
               pagination={false}

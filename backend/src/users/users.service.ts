@@ -18,8 +18,30 @@ export class UsersService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async getAllUsers(): Promise<User[]> {
-    return await this.usersRepository.find();
+  async getAllUsers(name?: string): Promise<User[]> {
+    const query = this.usersRepository.createQueryBuilder('user');
+
+    if (name) {
+      query
+        .where('user.name LIKE :name', { name: `%${name}%` })
+        .orderBy(
+          `CASE
+        WHEN user.name = :exactName THEN 1
+        WHEN user.name LIKE :startName THEN 2
+        ELSE 3
+      END`,
+          'ASC',
+        )
+        .addOrderBy('user.name', 'ASC')
+        .setParameters({
+          exactName: name,
+          startName: `${name}%`,
+        });
+    } else {
+      query.orderBy('user.name', 'ASC');
+    }
+
+    return await query.take(10).getMany();
   }
 
   async getAllNonAdminUsers(): Promise<User[]> {

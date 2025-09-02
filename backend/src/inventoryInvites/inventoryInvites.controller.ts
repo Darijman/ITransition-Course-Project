@@ -56,19 +56,19 @@ export class InventoryInvitesController {
     return await this.inventoryInvitesService.rejectInventoryInvites(inviteIds, req.user);
   }
 
-  @Admin()
-  @UseGuards(AuthGuard)
-  @Get()
-  async getAllInventoryInvites(): Promise<InventoryInvite[]> {
-    return await this.inventoryInvitesService.getAllInventoryInvites();
-  }
-
   @UseGuards(AuthGuard)
   @Get('/inventory/:inventoryId')
   async getInvitesByInventoryId(
     @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
   ): Promise<InventoryInvite[]> {
     return await this.inventoryInvitesService.getInvitesByInventoryId(inventoryId);
+  }
+
+  @Admin()
+  @UseGuards(AuthGuard)
+  @Get()
+  async getAllInventoryInvites(): Promise<InventoryInvite[]> {
+    return await this.inventoryInvitesService.getAllInventoryInvites();
   }
 
   @UseGuards(AuthGuard)
