@@ -4,11 +4,11 @@ import { Inventory } from '@/interfaces/inventories/Inventory';
 import { Empty, Input, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { getInventoryUsersColumns } from './columns';
+import { useAuth } from '@/contexts/authContext/AuthContext';
 import { useMemo, useState } from 'react';
 import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import './inventoryInfo.css';
-import { useAuth } from '@/contexts/authContext/AuthContext';
 
 const { Title, Paragraph } = Typography;
 

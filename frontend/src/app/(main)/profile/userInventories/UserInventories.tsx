@@ -2,7 +2,7 @@
 
 import { Button, Empty, Input, message, Spin, Table, Tooltip, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { useTranslations } from 'next-intl';
 import { LogoutOutlined } from '@ant-design/icons';
@@ -111,23 +111,6 @@ export const UserInventories = () => {
     }
   };
 
-  const filteredInventories = useMemo(() => {
-    return inventories.filter((inventory) => {
-      if (statusFilter !== 'ALL' && inventory.status !== statusFilter) return false;
-
-      if (searchValue) {
-        const lowerSearch = searchValue.toLowerCase();
-        const matchesTitle = inventory.title?.toLowerCase().includes(lowerSearch);
-        const matchesCreator = inventory.creator?.name?.toLowerCase().includes(lowerSearch);
-        const matchesCategory = inventory.category?.title?.toLowerCase().includes(lowerSearch);
-        const matchesTags = inventory.tags?.some((tag) => tag.title.toLowerCase().includes(lowerSearch));
-        if (!matchesTitle && !matchesCreator && !matchesCategory && !matchesTags) return false;
-      }
-
-      return true;
-    });
-  }, [inventories, statusFilter, searchValue]);
-
   return (
     <div className='inventories_table'>
       {contextHolder}
@@ -182,7 +165,7 @@ export const UserInventories = () => {
       ) : (
         <div id='user_inventories' style={{ height: 500, overflow: 'auto' }}>
           <InfiniteScroll
-            dataLength={filteredInventories.length}
+            dataLength={inventories.length}
             next={loadMore}
             hasMore={hasMore}
             loader={
@@ -204,7 +187,7 @@ export const UserInventories = () => {
                   disabled: record.creator?.id === user?.id,
                 }),
               }}
-              dataSource={filteredInventories}
+              dataSource={inventories}
               rowKey='id'
               pagination={false}
               locale={{

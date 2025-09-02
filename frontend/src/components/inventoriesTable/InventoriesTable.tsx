@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { Table, Typography, Spin, Empty, message, Input, Button } from 'antd';
 import { useTranslations } from 'next-intl';
@@ -13,140 +13,86 @@ import api from '../../../axiosConfig';
 import './inventoriesTable.css';
 
 const { Title } = Typography;
-
-interface Query {
-  offset?: number;
-  limit?: number;
-  status?: 'ALL' | InventoryStatuses;
-  searchValue?: string;
-}
+const limit: number = 10;
 
 interface InventoriesTableProps<T> {
   columns: ColumnsType<T>;
   rowKey: string | ((record: T) => string | number);
   title: string;
-  pageLimit?: number;
   searchKeys: string[];
   onCreate: () => void;
 }
 
-export const InventoriesTable = <T extends object>({
-  columns,
-  rowKey,
-  title = 'Items',
-  pageLimit = 20,
-  searchKeys = [],
-  onCreate,
-}: InventoriesTableProps<T>) => {
+export const InventoriesTable = <T extends object>({ columns, rowKey, title = 'Items', onCreate }: InventoriesTableProps<T>) => {
   const { user } = useAuth();
   const t = useTranslations();
 
   const [items, setItems] = useState<T[]>([]);
+  const [offset, setOffset] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
 
-  const [query, setQuery] = useState<Query>({
-    offset: 0,
-    limit: pageLimit,
-    status: 'ALL',
-    searchValue: '',
-  });
   const [searchValue, setSearchValue] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | InventoryStatuses>('ALL');
+  const [errorText, setErrorText] = useState<string>('');
+
+  const handleSearchChange = (val: string) => {
+    setSearchValue(val);
+    setOffset(0);
+  };
+
+  const handleStatusChange = (val: 'ALL' | InventoryStatuses) => {
+    setStatusFilter(val);
+    setOffset(0);
+  };
 
   useEffect(() => {
     const fetchInitial = async () => {
       setIsLoading(true);
-
       try {
-        const { data } = await api.get(`/inventories/public`, { params: query });
+        const { data } = await api.get('/inventories/public', {
+          params: { status: statusFilter, searchValue, offset: 0, limit },
+        });
+
         setItems(data);
-        setHasMore(data.length === (query.limit ?? pageLimit));
-        setQuery((prev) => ({ ...prev, offset: 0 }));
+        setHasMore(data.length === limit);
+        setOffset(data.length);
+        setErrorText('');
       } catch {
-        messageApi.open({ type: 'error', content: 'Failed to load data!' });
+        setErrorText(t('home.inventories_table_failed_to_load'));
+        setItems([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchInitial();
-  }, [messageApi, query, pageLimit]);
+  }, [statusFilter, searchValue, t]);
 
   const loadMore = async () => {
     if (isLoading || !hasMore) return;
-
     setIsLoading(true);
     try {
-      const nextOffset = (query.offset ?? 0) + (query.limit ?? pageLimit);
-      const { data } = await api.get(`/inventories/public`, {
-        params: { ...query, offset: nextOffset },
+      const { data } = await api.get('/inventories/public', {
+        params: { status: statusFilter, searchValue, offset, limit },
       });
 
       setItems((prev) => [...prev, ...data]);
-      setHasMore(data.length === (query.limit ?? pageLimit));
-      setQuery((prev) => ({ ...prev, offset: nextOffset }));
+      setHasMore(data.length === limit);
+      setOffset((prev) => prev + data.length);
     } catch {
-      messageApi.open({ type: 'error', content: 'Failed to load more data!' });
+      messageApi.error(t('home.inventories_table_failed_to_load_more'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSearchChange = (val: string) => {
-    setSearchValue(val);
-    setQuery((prev) => ({ ...prev, searchValue: val, offset: 0 }));
-  };
-
-  const handleStatusChange = (val: 'ALL' | InventoryStatuses) => {
-    setStatusFilter(val);
-    setQuery((prev) => ({ ...prev, status: val, offset: 0 }));
-  };
-
-  const getValueByPath = (obj: any, path: string) => {
-    return path.split('.').reduce((acc, part) => {
-      if (!acc) return undefined;
-      if (Array.isArray(acc)) {
-        return acc
-          .map((item) => item?.[part])
-          .filter(Boolean)
-          .join(', ');
-      }
-      return acc[part];
-    }, obj);
-  };
-
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      if (statusFilter !== 'ALL') {
-        const status = (item as any).status as InventoryStatuses;
-        if (
-          (statusFilter === 'PUBLIC' && status !== InventoryStatuses.PUBLIC) ||
-          (statusFilter === 'PRIVATE' && status !== InventoryStatuses.PRIVATE)
-        ) {
-          return false;
-        }
-      }
-
-      if (!searchValue) return true;
-
-      return searchKeys.some((key) => {
-        let val;
-        if (key === 'status') {
-          val = (item as any).status;
-        } else {
-          val = getValueByPath(item, key as string);
-        }
-        return val?.toString().toLowerCase().includes(searchValue.toLowerCase());
-      });
-    });
-  }, [items, searchValue, searchKeys, statusFilter]);
-
   return (
     <div className='inventories_table'>
       {contextHolder}
+
       <div className='inventories_table_header'>
         <Title level={3} style={{ margin: 0 }}>
           {title}
@@ -166,48 +112,53 @@ export const InventoriesTable = <T extends object>({
             { label: t('home.select_status_public'), value: 'PUBLIC' },
             { label: t('home.select_status_private'), value: 'PRIVATE' },
           ]}
-          placeholder='Select a status'
           value={statusFilter}
           style={{ width: 200 }}
           onChange={handleStatusChange}
         />
 
-        {user.id ? (
+        {user.id && (
           <Button type='primary' icon={<MdBackpack />} onClick={onCreate}>
             {t('home.create_inventory_text')}
           </Button>
-        ) : null}
+        )}
       </div>
 
-      <div id='scrollable-table-body' style={{ height: 500, overflow: 'auto' }}>
-        <InfiniteScroll
-          dataLength={filteredItems.length}
-          next={loadMore}
-          hasMore={hasMore}
-          loader={
-            <div style={{ textAlign: 'center', padding: 16 }}>
-              <Spin size='large' />
-            </div>
-          }
-          scrollableTarget='scrollable-table-body'
-          scrollThreshold='100px'
-        >
-          <Table
-            className='table'
-            columns={columns}
-            dataSource={filteredItems}
-            rowKey={rowKey}
-            pagination={false}
-            locale={{
-              emptyText: (
-                <div style={{ textAlign: 'center' }}>
-                  <Empty description={<span style={{ color: 'var(--red-color)' }}>No data</span>} />
-                </div>
-              ),
-            }}
-          />
-        </InfiniteScroll>
-      </div>
+      {errorText ? (
+        <Title level={4} style={{ textAlign: 'center', color: 'var(--red-color)' }}>
+          {errorText}
+        </Title>
+      ) : (
+        <div id='scrollable-table-body' style={{ height: 500, overflow: 'auto' }}>
+          <InfiniteScroll
+            dataLength={items.length}
+            next={loadMore}
+            hasMore={hasMore}
+            loader={
+              <div style={{ textAlign: 'center', padding: 16 }}>
+                <Spin size='large' />
+              </div>
+            }
+            scrollableTarget='scrollable-table-body'
+            scrollThreshold='100px'
+          >
+            <Table
+              className='table'
+              columns={columns}
+              dataSource={items}
+              rowKey={rowKey}
+              pagination={false}
+              locale={{
+                emptyText: (
+                  <div style={{ textAlign: 'center' }}>
+                    <Empty description={<span style={{ color: 'var(--red-color)' }}>No data</span>} />
+                  </div>
+                ),
+              }}
+            />
+          </InfiniteScroll>
+        </div>
+      )}
     </div>
   );
 };

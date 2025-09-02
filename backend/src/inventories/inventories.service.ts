@@ -76,7 +76,7 @@ export class InventoriesService {
     }));
   }
 
-  async getAllPublicInventories(user?: ReqUser, query: Query = {}): Promise<Inventory[]> {
+  async getAllPublicInventories(reqUser?: ReqUser, query: Query = {}): Promise<Inventory[]> {
     const { limit = 10, offset = 0, status = 'ALL', searchValue } = query;
 
     if (isNaN(limit) || isNaN(offset)) {
@@ -94,28 +94,34 @@ export class InventoriesService {
       .leftJoinAndSelect('inventory.items', 'items')
       .leftJoinAndSelect('inventory.tags', 'tags');
 
-    if (user?.role !== UserRoles.ADMIN) {
-      qb.where(
-        new Brackets((qb1) => {
-          if (!user) {
-            qb1.where('inventory.status = :publicStatus', { publicStatus: InventoryStatuses.PUBLIC });
-          } else if (status === 'ALL') {
-            qb1.where('inventory.status = :publicStatus OR inventory.creatorId = :userId', {
-              publicStatus: InventoryStatuses.PUBLIC,
-              userId: user.id,
-            });
-          } else {
-            qb1.where('inventory.status = :status OR inventory.creatorId = :userId', {
-              status,
-              userId: user.id,
-            });
-          }
-        }),
-      );
-    } else if (status !== 'ALL') {
-      qb.where('inventory.status = :status', { status });
+    // --- Условия по пользователю и статусу ---
+    if (reqUser?.role !== UserRoles.ADMIN) {
+      if (!reqUser) {
+        // Гость видит только PUBLIC
+        qb.where('inventory.status = :publicStatus', { publicStatus: InventoryStatuses.PUBLIC });
+      } else {
+        if (status === 'ALL') {
+          // Авторизованный видит PUBLIC + свои любые
+          qb.where('(inventory.status = :publicStatus OR inventory.creatorId = :userId)', {
+            publicStatus: InventoryStatuses.PUBLIC,
+            userId: reqUser.id,
+          });
+        } else if (status === InventoryStatuses.PUBLIC) {
+          // Только PUBLIC
+          qb.where('inventory.status = :publicStatus', { publicStatus: InventoryStatuses.PUBLIC });
+        } else {
+          // PRIVATE (и прочие, если будут) → только свои
+          qb.where('inventory.status = :status AND inventory.creatorId = :userId', { status, userId: reqUser.id });
+        }
+      }
+    } else {
+      // --- ADMIN видит всё ---
+      if (status !== 'ALL') {
+        qb.where('inventory.status = :status', { status });
+      }
     }
 
+    // --- Поиск ---
     if (searchValue) {
       const search = `%${searchValue.toLowerCase()}%`;
       qb.andWhere(
@@ -142,6 +148,7 @@ export class InventoriesService {
     }
 
     qb.orderBy('inventory.createdAt', 'DESC').take(limit).skip(offset).distinct(true);
+
     return qb.getMany();
   }
 

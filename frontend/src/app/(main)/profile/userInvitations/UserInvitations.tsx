@@ -2,7 +2,7 @@
 
 import { Badge, Button, Empty, Input, message, Spin, Table, Tooltip, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useTranslations } from 'next-intl';
 import { getInvitationColumns } from './columns';
@@ -125,14 +125,6 @@ export const UserInvitations = () => {
     }
   };
 
-  const filteredInvites = useMemo(() => {
-    return invites.filter((invite) => {
-      if (filters.status !== 'ALL' && invite.status !== filters.status) return false;
-      if (filters.searchValue && !invite.inventory?.title?.toLowerCase().includes(filters.searchValue.toLowerCase())) return false;
-      return true;
-    });
-  }, [invites, filters]);
-
   return (
     <div className='inventories_table'>
       {contextHolder}
@@ -193,7 +185,7 @@ export const UserInvitations = () => {
       ) : (
         <div id='user_invitations_table' style={{ height: 500, overflow: 'auto' }}>
           <InfiniteScroll
-            dataLength={filteredInvites.length}
+            dataLength={invites.length}
             next={loadMore}
             hasMore={hasMore}
             loader={
@@ -214,7 +206,7 @@ export const UserInvitations = () => {
                 getCheckboxProps: (record) => ({ disabled: record.status !== InventoryInviteStatuses.PENDING }),
               }}
               columns={getInvitationColumns(t)}
-              dataSource={filteredInvites}
+              dataSource={invites}
               rowKey='id'
               pagination={false}
               locale={{

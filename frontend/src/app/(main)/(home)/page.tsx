@@ -99,7 +99,6 @@ export default function Home() {
           columns={getInventoryColumns(t, user)}
           rowKey='id'
           title={t('home.inventories_table_title')}
-          pageLimit={20}
           searchKeys={['title', 'creator.name', 'tags.title', 'category.title']}
           onCreate={() => router.push('/inventories/new')}
         />
