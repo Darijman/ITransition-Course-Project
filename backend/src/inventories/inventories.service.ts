@@ -92,36 +92,35 @@ export class InventoriesService {
       .leftJoinAndSelect('inventory.creator', 'creator')
       .leftJoinAndSelect('inventory.category', 'category')
       .leftJoinAndSelect('inventory.items', 'items')
-      .leftJoinAndSelect('inventory.tags', 'tags');
+      .leftJoinAndSelect('inventory.tags', 'tags')
+      .leftJoinAndSelect('inventory.inventoryUsers', 'inventoryUsers');
 
-    // --- Условия по пользователю и статусу ---
     if (reqUser?.role !== UserRoles.ADMIN) {
       if (!reqUser) {
-        // Гость видит только PUBLIC
         qb.where('inventory.status = :publicStatus', { publicStatus: InventoryStatuses.PUBLIC });
       } else {
         if (status === 'ALL') {
-          // Авторизованный видит PUBLIC + свои любые
-          qb.where('(inventory.status = :publicStatus OR inventory.creatorId = :userId)', {
+          qb.where('(inventory.status = :publicStatus OR inventory.creatorId = :userId OR inventoryUsers.userId = :userId)', {
             publicStatus: InventoryStatuses.PUBLIC,
             userId: reqUser.id,
           });
         } else if (status === InventoryStatuses.PUBLIC) {
-          // Только PUBLIC
           qb.where('inventory.status = :publicStatus', { publicStatus: InventoryStatuses.PUBLIC });
+        } else if (status === InventoryStatuses.PRIVATE) {
+          qb.where('(inventory.status = :status AND (inventory.creatorId = :userId OR inventoryUsers.userId = :userId))', {
+            status: InventoryStatuses.PRIVATE,
+            userId: reqUser.id,
+          });
         } else {
-          // PRIVATE (и прочие, если будут) → только свои
           qb.where('inventory.status = :status AND inventory.creatorId = :userId', { status, userId: reqUser.id });
         }
       }
     } else {
-      // --- ADMIN видит всё ---
       if (status !== 'ALL') {
         qb.where('inventory.status = :status', { status });
       }
     }
 
-    // --- Поиск ---
     if (searchValue) {
       const search = `%${searchValue.toLowerCase()}%`;
       qb.andWhere(
@@ -148,31 +147,29 @@ export class InventoriesService {
     }
 
     qb.orderBy('inventory.createdAt', 'DESC').take(limit).skip(offset).distinct(true);
-
     return qb.getMany();
   }
 
   async getTopPublicInventories(user?: ReqUser, limit: number = 5): Promise<Inventory[]> {
-    const inventories = await this.inventoriesRepository
+    const qb = this.inventoriesRepository
       .createQueryBuilder('inventory')
       .leftJoinAndSelect('inventory.category', 'category')
       .leftJoinAndSelect('inventory.creator', 'creator')
       .leftJoinAndSelect('inventory.tags', 'tags')
       .leftJoinAndSelect('inventory.items', 'items')
-      .loadRelationCountAndMap('inventory._itemsCount', 'inventory.items')
-      .getMany();
+      .leftJoinAndSelect('inventory.inventoryUsers', 'inventoryUsers')
+      .loadRelationCountAndMap('inventory._itemsCount', 'inventory.items');
 
-    let filtered: Inventory[];
-
-    if (user?.role === UserRoles.ADMIN) {
-      filtered = inventories.sort((a, b) => ((b as any)._itemsCount ?? 0) - ((a as any)._itemsCount ?? 0)).slice(0, limit);
-    } else {
-      filtered = inventories
-        .filter((inv) => inv.status === InventoryStatuses.PUBLIC || (user && inv.creatorId === user.id))
-        .sort((a, b) => ((b as any)._itemsCount ?? 0) - ((a as any)._itemsCount ?? 0))
-        .slice(0, limit);
+    if (user?.role !== UserRoles.ADMIN) {
+      qb.where('(inventory.status = :publicStatus OR inventory.creatorId = :userId OR inventoryUsers.userId = :userId)', {
+        publicStatus: InventoryStatuses.PUBLIC,
+        userId: user?.id,
+      });
     }
 
+    const inventories = await qb.getMany();
+
+    const filtered = inventories.sort((a, b) => ((b as any)._itemsCount ?? 0) - ((a as any)._itemsCount ?? 0)).slice(0, limit);
     filtered.forEach((inv) => delete (inv as any)._itemsCount);
     return filtered;
   }
