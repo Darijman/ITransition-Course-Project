@@ -28,7 +28,6 @@ export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory
   const t = useTranslations();
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
-  const [isInvited, setIsInvited] = useState<boolean>(false);
   const [popoverVisible, setPopoverVisible] = useState<boolean>(false);
 
   const inviteUserHandler = async (role: InventoryUserRoles) => {
@@ -51,9 +50,6 @@ export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory
     try {
       const { data } = await api.post(`/inventory_invites/`, newInvite);
 
-      console.log(`data`, data);
-      
-
       setInventory((prev) =>
         prev
           ? {
@@ -63,7 +59,6 @@ export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory
           : prev,
       );
 
-      setIsInvited(true);
     } catch {
       messageApi.error({ content: t('inventory.access.invite_error') });
     }
@@ -105,11 +100,11 @@ export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory
         >
           <Button
             className='invite_user_item_button'
-            disabled={disabled || isInvited}
+            disabled={disabled}
             icon={<TeamOutlined style={{ fontSize: '15px' }} />}
             type='primary'
           >
-            {isInvited ? t('inventory.access.invited') : t('inventory.access.invite')}
+            {disabled ? t('inventory.access.invited') : t('inventory.access.invite')}
           </Button>
         </Popover>
       </div>

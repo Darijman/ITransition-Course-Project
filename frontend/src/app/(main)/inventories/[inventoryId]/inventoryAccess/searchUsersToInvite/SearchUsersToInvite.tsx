@@ -26,9 +26,6 @@ export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInvent
   const { user } = useAuth();
   const t = useTranslations();
 
-  console.log(`inventory`, inventory);
-  
-
   const [users, setUsers] = useState<User[]>([]);
   const [name, setName] = useState<string>('');
 
@@ -93,7 +90,7 @@ export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInvent
             );
             return (
               <InviteUserItem
-                key={u.id}
+                key={`${u.id}-${inventory?.invites?.length}`}
                 currentInventoryUser={currentInventoryUser}
                 inventory={inventory}
                 setInventory={setInventory}

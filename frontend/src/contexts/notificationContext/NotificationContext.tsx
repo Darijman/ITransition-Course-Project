@@ -45,7 +45,7 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
       setNotifications(notificationsRes.data);
       setUnreadCounts(countsRes.data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   }, [user.id]);
 
@@ -58,9 +58,8 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
 
     socket.emit('join-room', user.email);
 
-    const handler = (notification: Notification) => {
+    const handleNotificationCreated = (notification: Notification) => {
       setNotifications((prev) => [notification, ...prev]);
-
       setUnreadCounts((prev) => ({
         ...prev,
         [notification.type]: (prev[notification.type] || 0) + 1,
@@ -68,10 +67,24 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
       }));
     };
 
-    socket.on('notification', handler);
+    const handleNotificationDeleted = (deletedNotification: { id: number; type: Notifications }) => {
+      setNotifications((prev) => prev.filter((n) => n.id !== deletedNotification.id));
+      setUnreadCounts((prev) => {
+        const newCounts = { ...prev };
+        if (deletedNotification.type && newCounts[deletedNotification.type] > 0) {
+          newCounts[deletedNotification.type] = Math.max(newCounts[deletedNotification.type] - 1, 0);
+          newCounts.TOTAL = Math.max(newCounts.TOTAL - 1, 0);
+        }
+        return newCounts;
+      });
+    };
+
+    socket.on('invite-notification-created', handleNotificationCreated);
+    socket.on('invite-notification-deleted', handleNotificationDeleted);
 
     return () => {
-      socket.off('notification', handler);
+      socket.off('invite-notification-created', handleNotificationCreated);
+      socket.off('invite-notification-deleted', handleNotificationDeleted);
     };
   }, [socket, user.email]);
 

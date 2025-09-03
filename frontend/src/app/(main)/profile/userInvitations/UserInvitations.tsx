@@ -51,11 +51,18 @@ export const UserInvitations = () => {
   useEffect(() => {
     if (!socket || !user.id) return;
 
-    const handler = (invite: InventoryInvite) => setInvites((prev) => [invite, ...prev]);
-    socket.on('user-inventory-invite', handler);
+    const handleInviteCreated = (invite: InventoryInvite) => setInvites((prev) => [invite, ...prev]);
+    const handleInviteDeleted = (data: { inviteId: number; inventoryId: number }) => {
+      setInvites((prev) => prev.filter((invite) => invite.id !== data.inviteId));
+      setSelectedRowKeys((prev) => prev.filter((id) => id !== data.inviteId));
+    };
+
+    socket.on('inventory-invite-created', handleInviteCreated);
+    socket.on('inventory-invite-deleted', handleInviteDeleted);
 
     return () => {
-      socket.off('user-inventory-invite', handler);
+      socket.off('inventory-invite-created', handleInviteCreated);
+      socket.off('inventory-invite-deleted', handleInviteDeleted);
     };
   }, [socket, user.id]);
 

@@ -1,15 +1,18 @@
 'use client';
 
-import { Empty, Input, message, Spin, Table, Typography } from 'antd';
+import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { getInventoryInvitationColumns } from './columns';
 import { InventoryInvite, InventoryInviteStatuses } from '@/interfaces/inventories/InventoryInvite';
 import { useSocket } from '@/contexts/socketContext/SocketContext';
+import { DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import { Inventory } from '@/interfaces/inventories/Inventory';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../../../axiosConfig';
 import './inventoryInvitations.css';
@@ -74,18 +77,40 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
   }, [filters, inventory]);
 
   useEffect(() => {
-    if (!socket || !user.id) return;
+    if (!socket || !user.id || !inventory?.id) return;
 
     const handleUpdatedInvite = (updated: InventoryInvite) => {
-      setInvites((prev) => prev.map((inv) => (inv.id === updated.id ? updated : inv)));
+      setInvites((prev) => prev.map((inv) => (inv.id === updated.id ? { ...inv, status: updated.status } : inv)));
+      setInventory((prev) =>
+        prev ? { ...prev, invites: prev.invites?.map((inv) => (inv.id === updated.id ? { ...inv, status: updated.status } : inv)) } : prev,
+      );
+    };
+
+    const handleInviteDeleted = (data: { inviteId: number; inventoryId: number }) => {
+      console.log(`inviteId`, data.inviteId);
+      console.log(`inventoryId`,data.inventoryId);
+      
+      if (data.inventoryId !== inventory?.id) return;
+
+      setInvites((prevSlice) => prevSlice.filter((inv) => inv.id !== data.inviteId));
+      setInventory((prev) => {
+        if (!prev) return prev;
+        const newInvites = prev.invites?.filter((inv) => inv.id !== data.inviteId) || [];
+        return { ...prev, invites: newInvites };
+      });
     };
 
     socket.on('inventory-invite-updated', handleUpdatedInvite);
+    socket.on('inventory-invite-deleted', handleInviteDeleted);
 
     return () => {
       socket.off('inventory-invite-updated', handleUpdatedInvite);
+      socket.off('inventory-invite-deleted', handleInviteDeleted);
     };
-  }, [socket, user.id]);
+  }, [socket, user.id, setInventory, inventory?.id]);
+
+  console.log(`inventory.invites`, inventory?.invites);
+  
 
   const loadMore = async () => {
     if (isLoading || !hasMore || !inventory?.id) return;
@@ -106,8 +131,24 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
     }
   };
 
+  const deleteManyInvitesHandler = async () => {
+    if (!selectedRowKeys.length) return;
+    if (currentInventoryUser?.role !== InventoryUserRoles.CREATOR && user.role !== UserRoles.ADMIN) return;
+
+    try {
+      await api.delete('/inventory_invites', { data: { inviteIds: selectedRowKeys } });
+
+      setSelectedRowKeys([]);
+      messageApi.success({ content: t('inventory.access.invitations_deleted') });
+    } catch {
+      messageApi.error({ content: t('inventory.access.failed_to_delete_invitations') });
+    }
+  };
+
   const handleSearchChange = (val: string) => setFilters((prev) => ({ ...prev, searchValue: val }));
   const handleStatusChange = (val: 'ALL' | InventoryInviteStatuses) => setFilters((prev) => ({ ...prev, status: val }));
+
+  console.log(`selectedrowkeys`, selectedRowKeys);
 
   return (
     <div className='inventory_invites_table'>
@@ -125,6 +166,17 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
           value={filters.searchValue}
           onChange={(e) => handleSearchChange(e.target.value)}
         />
+
+        <Button
+          className='inventory_invitations_delete_button'
+          disabled={!selectedRowKeys.length}
+          onClick={deleteManyInvitesHandler}
+          type='primary'
+          danger
+          icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
+        >
+          {t('inventory.access.cancel_invitations')}
+        </Button>
 
         <Select
           options={[

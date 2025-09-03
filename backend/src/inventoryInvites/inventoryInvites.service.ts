@@ -152,10 +152,8 @@ export class InventoryInvitesService {
     }
 
     const existingInvite = await this.inventoryInvitesRepository.findOne({ where: { inventoryId, inviteeEmail } });
-    if (existingInvite) {
-      if (existingInvite.status === InventoryInviteStatuses.PENDING || existingInvite.status === InventoryInviteStatuses.ACCEPTED) {
-        throw new ConflictException({ error: 'Invite already exists and cannot be sent!' });
-      }
+    if (existingInvite && existingInvite.status === InventoryInviteStatuses.PENDING) {
+      throw new ConflictException({ error: 'Invite already exists and cannot be sent!' });
     }
 
     const newInvite = this.inventoryInvitesRepository.create({
@@ -184,8 +182,8 @@ export class InventoryInvitesService {
       data: savedInvite,
     });
 
-    this.inventoriesGateway.server.to(inviteeEmail).emit('notification', notification);
-    this.inventoriesGateway.server.to(inviteeEmail).emit('user-inventory-invite', inviteWithRelations);
+    this.inventoriesGateway.server.to(inviteeEmail).emit('invite-notification-created', notification);
+    this.inventoriesGateway.server.to(inviteeEmail).emit('inventory-invite-created', inviteWithRelations);
     return inviteWithRelations;
   }
 
@@ -285,17 +283,49 @@ export class InventoryInvitesService {
     return inventoryInvite;
   }
 
-  async deleteInventoryInviteById(inviteId: number): Promise<{ success: boolean }> {
-    if (!inviteId || isNaN(inviteId)) {
-      throw new BadRequestException({ error: 'Invalid Inventory Invite ID!' });
+  async deleteInventoryInvitesByIds(inviteIds: number[]): Promise<{ success: boolean }> {
+    if (!inviteIds || !Array.isArray(inviteIds) || inviteIds.some((id) => isNaN(id))) {
+      throw new BadRequestException({ error: 'Invalid Inventory Invite IDs!' });
     }
 
-    const inventoryInvite = await this.inventoryInvitesRepository.findOne({ where: { id: inviteId } });
-    if (!inventoryInvite) {
-      throw new NotFoundException({ error: 'Inventory Invite not found!' });
+    const existingInvites = await this.inventoryInvitesRepository.findBy({ id: In(inviteIds) });
+    if (!existingInvites.length) {
+      throw new NotFoundException({ error: 'No Inventory Invites found for the given IDs!' });
     }
 
-    await this.inventoryInvitesRepository.delete(inviteId);
+    const notificationsToDelete: { id: number; userEmail: string; type: Notifications }[] = [];
+    for (const invite of existingInvites) {
+      const notifications = await this.notificationsService.getNotificationsByInviteId(invite.id);
+      notifications.forEach((notif) => {
+        notificationsToDelete.push({ id: notif.id, userEmail: invite.inviteeEmail, type: notif.type });
+      });
+    }
+
+    if (notificationsToDelete.length) {
+      const notifIds = notificationsToDelete.map((n) => n.id);
+      await this.notificationsService.deleteNotificationsByIds(notifIds);
+
+      notificationsToDelete.forEach((n) => {
+        this.inventoriesGateway.server.to(n.userEmail).emit('invite-notification-deleted', {
+          id: n.id,
+          type: n.type,
+        });
+      });
+    }
+    await this.inventoryInvitesRepository.delete(inviteIds);
+
+    existingInvites.forEach((invite) => {
+      this.inventoriesGateway.server.to(invite.inviteeEmail).emit('inventory-invite-deleted', {
+        inviteId: invite.id,
+        inventoryId: invite.inventoryId,
+      });
+
+      this.inventoriesGateway.server.to(`${invite.inventoryId}`).emit('inventory-invite-deleted', {
+        inviteId: invite.id,
+        inventoryId: invite.inventoryId,
+      });
+    });
+
     return { success: true };
   }
 }

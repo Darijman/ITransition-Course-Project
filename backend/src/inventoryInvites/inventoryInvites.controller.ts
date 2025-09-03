@@ -84,8 +84,8 @@ export class InventoryInvitesController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':inviteId')
-  async deleteInventoryInviteById(@Param('inviteId', new CustomParseIntPipe('Invite ID')) inviteId: number): Promise<{ success: boolean }> {
-    return await this.inventoryInvitesService.deleteInventoryInviteById(inviteId);
+  @Delete()
+  async deleteInventoryInvites(@Body() body: { inviteIds: number[] }): Promise<{ success: boolean }> {
+    return await this.inventoryInvitesService.deleteInventoryInvitesByIds(body.inviteIds);
   }
 }

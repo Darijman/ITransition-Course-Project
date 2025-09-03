@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Notification, Notifications, NotificationStatus } from './notification.entity';
 import { CreateNotificationDto } from './createNotification.dto';
 import { User } from 'src/users/user.entity';
@@ -18,6 +18,17 @@ export class NotificationsService {
 
   async getAllNotifications(): Promise<Notification[]> {
     return await this.notificationsRepository.find();
+  }
+
+  async getNotificationsByInviteId(inviteId: number): Promise<Notification[]> {
+    if (!inviteId || isNaN(inviteId)) {
+      throw new BadRequestException({ error: 'Invalid Invite ID!' });
+    }
+
+    return this.notificationsRepository
+      .createQueryBuilder('notification')
+      .where('JSON_UNQUOTE(JSON_EXTRACT(notification.data, "$.id")) = :inviteId', { inviteId: inviteId.toString() })
+      .getMany();
   }
 
   async getNotificationById(notificationId: number): Promise<Notification> {
@@ -102,6 +113,20 @@ export class NotificationsService {
     }
 
     await this.notificationsRepository.delete(notification.id);
+    return { success: true };
+  }
+
+  async deleteNotificationsByIds(notificationIds: number[]): Promise<{ success: boolean }> {
+    if (!notificationIds || !Array.isArray(notificationIds) || notificationIds.some((id) => isNaN(id))) {
+      throw new BadRequestException({ error: 'Invalid Notification IDs!' });
+    }
+
+    const existingNotifications = await this.notificationsRepository.findBy({ id: In(notificationIds) });
+    if (!existingNotifications.length) {
+      throw new NotFoundException({ error: 'No notifications found for the given IDs!' });
+    }
+
+    await this.notificationsRepository.delete(notificationIds);
     return { success: true };
   }
 }

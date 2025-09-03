@@ -1,5 +1,5 @@
 import { ColumnsType } from 'antd/es/table';
-import { Tag, Typography, Avatar } from 'antd';
+import { Tag, Typography, Image } from 'antd';
 import { formatDate } from '@/helpers/formatDate';
 import { InventoryInvite } from '@/interfaces/inventories/InventoryInvite';
 import React from 'react';
@@ -9,41 +9,23 @@ const { Text } = Typography;
 
 export const getInventoryInvitationColumns = (t: (key: string) => string): ColumnsType<InventoryInvite> => [
   {
-    title: t('inventory.access.user'),
-    key: 'user',
+    title: t('tables.avatar'),
+    dataIndex: ['user', 'avatarUrl'],
+    key: 'avatar',
+    render: (url: string, record: InventoryInvite) => (
+      <Image preview={false} src={url || '/no-avatar.svg'} alt={record.inviteeUser?.name} width={50} height={50} />
+    ),
+  },
+  {
+    title: t('tables.name'),
+    key: 'name',
     width: 300,
     render: (_, record: InventoryInvite) => {
-      let avatarUrl: string | null = null;
-      let name: string | undefined;
-      let link: string | undefined;
-
-      if (record.invitee) {
-        avatarUrl = record.invitee.user?.avatarUrl ?? null;
-        name = record.invitee.user?.name;
-        link = `/users/${record.invitee.user?.id}`;
-      } else if (record.inviteeUser) {
-        avatarUrl = record.inviteeUser.avatarUrl ?? null;
-        name = record.inviteeUser.name;
-        link = `/users/${record.inviteeUser.id}`;
-      } else {
-        name = record.inviteeEmail;
-      }
-
-      const avatar = <Avatar src={avatarUrl || '/no-avatar.svg'} alt={name} style={{ marginRight: 8 }} />;
-      const text = (
-        <Text ellipsis={{ tooltip: name }} style={{ maxWidth: 300, display: 'inline-block', verticalAlign: 'middle' }}>
-          {name}
-        </Text>
+      return (
+        <Link href={`/users/${record.inviteeUser?.id}`}>
+          <Text className='inventory_invitations_user_name' >{record.inviteeUser?.name}</Text>
+        </Link>
       );
-
-      const content = (
-        <div className='inventations_table_columns_user' style={{ display: 'flex', alignItems: 'center' }}>
-          {avatar}
-          {text}
-        </div>
-      );
-
-      return link ? <Link href={link}>{content}</Link> : content;
     },
   },
   {

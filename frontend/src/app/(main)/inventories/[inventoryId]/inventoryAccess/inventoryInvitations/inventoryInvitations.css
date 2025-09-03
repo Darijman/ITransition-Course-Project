@@ -123,3 +123,12 @@
 .invites_table .ant-table-tbody > tr.row-pending > td {
   background-color: var(--secondary-text-color) !important;
 }
+
+.inventory_invitations_user_name:hover {
+  text-decoration: underline;
+}
+
+.inventory_invitations_delete_button:disabled {
+  border: 1px solid gray !important;
+  background-color: gray !important;
+}

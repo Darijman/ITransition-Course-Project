@@ -2,9 +2,9 @@ import { ColumnsType } from 'antd/es/table';
 import { Typography, Image, Tag } from 'antd';
 import { formatDate } from '@/helpers/formatDate';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
+import { BasicUser } from '@/interfaces/users/BasicUser';
 import React from 'react';
 import Link from 'next/link';
-import { BasicUser } from '@/interfaces/users/BasicUser';
 
 const { Text } = Typography;
 

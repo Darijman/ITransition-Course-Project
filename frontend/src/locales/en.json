@@ -69,7 +69,10 @@
       "invited": "Invited",
       "invite_error": "Failed to invite user. Try again later!",
       "select_role": "Select user role",
-      "user": "User"
+      "user": "User",
+      "cancel_invitations": "Cancel Invitations",
+      "invitations_deleted": "Invitations successfully deleted!",
+      "failed_to_delete_invitations": "Failed to delete invitations!"
     },
     "discussion": {
       "title": "Inventory Discussion",
