@@ -77,7 +77,7 @@ export const InventoryInfo = ({ inventory }: Props) => {
             locale={{
               emptyText: (
                 <div style={{ textAlign: 'center' }}>
-                  <Empty description={<span style={{ color: 'var(--red-color)' }}>No data</span>} />
+                  <Empty description={<span style={{ color: 'var(--red-color)' }}>{t('inventory.info.no_users')}</span>} />
                 </div>
               ),
             }}

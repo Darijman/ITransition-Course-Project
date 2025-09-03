@@ -87,9 +87,6 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
     };
 
     const handleInviteDeleted = (data: { inviteId: number; inventoryId: number }) => {
-      console.log(`inviteId`, data.inviteId);
-      console.log(`inventoryId`,data.inventoryId);
-      
       if (data.inventoryId !== inventory?.id) return;
 
       setInvites((prevSlice) => prevSlice.filter((inv) => inv.id !== data.inviteId));
@@ -108,9 +105,6 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
       socket.off('inventory-invite-deleted', handleInviteDeleted);
     };
   }, [socket, user.id, setInventory, inventory?.id]);
-
-  console.log(`inventory.invites`, inventory?.invites);
-  
 
   const loadMore = async () => {
     if (isLoading || !hasMore || !inventory?.id) return;
@@ -147,8 +141,6 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
 
   const handleSearchChange = (val: string) => setFilters((prev) => ({ ...prev, searchValue: val }));
   const handleStatusChange = (val: 'ALL' | InventoryInviteStatuses) => setFilters((prev) => ({ ...prev, status: val }));
-
-  console.log(`selectedrowkeys`, selectedRowKeys);
 
   return (
     <div className='inventory_invites_table'>
@@ -221,7 +213,7 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
             locale={{
               emptyText: (
                 <div style={{ textAlign: 'center' }}>
-                  <Empty description={<span style={{ color: 'var(--red-color)' }}>No inventories</span>} />
+                  <Empty description={<span style={{ color: 'var(--red-color)' }}>{t('inventory.access.no_invitations')}</span>} />
                 </div>
               ),
             }}

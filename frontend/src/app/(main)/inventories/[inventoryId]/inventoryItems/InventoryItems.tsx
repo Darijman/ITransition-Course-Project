@@ -217,7 +217,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
           ) : null}
         </div>
 
-        <div id='scrollable-table-body' style={{ height: 500, overflow: 'auto' }}>
+        <div id='inventory_items_table' style={{ height: 500, overflow: 'auto' }}>
           <InfiniteScroll
             dataLength={filteredItems.length}
             next={loadMore}
@@ -227,7 +227,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
                 <Spin size='large' />
               </div>
             }
-            scrollableTarget='scrollable-table-body'
+            scrollableTarget='inventory_items_table'
             scrollThreshold='100px'
           >
             <Table
@@ -243,7 +243,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
               locale={{
                 emptyText: (
                   <div style={{ textAlign: 'center' }}>
-                    <Empty description={<span style={{ color: 'var(--red-color)' }}>No items</span>} />
+                    <Empty description={<span style={{ color: 'var(--red-color)' }}>{t('inventory.items.no_items')}</span>} />
                   </div>
                 ),
               }}
@@ -256,7 +256,6 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
         open={showCreateItemModal}
         onClose={() => setShowCreateItemModal(false)}
         currentInventoryUser={currentInventoryUser}
-        setItems={setItems}
         inventoryId={inventoryId}
       />
 

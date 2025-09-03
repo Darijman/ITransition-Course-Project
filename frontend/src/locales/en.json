@@ -32,7 +32,6 @@
     "tabs": {
       "items": "Items",
       "discussion": "Discussion",
-      "settings": "Settings",
       "access": "Access",
       "info": "Info"
     },
@@ -48,14 +47,16 @@
       "liked_by": "Liked by",
       "delete_success": "Items deleted successfully!",
       "delete_failed": "Failed to delete items. Try again later!",
-      "delete_selected": "Delete selected items"
+      "delete_selected": "Delete selected items",
+      "no_items": "No items"
     },
     "info": {
       "title": "Inventory Info",
       "description": "Description",
       "users": "Users",
       "table_title": "Inventory Users",
-      "table_search_placeholder": "Search users.."
+      "table_search_placeholder": "Search users..",
+      "no_users": "No users"
     },
     "access": {
       "title": "Inventory Access",
@@ -72,7 +73,8 @@
       "user": "User",
       "cancel_invitations": "Cancel Invitations",
       "invitations_deleted": "Invitations successfully deleted!",
-      "failed_to_delete_invitations": "Failed to delete invitations!"
+      "failed_to_delete_invitations": "Failed to delete invitations!",
+      "no_invitations": "No invitations"
     },
     "discussion": {
       "title": "Inventory Discussion",

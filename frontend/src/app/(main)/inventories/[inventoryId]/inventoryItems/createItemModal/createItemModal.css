@@ -1,3 +1,8 @@
+.create_item_form_modal_cancel_button,
+.create_item_form_modal_save_button {
+  text-transform: capitalize !important;
+}
+
 .create_item_form_modal_save_button {
   background-color: var(--submit-button-color) !important;
   border-color: var(--submit-button-color) !important;

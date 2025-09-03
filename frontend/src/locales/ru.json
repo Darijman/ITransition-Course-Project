@@ -31,32 +31,33 @@
   },
   "inventory": {
     "tabs": {
-      "items": "Айтемы",
+      "items": "Предметы",
       "discussion": "Обсуждение",
-      "settings": "Настройки",
       "access": "Доступ",
       "info": "Информация"
     },
     "title": "Инвентарь",
     "failed_to_get": "Не удалось загрузить инвентарь. Попробуйте позже!",
     "items": {
-      "title": "Айтемы инвентаря",
-      "table_search_placeholder": "Искать айтем..",
-      "create_item": "Создать Айтем",
+      "title": "Предметы инвентаря",
+      "table_search_placeholder": "Искать предмет..",
+      "create_item": "Создать Предмет",
       "like_failed": "Не удалось поставить лайк. Попробуйте ещё раз.",
       "unlike_failed": "Не удалось убрать лайк. Попробуйте ещё раз.",
       "view_all_likes": "Посмотреть все",
       "liked_by": "Понравилось",
       "delete_success": "Предметы успешно удалены!",
       "delete_failed": "Не удалось удалить предметы. Попробуйте позже!",
-      "delete_selected": "Удалить выбранные предметы"
+      "delete_selected": "Удалить выбранные предметы",
+      "no_items": "Нет предметов"
     },
     "info": {
       "title": "Информация об инвентаре",
       "description": "Описание",
       "users": "Пользователи",
       "table_title": "Пользователи инвентаря",
-      "table_search_placeholder": "Искать пользователей.."
+      "table_search_placeholder": "Искать пользователей..",
+      "no_users": "Нет пользователей"
     },
     "access": {
       "title": "Доступ в инвентаре",
@@ -73,7 +74,8 @@
       "user": "Пользователь",
       "cancel_invitations": "Отменить Приглашения",
       "invitations_deleted": "Приглашения успешно удалены",
-      "failed_to_delete_invitations": "Не удалось удалить приглашения"
+      "failed_to_delete_invitations": "Не удалось удалить приглашения",
+      "no_invitations": "Нет приглашений"
     },
     "discussion": {
       "title": "Обсуждение инвентаря",

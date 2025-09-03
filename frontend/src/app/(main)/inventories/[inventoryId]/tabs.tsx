@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { AppstoreOutlined, CommentOutlined, SettingOutlined, UnlockOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, CommentOutlined, UnlockOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { InventoryItems } from './inventoryItems/InventoryItems';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import { Inventory } from '@/interfaces/inventories/Inventory';
@@ -53,19 +53,6 @@ export const getTabs = (
       children: <InventoryInfo inventory={inventory} />,
     },
   ];
-
-  if (userRole === UserRoles.ADMIN || currentInventoryUser?.role === InventoryUserRoles.CREATOR) {
-    tabs.splice(2, 0, {
-      key: '3',
-      label: (
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <SettingOutlined style={{ fontSize: '20px' }} />
-          {t('inventory.tabs.settings')}
-        </span>
-      ),
-      children: <div>Inventory Settings</div>,
-    });
-  }
 
   if (userRole === UserRoles.ADMIN || currentInventoryUser?.role === InventoryUserRoles.CREATOR) {
     tabs.splice(3, 0, {

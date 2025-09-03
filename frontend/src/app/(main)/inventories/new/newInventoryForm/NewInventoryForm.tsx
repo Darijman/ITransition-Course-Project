@@ -14,8 +14,8 @@ import { Select } from '@/components/select/Select';
 import { TagSelector } from './tagsSelector/TagsSelector';
 import { RcFile } from 'antd/es/upload';
 import { useRouter } from 'next/navigation';
-import './newInventoryForm.css';
 import api from '../../../../../../axiosConfig';
+import './newInventoryForm.css';
 import './responsive.css';
 
 const { Dragger } = Upload;

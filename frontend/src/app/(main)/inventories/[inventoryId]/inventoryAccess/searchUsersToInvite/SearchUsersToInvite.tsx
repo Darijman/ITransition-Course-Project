@@ -30,7 +30,7 @@ export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInvent
   const [name, setName] = useState<string>('');
 
   const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const getUsers = useCallback(async () => {
     if (!canModifyInventory(currentInventoryUser, user) || !name.trim() || !inventory?.id) return;

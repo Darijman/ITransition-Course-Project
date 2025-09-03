@@ -1,10 +1,9 @@
 'use client';
 
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Form, Typography, Button, Upload, message } from 'antd';
 import { InputField } from '@/components/inputField/InputField';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { InventoryItem } from '@/interfaces/inventories/InventoryItem';
 import { UploadOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/es/upload';
 import { useTranslations } from 'next-intl';
@@ -28,12 +27,11 @@ interface CreateItemForm {
 interface Props {
   open: boolean;
   onClose: () => void;
-  setItems: Dispatch<SetStateAction<InventoryItem[]>>;
   currentInventoryUser: InventoryUser | null;
   inventoryId: ParamValue;
 }
 
-export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser, inventoryId }: Props) => {
+export const CreateItemModal = ({ open, onClose, currentInventoryUser, inventoryId }: Props) => {
   const { user } = useAuth();
   const t = useTranslations();
 
@@ -87,8 +85,7 @@ export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser,
           formData.append('description', values.description.trim());
         }
 
-        const { data } = await api.post('/inventory_items', formData);
-        // setItems((prev) => [data, ...prev]);
+        await api.post('/inventory_items', formData);
       } else {
         const body = {
           title: values.title.trim(),
@@ -96,8 +93,7 @@ export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser,
           inventoryId: Number(inventoryId),
         };
 
-        const { data } = await api.post('/inventory_items', body);
-        // setItems((prev) => [data, ...prev]);
+        await api.post('/inventory_items', body);
       }
 
       form.resetFields();
@@ -169,10 +165,10 @@ export const CreateItemModal = ({ open, onClose, setItems, currentInventoryUser,
 
           <div className='modal_footer'>
             <Button onClick={onClose} className='create_item_form_modal_cancel_button'>
-              Cancel
+              {t('delete_modal.cancel_logout_text')}
             </Button>
             <Button htmlType='submit' className='create_item_form_modal_save_button' loading={isCreating}>
-              Create Item
+              {t('inventory.items.create_item')}
             </Button>
           </div>
         </Form>
