@@ -12,6 +12,7 @@ import { UserRoles } from 'src/users/userRoles.enum';
 import { ReqUser } from 'src/interfaces/ReqUser';
 import { InventoryStatuses } from './inventoryStatuses.enum';
 import { InventoriesGateway } from './inventories.gateway';
+import { InventoryInvite } from 'src/inventoryInvites/inventoryInvite.entity';
 
 interface Query {
   limit?: number;
@@ -32,6 +33,9 @@ export class InventoriesService {
 
     @InjectRepository(InventoryUser)
     private readonly inventoryUsersRepository: Repository<InventoryUser>,
+
+    @InjectRepository(InventoryInvite)
+    private readonly inventoryInvitesRepository: Repository<InventoryInvite>,
 
     private readonly inventoriesGateway: InventoriesGateway,
   ) {}
@@ -202,44 +206,48 @@ export class InventoriesService {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
     }
 
-    const inventory = await this.inventoriesRepository.findOne({
-      where: { id: inventoryId },
-      relations: [
-        'tags',
-        'inventoryUsers',
-        'inventoryUsers.user',
-        'comments',
-        'comments.author',
-        'comments.author.user',
-        'items',
-        'category',
-        'creator',
-      ],
-      order: {
-        comments: {
-          createdAt: 'ASC',
-        },
-      },
-    });
+    const inventory = await this.inventoriesRepository
+      .createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.tags', 'tags')
+      .leftJoinAndSelect('inventory.inventoryUsers', 'iu')
+      .leftJoinAndSelect('iu.user', 'iuUser')
+      .leftJoinAndSelect('inventory.comments', 'comments')
+      .leftJoinAndSelect('comments.author', 'author')
+      .leftJoinAndSelect('author.user', 'authorUser')
+      .leftJoinAndSelect('inventory.items', 'items')
+      .leftJoinAndSelect('inventory.category', 'category')
+      .leftJoinAndSelect('inventory.creator', 'creator')
+      .where('inventory.id = :inventoryId', { inventoryId })
+      .orderBy('comments.createdAt', 'ASC')
+      .getOne();
+
     if (!inventory) {
       throw new NotFoundException({ error: 'Inventory not found!' });
     }
 
-    if (reqUser?.role === UserRoles.ADMIN) {
-      return inventory;
-    }
-
-    if (inventory.status === InventoryStatuses.PUBLIC) {
-      return inventory;
-    }
-
-    if (reqUser) {
-      const userHasAccess = inventory.inventoryUsers.some((iu) => iu.userId === reqUser.id);
-      if (userHasAccess) {
-        return inventory;
+    if (reqUser?.role !== UserRoles.ADMIN) {
+      if (inventory.status !== InventoryStatuses.PUBLIC) {
+        const userHasAccess = reqUser && inventory.inventoryUsers.some((iu) => iu.userId === reqUser.id);
+        if (!userHasAccess) {
+          throw new ForbiddenException({ error: 'You do not have permission to access this inventory!' });
+        }
       }
     }
-    throw new ForbiddenException({ error: 'You do not have permission to access this inventory!' });
+
+    const invites = await this.inventoryInvitesRepository
+      .createQueryBuilder('invite')
+      .leftJoinAndSelect('invite.inviter', 'inviter')
+      .leftJoinAndSelect('inviter.user', 'inviterUser')
+      .leftJoinAndSelect('invite.invitee', 'invitee')
+      .leftJoinAndSelect('invitee.user', 'inviteeUser')
+      .leftJoinAndSelect('invite.inviteeUser', 'directInvitee')
+      .where('invite.inventoryId = :inventoryId', { inventoryId })
+      .orderBy('invite.createdAt', 'DESC')
+      .take(10)
+      .getMany();
+
+    inventory.invites = invites;
+    return inventory;
   }
 
   async updateInventoryStatus(inventoryId: number, status: InventoryStatuses, user: ReqUser) {

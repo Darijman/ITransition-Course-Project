@@ -64,13 +64,25 @@
       "status_updated": "Статус инвентаря изменён на {status} пользователем {updatedBy}",
       "search_invite_placeholder": "Искать приглашение..",
       "search": "Искать",
-      "search_users_placeholder": "Искать пользователя для приглашения.."
+      "search_users_placeholder": "Искать пользователя для приглашения..",
+      "search_users_error": "Что-то пошло не так, попробуйте снова.",
+      "invite": "Пригласить",
+      "invited": "Приглашен",
+      "invite_error": "Не удалось пригласить пользователя. Попробуйте позже!",
+      "select_role": "Выберите роль пользователя",
+      "user": "Пользователь"
     },
     "discussion": {
       "title": "Обсуждение инвентаря",
       "add_comment_textfield_placeholder": "Добавьте комментарий...",
       "post_button": "Добавить",
       "failed_to_post_comment": "Не удалось добавить комментарий. Попробуйте позже.."
+    },
+    "roles": {
+      "VIEWER": "ЗРИТЕЛЬ",
+      "CREATOR": "СОЗДАТЕЛЬ",
+      "EDITOR": "РЕДАКТОР",
+      "ADMIN": "АДМИН"
     }
   },
   "profile": {

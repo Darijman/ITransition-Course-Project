@@ -69,6 +69,7 @@ export class InventoryInvitesService {
 
     return await qb.getMany();
   }
+
   async getInvitesByInventoryId(
     inventoryId: number,
     options: {
@@ -170,8 +171,12 @@ export class InventoryInvitesService {
     const savedInvite = await this.inventoryInvitesRepository.save(newInvite);
     const inviteWithRelations = await this.inventoryInvitesRepository.findOne({
       where: { id: savedInvite.id },
-      relations: ['inventory', 'inviter', 'inventory.creator', 'inventory.category'],
+      relations: ['inviter', 'inviter.user', 'inviteeUser', 'invitee', 'inventory', 'inventory.creator', 'inventory.category'],
     });
+
+    if (!inviteWithRelations) {
+      throw new BadRequestException({ error: 'Failed to find new invite!' });
+    }
 
     const notification = await this.notificationsService.createNotification({
       userId: user.id,
@@ -181,7 +186,7 @@ export class InventoryInvitesService {
 
     this.inventoriesGateway.server.to(inviteeEmail).emit('notification', notification);
     this.inventoriesGateway.server.to(inviteeEmail).emit('user-inventory-invite', inviteWithRelations);
-    return savedInvite;
+    return inviteWithRelations;
   }
 
   async acceptInventoryInvites(inviteIds: number[], reqUser: ReqUser): Promise<InventoryInvite[]> {
@@ -217,8 +222,11 @@ export class InventoryInvitesService {
 
       invite.status = InventoryInviteStatuses.ACCEPTED;
       invite.inviteeInventoryUserId = inventoryUser.id;
-      await this.inventoryInvitesRepository.save(invite);
-      acceptedInvites.push(invite);
+      const savedInvite = await this.inventoryInvitesRepository.save(invite);
+
+      this.inventoriesGateway.server.to(`${invite.inventoryId}`).emit('inventory-invite-updated', savedInvite);
+
+      acceptedInvites.push(savedInvite);
 
       const inventoryWithRelations = await this.inventoriesRepository.findOne({
         where: { id: invite.inventoryId },
@@ -256,9 +264,10 @@ export class InventoryInvitesService {
       }
 
       invite.status = InventoryInviteStatuses.REJECTED;
-      await this.inventoryInvitesRepository.save(invite);
+      const saved = await this.inventoryInvitesRepository.save(invite);
 
-      rejectedInvites.push(invite);
+      this.inventoriesGateway.server.to(`${invite.inventoryId}`).emit('inventory-invite-updated', saved);
+      rejectedInvites.push(saved);
     }
 
     return rejectedInvites;

@@ -9,39 +9,35 @@ const { Text } = Typography;
 
 export const getInventoryInvitationColumns = (t: (key: string) => string): ColumnsType<InventoryInvite> => [
   {
-    title: 'user',
+    title: t('inventory.access.user'),
     key: 'user',
+    width: 300,
     render: (_, record: InventoryInvite) => {
       let avatarUrl: string | null = null;
       let name: string | undefined;
-      let email: string | undefined;
       let link: string | undefined;
 
       if (record.invitee) {
         avatarUrl = record.invitee.user?.avatarUrl ?? null;
         name = record.invitee.user?.name;
-        email = record.invitee.user?.email;
         link = `/users/${record.invitee.user?.id}`;
       } else if (record.inviteeUser) {
         avatarUrl = record.inviteeUser.avatarUrl ?? null;
         name = record.inviteeUser.name;
-        email = record.inviteeUser.email;
         link = `/users/${record.inviteeUser.id}`;
       } else {
         name = record.inviteeEmail;
-        email = record.inviteeEmail;
       }
 
       const avatar = <Avatar src={avatarUrl || '/no-avatar.svg'} alt={name} style={{ marginRight: 8 }} />;
-
       const text = (
-        <Text ellipsis={{ tooltip: `${name}${email ? ` (${email})` : ''}` }}>
-          {name} {email && email !== name ? `(${email})` : ''}
+        <Text ellipsis={{ tooltip: name }} style={{ maxWidth: 300, display: 'inline-block', verticalAlign: 'middle' }}>
+          {name}
         </Text>
       );
 
       const content = (
-        <div className='inventations_table_columns_user'>
+        <div className='inventations_table_columns_user' style={{ display: 'flex', alignItems: 'center' }}>
           {avatar}
           {text}
         </div>

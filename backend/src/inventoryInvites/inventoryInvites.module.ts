@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InventoriesModule } from 'src/inventories/inventories.module';
 import { InventoryInvite } from './inventoryInvite.entity';
@@ -13,7 +13,7 @@ import { Inventory } from 'src/inventories/inventory.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([InventoryInvite, User, Inventory]),
-    InventoriesModule,
+    forwardRef(() => InventoriesModule),
     UsersModule,
     InventoryUsersModule,
     NotificationsModule,

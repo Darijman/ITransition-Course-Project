@@ -44,6 +44,41 @@ export class UsersService {
     return await query.take(10).getMany();
   }
 
+  async getUsersToInviteToInventory(name: string | undefined, reqUser: ReqUser, inventoryId: number): Promise<User[]> {
+    const qb = this.usersRepository.createQueryBuilder('user').where('user.id != :currentUserId', { currentUserId: reqUser.id });
+
+    qb.andWhere(
+      (qb1) => {
+        const subQuery = qb1.subQuery().select('iu.userId').from('inventory_users', 'iu').where('iu.inventoryId = :inventoryId').getQuery();
+        return 'user.id NOT IN ' + subQuery;
+      },
+      { inventoryId },
+    );
+
+    qb.andWhere(
+      (qb2) => {
+        const subQuery = qb2
+          .subQuery()
+          .select('invite.inviteeUserId')
+          .from('inventory_invites', 'invite')
+          .where('invite.inventoryId = :inventoryId')
+          .andWhere('invite.status = :status')
+          .getQuery();
+        return 'user.id NOT IN ' + subQuery;
+      },
+      { inventoryId, status: 'PENDING' },
+    );
+
+    if (name?.trim()) {
+      const search = `%${name.toLowerCase()}%`;
+      qb.andWhere('LOWER(user.name) LIKE :search', { search });
+    }
+
+    qb.orderBy('user.name', 'ASC').take(10);
+
+    return qb.getMany();
+  }
+
   async getAllNonAdminUsers(): Promise<User[]> {
     return this.usersRepository.find({ where: { role: Not(UserRoles.ADMIN) } });
   }

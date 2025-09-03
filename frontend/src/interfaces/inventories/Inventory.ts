@@ -4,6 +4,7 @@ import { InventoryItem } from './InventoryItem';
 import { InventoryTag } from './InventoryTag';
 import { InventoryUser } from './InventoryUser';
 import { User } from '../users/User';
+import { InventoryInvite } from './InventoryInvite';
 
 export enum InventoryStatuses {
   PUBLIC = 'PUBLIC',
@@ -27,6 +28,7 @@ export interface Inventory {
   items?: InventoryItem[];
   tags?: InventoryTag[];
   inventoryUsers?: InventoryUser[];
+  invites?: InventoryInvite[];
 
   createdAt: string;
   updatedAt: string;

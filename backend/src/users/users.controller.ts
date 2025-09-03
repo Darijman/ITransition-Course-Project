@@ -33,6 +33,16 @@ export class UsersController {
   ) {}
 
   @UseGuards(AuthGuard)
+  @Get('to-invite/:inventoryId')
+  async getUsersToInviteToInventory(
+    @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Req() req: Request,
+    @Query('name') name?: string,
+  ): Promise<User[]> {
+    return await this.usersService.getUsersToInviteToInventory(name, req.user, inventoryId);
+  }
+
+  @UseGuards(AuthGuard)
   @Get()
   async getAllUsers(@Query('name') name?: string): Promise<User[]> {
     return await this.usersService.getAllUsers(name);

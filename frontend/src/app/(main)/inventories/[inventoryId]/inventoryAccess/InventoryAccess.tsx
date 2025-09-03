@@ -101,8 +101,8 @@ export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory 
       </div>
 
       <div className='inventory_access_table_and_search'>
-        <SearchUsersToInvite />
-        <InventoryInvitations setInventory={setInventory} currentInventoryUser={currentInventoryUser} inventory={inventory} />
+        <SearchUsersToInvite setInventory={setInventory} inventory={inventory} currentInventoryUser={currentInventoryUser} />
+        <InventoryInvitations setInventory={setInventory} inventory={inventory} currentInventoryUser={currentInventoryUser} />
       </div>
     </div>
   );

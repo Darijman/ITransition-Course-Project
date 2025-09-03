@@ -63,13 +63,25 @@
       "status_updated": "Inventory status updated to {status} by {updatedBy}",
       "search_invite_placeholder": "Search invite..",
       "search": "Search",
-      "search_users_placeholder": "Search to invite.."
+      "search_users_placeholder": "Search to invite..",
+      "search_users_error": "Something went wrong. Try again.",
+      "invite": "Invite",
+      "invited": "Invited",
+      "invite_error": "Failed to invite user. Try again later!",
+      "select_role": "Select user role",
+      "user": "User"
     },
     "discussion": {
       "title": "Inventory Discussion",
       "add_comment_textfield_placeholder": "Add a comment...",
       "post_button": "Post",
       "failed_to_post_comment": "Failed to post a comment. Try again later.."
+    },
+    "roles": {
+      "VIEWER": "VIEWER",
+      "CREATOR": "CREATOR",
+      "EDITOR": "EDITOR",
+      "ADMIN": "ADMIN"
     }
   },
   "profile": {

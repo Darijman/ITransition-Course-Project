@@ -15,7 +15,7 @@ import api from '../../../../../../../axiosConfig';
 import './inventoryInvitations.css';
 
 const { Title } = Typography;
-const limit: number = 10;
+const LIMIT: number = 10;
 
 interface Props {
   currentInventoryUser: InventoryUser | null;
@@ -25,74 +25,89 @@ interface Props {
 
 export const InventoryInvitations = ({ currentInventoryUser, inventory, setInventory }: Props) => {
   const t = useTranslations();
-
   const { user } = useAuth();
   const { socket } = useSocket();
 
   const [invites, setInvites] = useState<InventoryInvite[]>([]);
   const [filters, setFilters] = useState({ status: 'ALL', searchValue: '' });
   const [offset, setOffset] = useState<number>(0);
-
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [errorText, setErrorText] = useState<string>('');
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
 
-  const handleSearchChange = (val: string) => {
-    setFilters((prev) => ({ ...prev, searchValue: val }));
-    setOffset(0);
-  };
+  useEffect(() => {
+    if (!inventory?.invites) return;
 
-  const handleStatusChange = (val: 'ALL' | InventoryInviteStatuses) => {
-    setFilters((prev) => ({ ...prev, status: val }));
-    setOffset(0);
-  };
+    const sortedInvites = [...inventory.invites].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const initial = sortedInvites.slice(0, LIMIT);
+    setInvites(initial);
+    setOffset(initial.length);
+    setHasMore(sortedInvites.length > LIMIT);
+  }, [inventory]);
+
+  useEffect(() => {
+    if (!inventory?.invites) return;
+
+    let filtered = [...inventory.invites];
+
+    if (filters.status !== 'ALL') {
+      filtered = filtered.filter((inv) => inv.status === filters.status);
+    }
+
+    if (filters.searchValue) {
+      const search = filters.searchValue.toLowerCase();
+      filtered = filtered.filter(
+        (inv) =>
+          inv.inviteeEmail?.toLowerCase().includes(search) ||
+          inv.inviteeUser?.name?.toLowerCase().includes(search) ||
+          inv.inviteeUser?.email?.toLowerCase().includes(search),
+      );
+    }
+
+    const initial = filtered.slice(0, LIMIT);
+    setInvites(initial);
+    setOffset(initial.length);
+    setHasMore(filtered.length > LIMIT);
+  }, [filters, inventory]);
 
   useEffect(() => {
     if (!socket || !user.id) return;
 
-    const handler = (invite: InventoryInvite) => setInvites((prev) => [invite, ...prev]);
-    socket.on('inventory-invite', handler);
+    const handleUpdatedInvite = (updated: InventoryInvite) => {
+      setInvites((prev) => prev.map((inv) => (inv.id === updated.id ? updated : inv)));
+    };
+
+    socket.on('inventory-invite-updated', handleUpdatedInvite);
 
     return () => {
-      socket.off('inventory-invite', handler);
+      socket.off('inventory-invite-updated', handleUpdatedInvite);
     };
   }, [socket, user.id]);
 
-  useEffect(() => {
-    const fetchInitial = async () => {
-      setIsLoading(true);
-      try {
-        const { data } = await api.get(`/inventory_invites/inventory/${inventory?.id}`, { params: { ...filters, offset: 0, limit } });
-        setInvites(data);
-        setHasMore(data.length === limit);
-        setOffset(data.length);
-      } catch {
-        setErrorText(t('profile.user_invitations.failed_to_load'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInitial();
-  }, [filters, t, inventory?.id]);
-
   const loadMore = async () => {
     if (isLoading || !hasMore || !inventory?.id) return;
-    setIsLoading(true);
 
+    setIsLoading(true);
     try {
-      const { data } = await api.get(`/inventory_invites/inventory/${inventory.id}`, { params: { ...filters, offset, limit } });
+      const { data } = await api.get(`/inventory_invites/inventory/${inventory.id}`, {
+        params: { offset, limit: LIMIT, ...filters },
+      });
+
       setInvites((prev) => [...prev, ...data]);
-      setHasMore(data.length === limit);
       setOffset((prev) => prev + data.length);
+      setHasMore(data.length === LIMIT);
     } catch {
       messageApi.error(t('profile.user_invitations.failed_to_load_more'));
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleSearchChange = (val: string) => setFilters((prev) => ({ ...prev, searchValue: val }));
+  const handleStatusChange = (val: 'ALL' | InventoryInviteStatuses) => setFilters((prev) => ({ ...prev, status: val }));
 
   return (
     <div className='inventory_invites_table'>
@@ -125,48 +140,42 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
         />
       </div>
 
-      {errorText ? (
-        <Title level={4} style={{ textAlign: 'center', color: 'var(--red-color)' }}>
-          {errorText}
-        </Title>
-      ) : (
-        <div id='inventory_invitations_table' style={{ height: 500, overflow: 'auto' }}>
-          <InfiniteScroll
-            dataLength={invites.length}
-            next={loadMore}
-            hasMore={hasMore}
-            loader={
-              <div style={{ textAlign: 'center', padding: 16 }}>
-                <Spin size='large' />
-              </div>
-            }
-            scrollableTarget='inventory_invitations_table'
-            scrollThreshold='100px'
-          >
-            <Table
-              className='invites_table'
-              rowClassName={(record) => (record.status === InventoryInviteStatuses.PENDING ? 'row-pending' : '')}
-              rowSelection={{
-                type: 'checkbox',
-                selectedRowKeys,
-                onChange: setSelectedRowKeys,
-                getCheckboxProps: (record) => ({ disabled: record.status !== InventoryInviteStatuses.PENDING }),
-              }}
-              columns={getInventoryInvitationColumns(t)}
-              dataSource={invites}
-              rowKey='id'
-              pagination={false}
-              locale={{
-                emptyText: (
-                  <div style={{ textAlign: 'center' }}>
-                    <Empty description={<span style={{ color: 'var(--red-color)' }}>No inventories</span>} />
-                  </div>
-                ),
-              }}
-            />
-          </InfiniteScroll>
-        </div>
-      )}
+      <div id='inventory_invitations_table' style={{ height: 500, overflow: 'auto' }}>
+        <InfiniteScroll
+          dataLength={invites.length}
+          next={loadMore}
+          hasMore={hasMore}
+          loader={
+            <div style={{ textAlign: 'center', padding: 16 }}>
+              <Spin size='large' />
+            </div>
+          }
+          scrollableTarget='inventory_invitations_table'
+          scrollThreshold='100px'
+        >
+          <Table
+            className='invites_table'
+            rowClassName={(record) => (record.status === InventoryInviteStatuses.PENDING ? 'row-pending' : '')}
+            rowSelection={{
+              type: 'checkbox',
+              selectedRowKeys,
+              onChange: setSelectedRowKeys,
+              getCheckboxProps: (record) => ({ disabled: record.status !== InventoryInviteStatuses.PENDING }),
+            }}
+            columns={getInventoryInvitationColumns(t)}
+            dataSource={invites}
+            rowKey='id'
+            pagination={false}
+            locale={{
+              emptyText: (
+                <div style={{ textAlign: 'center' }}>
+                  <Empty description={<span style={{ color: 'var(--red-color)' }}>No inventories</span>} />
+                </div>
+              ),
+            }}
+          />
+        </InfiniteScroll>
+      </div>
     </div>
   );
 };
