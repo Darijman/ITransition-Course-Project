@@ -10,9 +10,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { User } from '@/interfaces/users/User';
 import { InviteUserItem } from './inviteUserItem/InviteUserItem';
 import { Inventory } from '@/interfaces/inventories/Inventory';
-import './searchUsersToInvite.css';
-import api from '../../../../../../../axiosConfig';
 import { InventoryInviteStatuses } from '@/interfaces/inventories/InventoryInvite';
+import api from '../../../../../../../axiosConfig';
+import './searchUsersToInvite.css';
 
 const { Title } = Typography;
 
@@ -30,11 +30,11 @@ export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInvent
   const [name, setName] = useState<string>('');
 
   const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const getUsers = useCallback(async () => {
     if (!canModifyInventory(currentInventoryUser, user) || !name.trim() || !inventory?.id) return;
-    setLoading(true);
+    setIsLoading(true);
 
     try {
       const { data } = await api.get(`/users/to-invite/${inventory?.id}`, { params: { name } });
@@ -42,7 +42,7 @@ export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInvent
     } catch {
       setError(t('inventory.access.search_users_error'));
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [user, currentInventoryUser, name, inventory?.id, t]);
 
@@ -68,14 +68,11 @@ export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInvent
       <hr />
 
       <ul className='search_users_list'>
-        {loading ? (
+        {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <li key={i} className='invite_user_item_skeleton'>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Skeleton.Avatar active size={48} style={{ backgroundColor: 'var(--hover-color)' }} />
-                <Skeleton.Input active style={{ width: 100, backgroundColor: 'var(--hover-color)' }} />
-              </div>
-              <Skeleton.Button active size='small' style={{ width: 80, borderRadius: 4, backgroundColor: 'var(--hover-color)' }} />
+            <li key={i} className='invite_user_item'>
+              <Skeleton.Avatar active size={48} />
+              <Skeleton.Input active style={{ width: 100, marginLeft: 8 }} />
             </li>
           ))
         ) : error ? (
