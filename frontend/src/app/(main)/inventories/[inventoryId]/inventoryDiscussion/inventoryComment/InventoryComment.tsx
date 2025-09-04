@@ -7,9 +7,10 @@ import { InventoryComment as IInventoryComment } from '@/interfaces/inventories/
 import { formatDate } from '@/helpers/formatDate';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
-import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
+import { TextField } from '@/components/textField/TextField';
+import { useTranslations } from 'next-intl';
+import { canModifyInventory } from '@/helpers/canModifyInventory';
 import Link from 'next/link';
 import api from '../../../../../../../axiosConfig';
 import './inventoryComment.css';
@@ -22,22 +23,25 @@ interface Props {
 }
 
 export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryComment, currentInventoryUser }, ref) => {
-  const { id } = inventoryComment;
   const { user } = useAuth();
+  const t = useTranslations();
+
+  const { id } = inventoryComment;
   const { locale } = useLocale();
-  const { text, author, authorId, createdAt } = inventoryComment;
+  const { text, author, createdAt, updatedAt } = inventoryComment;
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editedText, setEditedText] = useState<string>(text);
+
   const avatarUrl = author?.user?.avatarUrl || '';
   const authorName = author?.name || author?.user?.name || '?';
-
-  const canModifyComment: boolean =
-    user.role === UserRoles.ADMIN || currentInventoryUser?.role === InventoryUserRoles.CREATOR || currentInventoryUser?.id === authorId;
+  const isEdited = new Date(updatedAt).getTime() > new Date(createdAt).getTime();
 
   const deleteCommentHandler = async () => {
-    if (!canModifyComment || !inventoryComment.id) return;
+    if (!canModifyInventory(currentInventoryUser, user) || !inventoryComment.id) return;
 
     try {
       await api.delete(`/inventory_comments/${id}`);
@@ -45,6 +49,20 @@ export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryCo
       messageApi.error({
         content: 'Failed to delete comment! Try again later..',
       });
+    }
+  };
+
+  const saveEditHandler = async () => {
+    if (!canModifyInventory(currentInventoryUser, user) || !inventoryComment.id) return;
+
+    try {
+      await api.put(`/inventory_comments/${id}`, { text: editedText });
+      setIsEditing(false);
+    } catch {
+      messageApi.error({
+        content: t('inventory.discussion.failed_to_edit_comment'),
+      });
+      setIsEditing(false);
     }
   };
 
@@ -69,7 +87,7 @@ export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryCo
             {authorName}
           </Title>
           <div>
-            {canModifyComment ? (
+            {canModifyInventory(currentInventoryUser, user) ? (
               <div className='inventory_comment_buttons'>
                 <Popconfirm
                   title={
@@ -89,16 +107,46 @@ export const InventoryComment = forwardRef<HTMLDivElement, Props>(({ inventoryCo
                 >
                   <Button className='inventory_comment_delete_button' type='text' icon={<DeleteOutlined style={{ fontSize: '20px' }} />} />
                 </Popconfirm>
-                <Button className='inventory_comment_edit_button' type='text' icon={<EditOutlined style={{ fontSize: '20px' }} />} />
+                <Button
+                  onClick={() => setIsEditing((prev) => !prev)}
+                  className='inventory_comment_edit_button'
+                  type='text'
+                  icon={<EditOutlined style={{ fontSize: '20px' }} />}
+                />
               </div>
             ) : null}
             <Text style={{ margin: 0 }} type='secondary'>
-              {formatDate(createdAt)}
+              {formatDate(createdAt)} {isEdited && '(Edited)'}
             </Text>
           </div>
         </div>
 
-        <Paragraph>{text}</Paragraph>
+        {isEditing ? (
+          <div style={{ marginTop: 8 }}>
+            <TextField value={editedText} onChange={(e: any) => setEditedText(e.target.value)} maxLength={255} minLength={1} showCount />
+            <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+              <Button
+                className='inventory_comment_save_edit_button'
+                type='primary'
+                onClick={saveEditHandler}
+                disabled={text.trim() === editedText.trim() || !editedText.trim()}
+              >
+                {t('inventory.discussion.save_edit')}
+              </Button>
+              <Button
+                className='inventory_comment_cancel_edit_button'
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedText(text);
+                }}
+              >
+                {t('inventory.discussion.cancel_edit')}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Paragraph>{text}</Paragraph>
+        )}
       </div>
     </div>
   );

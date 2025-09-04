@@ -81,7 +81,10 @@
       "title": "Обсуждение инвентаря",
       "add_comment_textfield_placeholder": "Добавьте комментарий...",
       "post_button": "Добавить",
-      "failed_to_post_comment": "Не удалось добавить комментарий. Попробуйте позже.."
+      "failed_to_post_comment": "Не удалось добавить комментарий. Попробуйте позже..",
+      "cancel_edit": "Cancel",
+      "save_edit": "Save Changes",
+      "failed_to_edit_comment": "Не удалось изменить комментарий! Попробуйте позже.."
     },
     "roles": {
       "VIEWER": "ЗРИТЕЛЬ",

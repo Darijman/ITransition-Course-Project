@@ -9,6 +9,7 @@ import { UserRoles } from 'src/users/userRoles.enum';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
 import { ReqUser } from 'src/interfaces/ReqUser';
 import { InventoriesGateway } from 'src/inventories/inventories.gateway';
+import { UpdateInventoryCommentDto } from './updateInventoryComment.dto';
 
 @Injectable()
 export class InventoryCommentsService {
@@ -130,5 +131,69 @@ export class InventoryCommentsService {
     await this.inventoryCommentsRepository.delete(commentId);
     this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-comment-deleted', { commentId });
     return { success: true };
+  }
+
+  async editInventoryCommentById(commentId: number, updateDto: UpdateInventoryCommentDto, user: ReqUser): Promise<InventoryComment> {
+    if (!commentId || isNaN(commentId)) {
+      throw new BadRequestException({ error: 'Invalid Inventory Comment ID!' });
+    }
+
+    const inventoryComment = await this.inventoryCommentsRepository.findOne({ where: { id: commentId } });
+    if (!inventoryComment) {
+      throw new NotFoundException({ error: 'Inventory Comment not found!' });
+    }
+
+    if (inventoryComment.text.trim() === updateDto.text.trim()) {
+      throw new BadRequestException({ error: 'You did not change comment!' });
+    }
+
+    const { inventoryId } = inventoryComment;
+
+    if (user.role === UserRoles.ADMIN) {
+      inventoryComment.text = updateDto.text;
+      const updated = await this.inventoryCommentsRepository.save(inventoryComment);
+
+      const fullComment = await this.inventoryCommentsRepository.findOne({
+        where: { id: updated.id },
+        relations: ['author', 'author.user'],
+      });
+
+      if (!fullComment) {
+        throw new BadRequestException({ error: 'Failed to find comment with relations!' });
+      }
+
+      this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-comment-updated', fullComment);
+      return fullComment;
+    }
+
+    const inventoryUser = await this.inventoryUsersRepository.findOneBy({
+      userId: user.id,
+      inventoryId,
+    });
+
+    if (!inventoryUser) {
+      throw new ForbiddenException({ error: 'You do not have access to this inventory!' });
+    }
+
+    const isCommentOwner = inventoryComment.authorId === inventoryUser.id;
+    const hasInventoryRights = inventoryUser.role === InventoryUserRoles.CREATOR || inventoryUser.role === InventoryUserRoles.EDITOR;
+
+    if (!isCommentOwner && !hasInventoryRights) {
+      throw new ForbiddenException({ error: 'You do not have permission to edit this comment!' });
+    }
+
+    inventoryComment.text = updateDto.text;
+    const updated = await this.inventoryCommentsRepository.save(inventoryComment);
+
+    const fullComment = await this.inventoryCommentsRepository.findOne({
+      where: { id: updated.id },
+      relations: ['author', 'author.user'],
+    });
+    if (!fullComment) {
+      throw new BadRequestException({ error: 'Failed to find comment with relations!' });
+    }
+
+    this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-comment-updated', fullComment);
+    return fullComment;
   }
 }

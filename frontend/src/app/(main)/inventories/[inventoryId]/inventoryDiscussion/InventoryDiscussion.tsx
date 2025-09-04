@@ -10,6 +10,7 @@ import { AddInventoryCommentForm } from './addInventoryCommentForm/AddInventoryC
 import { useSocket } from '@/contexts/socketContext/SocketContext';
 import { canModifyInventory } from '@/helpers/canModifyInventory';
 import { useAuth } from '@/contexts/authContext/AuthContext';
+import { InventoryComment as IInventoryComment } from '@/interfaces/inventories/InventoryComment';
 import './inventoryDiscussion.css';
 
 const { Title } = Typography;
@@ -31,7 +32,8 @@ export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInvent
   useEffect(() => {
     if (!socket || !inventory?.id) return;
 
-    socket.on('inventory-comment-created', (newComment) => {
+    // === socket handlers ===
+    const handleCommentCreated = (newComment: IInventoryComment) => {
       lastCommentIdRef.current = newComment.id;
 
       setInventory((prev) => {
@@ -46,9 +48,9 @@ export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInvent
           comments: [...(prev.comments ?? []), newComment],
         };
       });
-    });
+    };
 
-    socket.on('inventory-comment-deleted', ({ commentId }: { commentId: number }) => {
+    const handleCommentDeleted = ({ commentId }: { commentId: number }) => {
       setInventory((prev) => {
         if (!prev) return prev;
 
@@ -57,11 +59,30 @@ export const InventoryDiscussion = ({ currentInventoryUser, inventory, setInvent
           comments: prev.comments?.filter((c) => c.id !== commentId) ?? [],
         };
       });
-    });
+    };
+
+    const handleCommentUpdated = (updatedComment: IInventoryComment) => {
+      setInventory((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          comments:
+            prev.comments?.map((c) =>
+              c.id === updatedComment.id ? { ...c, text: updatedComment.text, updatedAt: updatedComment.updatedAt } : c,
+            ) ?? [],
+        };
+      });
+    };
+
+    socket.on('inventory-comment-created', handleCommentCreated);
+    socket.on('inventory-comment-deleted', handleCommentDeleted);
+    socket.on('inventory-comment-updated', handleCommentUpdated);
 
     return () => {
-      socket.off('inventory-comment-created');
-      socket.off('inventory-comment-deleted');
+      socket.off('inventory-comment-created', handleCommentCreated);
+      socket.off('inventory-comment-deleted', handleCommentDeleted);
+      socket.off('inventory-comment-updated', handleCommentUpdated);
     };
   }, [socket, inventory?.id, setInventory]);
 
