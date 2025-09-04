@@ -1,9 +1,9 @@
 import { ColumnsType } from 'antd/es/table';
-import { InventoryItem } from '@/interfaces/InventoryItem';
+import { InventoryItem } from '@/interfaces/inventories/InventoryItem';
 import { Typography, Image, Button, Popover } from 'antd';
 import { formatDate } from '@/helpers/formatDate';
 import { LikeButton } from './likeButton/LikeButton';
-import { InventoryItemLike } from '@/interfaces/InventoryItemLike';
+import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import Link from 'next/link';
 
 const { Text, Paragraph } = Typography;
@@ -26,6 +26,12 @@ export const getInventoryItemsColumns = (
     render: (_, record: InventoryItem) => {
       const likes = record.likes ?? [];
 
+      const likeButton = <LikeButton itemId={record.id} likes={likes} onToggleLike={handleToggleLike} inventoryUserId={inventoryUserId} />;
+
+      if (!likes.length) {
+        return <div style={{ display: 'inline-block' }}>{likeButton}</div>;
+      }
+
       return (
         <Popover
           content={
@@ -45,13 +51,12 @@ export const getInventoryItemsColumns = (
           mouseEnterDelay={0.5}
           getPopupContainer={() => document.body}
         >
-          <div style={{ display: 'inline-block' }}>
-            <LikeButton itemId={record.id} likes={likes} onToggleLike={handleToggleLike} inventoryUserId={inventoryUserId} />
-          </div>
+          <div style={{ display: 'inline-block' }}>{likeButton}</div>
         </Popover>
       );
     },
   },
+
   {
     title: 'Title',
     dataIndex: 'title',

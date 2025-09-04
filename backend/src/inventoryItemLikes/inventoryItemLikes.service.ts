@@ -31,9 +31,7 @@ export class InventoryItemLikesService {
   async createNewLike(createInventoryItemLikeDto: CreateInventoryItemLikeDto, user: ReqUser): Promise<InventoryItemLike | null> {
     const { itemId } = createInventoryItemLikeDto;
 
-    const item = await this.inventoryItemsRepository.findOne({
-      where: { id: itemId },
-    });
+    const item = await this.inventoryItemsRepository.findOne({ where: { id: itemId } });
     if (!item) {
       throw new NotFoundException({ error: 'Item not found!' });
     }
@@ -64,13 +62,9 @@ export class InventoryItemLikesService {
       throw new BadRequestException({ error: 'User already liked this item!' });
     }
 
-    const like = this.inventoryItemLikesRepository.create({
-      itemId,
-      inventoryUserId: inventoryUser.id,
-    });
+    const like = this.inventoryItemLikesRepository.create({ itemId, inventoryUserId: inventoryUser.id });
     await this.inventoryItemLikesRepository.save(like);
 
-    // подгрузить вместе с юзером
     return this.inventoryItemLikesRepository.findOne({
       where: { id: like.id },
       relations: ['inventoryUser', 'inventoryUser.user'],

@@ -117,7 +117,7 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
   };
 
   const handleToggleLike = async (itemId: number, likeId?: number) => {
-    if (!canModifyInventory(currentInventoryUser, user)) return;
+    if (!currentInventoryUser) return;
     const action: 'like' | 'unlike' = likeId ? 'unlike' : 'like';
 
     try {
