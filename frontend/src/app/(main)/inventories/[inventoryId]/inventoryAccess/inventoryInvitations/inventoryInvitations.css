@@ -133,7 +133,3 @@
   background-color: gray !important;
 }
 
-.inventory_invitations_role_button:disabled {
-  border: 1px solid gray !important;
-  background-color: gray !important;
-}

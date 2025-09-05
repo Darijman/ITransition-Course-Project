@@ -12,6 +12,7 @@ import { useSocket } from '@/contexts/socketContext/SocketContext';
 import { InventoryComment } from '@/interfaces/inventories/InventoryComment';
 import { InventoryItem } from '@/interfaces/inventories/InventoryItem';
 import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
+import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import api from '../../../../../axiosConfig';
 
 const { Title } = Typography;
@@ -82,17 +83,33 @@ const InventoryPage = () => {
 
     if (!socket || !inventory?.id) return;
 
-    const handleUsersDeleted = (data: { inventoryId: number; deletedUserIds: number[]; deletedBy: string }) => {
-      if (data.inventoryId !== inventory.id) return;
+    const handleUsersDeleted = (data: { inventoryId: number; inventoryUserIds: number[]; deletedBy: string }) => {
+      if (data.inventoryId !== inventory?.id) return;
 
       setInventory((prev) =>
         prev
           ? {
               ...prev,
-              inventoryUsers: prev.inventoryUsers?.filter((u) => !data.deletedUserIds.includes(u.id)),
+              inventoryUsers: prev.inventoryUsers?.filter((u) => !data.inventoryUserIds.includes(u.id)),
             }
           : prev,
       );
+    };
+
+    const handleUserJoined = (data: { inventoryId: number; inventoryUser: InventoryUser }) => {
+      if (data.inventoryId !== inventory.id) return;
+
+      setInventory((prev) => {
+        if (!prev) return prev;
+
+        const exists = prev.inventoryUsers?.some((u) => u.id === data.inventoryUser.id);
+        if (exists) return prev;
+
+        return {
+          ...prev,
+          inventoryUsers: prev.inventoryUsers ? [...prev.inventoryUsers, data.inventoryUser] : [data.inventoryUser],
+        };
+      });
     };
 
     const handleRemoved = (data: { inventoryId: number; inventoryName: string; inventoryStatus: InventoryStatuses; deletedBy: string }) => {
@@ -214,6 +231,7 @@ const InventoryPage = () => {
 
     socket.on('connect', handleConnect);
 
+    socket.on('inventory-user-joined', handleUserJoined);
     socket.on('inventory-users-deleted', handleUsersDeleted);
     socket.on('you-were-removed-from-inventory', handleRemoved);
     socket.on('inventory-users-role-updated', handleUsersRoleUpdated);
@@ -236,6 +254,7 @@ const InventoryPage = () => {
       socket.off('inventory-comment-created', handleCommentCreated);
       socket.off('inventory-comment-deleted', handleCommentDeleted);
       socket.off('inventory-comment-updated', handleCommentUpdated);
+      socket.off('inventory-user-joined', handleUserJoined);
     };
   }, [inventoryId, socket, accessDenied, currentInventoryUser, inventory?.id, messageApi, router, t]);
 

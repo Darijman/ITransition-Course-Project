@@ -51,12 +51,18 @@ export const UserInventories = () => {
       setInventories((prev) => [inventory, ...prev]);
     };
 
+    const handleRemoved = (data: { inventoryId: number; inventoryName: string; inventoryStatus: InventoryStatuses; deletedBy: string }) => {
+      setInventories((prev) => prev.filter((inv) => inv.id !== data.inventoryId));
+    };
+
     socket.on('inventory-joined', handleInventoryJoined);
+    socket.on('you-were-removed-from-inventory', handleRemoved);
 
     return () => {
       socket.off('inventory-joined', handleInventoryJoined);
+      socket.off('you-were-removed-from-inventory', handleRemoved);
     };
-  }, [socket, user?.email]);
+  }, [socket, user?.email, user?.id]);
 
   useEffect(() => {
     if (!user.id) return;

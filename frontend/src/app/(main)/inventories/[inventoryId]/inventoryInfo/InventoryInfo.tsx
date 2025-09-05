@@ -158,7 +158,7 @@ export const InventoryInfo = ({ inventory, currentInventoryUser }: Props) => {
                   onOpenChange={(visible) => setPopoverVisible(visible)}
                 >
                   <Button
-                    className='inventory_invitations_role_button'
+                    className='inventory_info_role_button'
                     disabled={!selectedRowKeys.length}
                     type='primary'
                     icon={<TeamOutlined style={{ fontSize: '20px' }} />}

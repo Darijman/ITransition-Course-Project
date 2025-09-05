@@ -96,7 +96,17 @@
   border: 1px solid gray !important;
 }
 
+.inventory_info_role_button:disabled {
+  border: 1px solid gray !important;
+  background-color: gray !important;
+}
+
 .inventory_users_table .ant-checkbox-disabled .ant-checkbox-inner {
   border: 1px solid gray !important;
   background-color: gray !important;
+}
+
+.inventory_info_role_button,
+.inventory_info_delete_users_button {
+  text-transform: capitalize !important;
 }

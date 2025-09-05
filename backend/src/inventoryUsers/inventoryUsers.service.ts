@@ -106,12 +106,12 @@ export class InventoryUsersService {
       }
     }
 
-    const idsToDelete = existingUsers.map((user) => user.id);
-    await this.inventoryUsersRepository.delete(idsToDelete);
+    const inventoryUserIdsToDelete = existingUsers.map((iu) => iu.id);
+    await this.inventoryUsersRepository.delete(inventoryUserIdsToDelete);
 
     this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-users-deleted', {
       inventoryId,
-      deletedUserIds: idsToDelete,
+      inventoryUserIds: inventoryUserIdsToDelete,
       deletedBy: reqUser.name,
     });
 
