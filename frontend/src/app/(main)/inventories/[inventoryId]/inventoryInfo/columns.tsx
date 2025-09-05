@@ -36,7 +36,10 @@ export const getInventoryUsersColumns = (t: (key: string) => string, user: Basic
     title: t('tables.role'),
     dataIndex: 'role',
     key: 'role',
-    render: (_: any, record: InventoryUser) => <Tag color='blue'>{record.role}</Tag>,
+    render: (_: any, record: InventoryUser) => {
+      const roleKey = `inventory.roles.${record.role}`;
+      return <Tag color='blue'>{t(roleKey)}</Tag>;
+    },
   },
   {
     title: t('tables.joined'),

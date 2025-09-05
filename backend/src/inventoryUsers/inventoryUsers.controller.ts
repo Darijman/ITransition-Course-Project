@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, UseFilters, Post, Body, Req } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, UseFilters, Post, Body, Req, Patch } from '@nestjs/common';
 import { InventoryUser } from './inventoryUser.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { CustomParseIntPipe } from 'src/common/pipes/customParseIntPipe/CustomParseInt.pipe';
@@ -7,6 +7,7 @@ import { InventoryUsersService } from './inventoryUsers.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { InventoryUserDuplicateFilter } from 'src/common/filters/inventoryUser-duplicate.filter';
 import { Request } from 'express';
+import { InventoryUserRoles } from './inventoryUserRoles.enum';
 
 @UseFilters(InventoryUserDuplicateFilter)
 @UseInterceptors(ClassSerializerInterceptor)
@@ -25,6 +26,17 @@ export class InventoryUsersController {
   @Post('/leave')
   async leaveManyInventories(@Body('inventoryIds') inventoryIds: number[], @Req() req: Request): Promise<{ success: boolean }> {
     return this.inventoryUsersService.leaveManyInventories(inventoryIds, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('/inventory/:inventoryId/roles')
+  async updateInventoryUsersRole(
+    @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Body('inventoryUserIds') inventoryUserIds: number[],
+    @Body('newRole') newRole: InventoryUserRoles,
+    @Req() req: Request,
+  ): Promise<{ success: boolean }> {
+    return await this.inventoryUsersService.updateInventoryUsersRole(inventoryId, inventoryUserIds, newRole, req.user);
   }
 
   @UseGuards(AuthGuard)

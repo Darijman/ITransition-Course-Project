@@ -19,6 +19,7 @@ export const getTabs = (
   inventory: Inventory | null,
   setInventory: React.Dispatch<React.SetStateAction<Inventory | null>>,
   userRole: UserRoles,
+  lastCommentIdRef: React.RefObject<number | null>,
   t: (key: string, values?: Record<string, any>) => string,
 ): TabItem[] => {
   const tabs: TabItem[] = [
@@ -30,7 +31,7 @@ export const getTabs = (
           {t('inventory.tabs.items')}
         </span>
       ),
-      children: <InventoryItems currentInventoryUser={currentInventoryUser} />,
+      children: <InventoryItems setInventory={setInventory} inventory={inventory} currentInventoryUser={currentInventoryUser} />,
     },
     {
       key: '2',
@@ -40,7 +41,7 @@ export const getTabs = (
           {t('inventory.tabs.discussion')}
         </span>
       ),
-      children: <InventoryDiscussion currentInventoryUser={currentInventoryUser} inventory={inventory} setInventory={setInventory} />,
+      children: <InventoryDiscussion currentInventoryUser={currentInventoryUser} inventory={inventory} lastCommentIdRef={lastCommentIdRef} />,
     },
     {
       key: 'info',
@@ -50,7 +51,7 @@ export const getTabs = (
           {t('inventory.tabs.info')}
         </span>
       ),
-      children: <InventoryInfo inventory={inventory} setInventory={setInventory} currentInventoryUser={currentInventoryUser} />,
+      children: <InventoryInfo inventory={inventory} currentInventoryUser={currentInventoryUser} />,
     },
   ];
 

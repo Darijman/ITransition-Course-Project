@@ -187,4 +187,70 @@ export class InventoryUsersService {
       })),
     };
   }
+
+  async updateInventoryUsersRole(
+    inventoryId: number,
+    inventoryUserIds: number[],
+    newRole: InventoryUserRoles,
+    reqUser: ReqUser,
+  ): Promise<{ success: boolean }> {
+    console.log(`inventoryUserIds`, inventoryUserIds);
+
+    if (!Array.isArray(inventoryUserIds) || !inventoryUserIds.length) {
+      throw new BadRequestException({ error: 'Invalid Inventory User IDs!' });
+    }
+
+    const invalidIds = inventoryUserIds.filter((id) => !id || isNaN(id));
+    if (invalidIds.length) {
+      throw new BadRequestException({ error: `Invalid Inventory User IDs: ${invalidIds.join(', ')}` });
+    }
+
+    const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
+    if (!inventory) {
+      throw new NotFoundException({ error: 'Inventory not found!' });
+    }
+
+    const existingUsers = await this.inventoryUsersRepository.find({
+      where: { id: In(inventoryUserIds), inventoryId },
+      relations: ['user'],
+    });
+    if (!existingUsers.length) {
+      throw new NotFoundException({ error: 'No Inventory Users found for the given IDs in this inventory!' });
+    }
+
+    if (reqUser.role !== UserRoles.ADMIN) {
+      const reqInventoryUser = await this.inventoryUsersRepository.findOne({
+        where: { inventoryId, userId: reqUser.id },
+      });
+
+      if (!reqInventoryUser || reqInventoryUser.role !== InventoryUserRoles.CREATOR) {
+        throw new ForbiddenException({ error: 'Only creator or global admin can update roles!' });
+      }
+    }
+
+    if (existingUsers.some((user) => user.role === InventoryUserRoles.CREATOR)) {
+      throw new ForbiddenException({ error: 'You cannot change the role of the inventory creator!' });
+    }
+
+    for (const invUser of existingUsers) {
+      invUser.role = newRole;
+      await this.inventoryUsersRepository.save(invUser);
+
+      if (invUser.user?.email) {
+        this.inventoriesGateway.server.to(invUser.user.email).emit('inventory-role-updated', {
+          inventoryId,
+          newRole,
+          updatedBy: reqUser.name,
+        });
+      }
+    }
+
+    this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-users-role-updated', {
+      inventoryId,
+      updatedUserIds: inventoryUserIds,
+      newRole,
+      updatedBy: reqUser.name,
+    });
+    return { success: true };
+  }
 }

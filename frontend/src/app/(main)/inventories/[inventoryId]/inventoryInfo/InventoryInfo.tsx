@@ -1,17 +1,15 @@
 'use client';
 
-import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
-import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
+import { Inventory } from '@/interfaces/inventories/Inventory';
+import { Button, Empty, Input, message, Popover, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { getInventoryUsersColumns } from './columns';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, TeamOutlined } from '@ant-design/icons';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
-import { useSocket } from '@/contexts/socketContext/SocketContext';
-import { useRouter } from 'next/navigation';
 import api from '../../../../../../axiosConfig';
 import './inventoryInfo.css';
 
@@ -26,67 +24,22 @@ const sortUsers = (users: InventoryUser[]) => {
 
 interface Props {
   inventory: Inventory | null;
-  setInventory: React.Dispatch<React.SetStateAction<Inventory | null>>;
   currentInventoryUser: InventoryUser | null;
 }
 
-export const InventoryInfo = ({ inventory, setInventory, currentInventoryUser }: Props) => {
-  const { socket } = useSocket();
+export const InventoryInfo = ({ inventory, currentInventoryUser }: Props) => {
   const { user } = useAuth();
-  const router = useRouter();
   const t = useTranslations();
 
   const [searchValue, setSearchValue] = useState<string>('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [isDeletingUsers, setIsDeletingUsers] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
 
+  const [isDeletingUsers, setIsDeletingUsers] = useState<boolean>(false);
+  const [popoverVisible, setPopoverVisible] = useState<boolean>(false);
+  const [isChangingUsersRoles, setIsChangingUsersRoles] = useState<boolean>(false);
+
   const canModify: boolean = currentInventoryUser?.role === InventoryUserRoles.CREATOR || user.role === UserRoles.ADMIN;
-
-  useEffect(() => {
-    if (!socket || !inventory?.id) return;
-
-    const handleUsersDeleted = (data: { inventoryId: number; deletedUserIds: number[]; deletedBy: string }) => {
-      if (data.inventoryId !== inventory.id) return;
-
-      setInventory((prev) =>
-        prev
-          ? {
-              ...prev,
-              inventoryUsers: prev.inventoryUsers?.filter((u) => !data.deletedUserIds.includes(u.id)),
-            }
-          : prev,
-      );
-    };
-
-    const handleRemoved = (data: { inventoryId: number; inventoryName: string; inventoryStatus: InventoryStatuses; deletedBy: string }) => {
-      if (data.inventoryStatus === InventoryStatuses.PRIVATE) {
-        messageApi.info({
-          content: (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {t('inventory.info.removed_private', {
-                name: data.deletedBy,
-                inventory: data.inventoryName,
-              })}
-              <Spin size='default' />
-            </div>
-          ),
-          onClose: () => router.push('/'),
-          duration: 3,
-        });
-      } else {
-        messageApi.info(t('inventory.info.removed_public', { name: data.deletedBy, inventory: data.inventoryName }));
-      }
-    };
-
-    socket.on('inventory-users-deleted', handleUsersDeleted);
-    socket.on('you-were-removed-from-inventory', handleRemoved);
-
-    return () => {
-      socket.off('inventory-users-deleted', handleUsersDeleted);
-      socket.off('you-were-removed-from-inventory', handleRemoved);
-    };
-  }, [socket, inventory, t, messageApi, router, setInventory]);
 
   const deleteInventoryUsersHandler = async () => {
     if (!canModify || !inventory) return;
@@ -107,6 +60,41 @@ export const InventoryInfo = ({ inventory, setInventory, currentInventoryUser }:
       setIsDeletingUsers(false);
     }
   };
+
+  const changeInventoryUsersRolesHandler = async (role: InventoryUserRoles) => {
+    if (!canModify || !inventory) return;
+    setIsChangingUsersRoles(true);
+
+    try {
+      await api.patch(`/inventory_users/inventory/${inventory.id}/roles`, {
+        inventoryUserIds: selectedRowKeys,
+        newRole: role,
+      });
+
+      messageApi.success({
+        content: t('inventory.info.roles_updated_successfully'),
+      });
+    } catch {
+      messageApi.error({
+        content: t('inventory.info.failed_to_update_roles'),
+      });
+    } finally {
+      setPopoverVisible(false);
+      setSelectedRowKeys([]);
+      setIsChangingUsersRoles(false);
+    }
+  };
+
+  const popoverContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      <Button type='primary' style={{ width: 120 }} onClick={() => changeInventoryUsersRolesHandler(InventoryUserRoles.VIEWER)}>
+        {t('inventory.roles.VIEWER')}
+      </Button>
+      <Button type='primary' style={{ width: 120 }} onClick={() => changeInventoryUsersRolesHandler(InventoryUserRoles.EDITOR)}>
+        {t('inventory.roles.EDITOR')}
+      </Button>
+    </div>
+  );
 
   const filteredUsers = useMemo(() => {
     const users = inventory?.inventoryUsers ?? [];
@@ -140,20 +128,6 @@ export const InventoryInfo = ({ inventory, setInventory, currentInventoryUser }:
               {t('inventory.info.table_title')}
             </Title>
 
-            {canModify ? (
-              <Button
-                className='inventory_info_delete_users_button'
-                disabled={!selectedRowKeys.length}
-                type='primary'
-                onClick={deleteInventoryUsersHandler}
-                danger
-                icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
-                loading={isDeletingUsers}
-              >
-                {t('inventory.info.delete_users')}
-              </Button>
-            ) : null}
-
             <Input.Search
               className='custom_search'
               style={{ width: 200 }}
@@ -161,6 +135,40 @@ export const InventoryInfo = ({ inventory, setInventory, currentInventoryUser }:
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />
+
+            {canModify ? (
+              <>
+                <Button
+                  className='inventory_info_delete_users_button'
+                  disabled={!selectedRowKeys.length}
+                  type='primary'
+                  onClick={deleteInventoryUsersHandler}
+                  danger
+                  icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
+                  loading={isDeletingUsers}
+                >
+                  {t('inventory.info.delete_users')}
+                </Button>
+
+                <Popover
+                  content={popoverContent}
+                  title={<div style={{ textAlign: 'center' }}>{t('inventory.access.select_role')}</div>}
+                  trigger='click'
+                  open={popoverVisible}
+                  onOpenChange={(visible) => setPopoverVisible(visible)}
+                >
+                  <Button
+                    className='inventory_invitations_role_button'
+                    disabled={!selectedRowKeys.length}
+                    type='primary'
+                    icon={<TeamOutlined style={{ fontSize: '20px' }} />}
+                    loading={isChangingUsersRoles}
+                  >
+                    {t('inventory.info.change_roles')}
+                  </Button>
+                </Popover>
+              </>
+            ) : null}
           </div>
           <Table
             className='inventory_users_table'
@@ -171,6 +179,7 @@ export const InventoryInfo = ({ inventory, setInventory, currentInventoryUser }:
             rowSelection={
               currentInventoryUser?.role === InventoryUserRoles.CREATOR || user?.role === UserRoles.ADMIN
                 ? {
+                    selectedRowKeys,
                     type: 'checkbox',
                     onChange: (keys) => setSelectedRowKeys(keys),
                     getCheckboxProps: (record) => ({

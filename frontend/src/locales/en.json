@@ -40,6 +40,7 @@
     "items": {
       "title": "Inventory Items",
       "table_search_placeholder": "Search item..",
+      "create_item_title": "Create New Item",
       "create_item": "Create Item",
       "like_failed": "Couldn’t add like. Please try again.",
       "unlike_failed": "Couldn’t remove like. Please try again.",
@@ -48,7 +49,8 @@
       "delete_success": "Items deleted successfully!",
       "delete_failed": "Failed to delete items. Try again later!",
       "delete_selected": "Delete selected items",
-      "no_items": "No items"
+      "no_items": "No items",
+      "created_successfully": "Item created successfully!"
     },
     "info": {
       "title": "Inventory Info",
@@ -61,7 +63,11 @@
       "failed_to_delete_users": "Failed to delete users! Try again later..",
       "users_deleted_successfully": "Selected users deleted succesfully!",
       "removed_private": "You were removed from the private inventory \"{inventory}\" by {name}. You have been redirected to the home page.",
-      "removed_public": "You were removed from the public inventory \"{inventory}\" by {name}."
+      "removed_public": "You were removed from the public inventory \"{inventory}\" by {name}.",
+      "change_roles": "Change roles",
+      "roles_updated_successfully": "Selected roles updated successfully!",
+      "failed_to_update_roles": "Failed to update roles! Try again later..",
+      "your_role_updated": "Your role was changed to {role} by {name}."
     },
     "access": {
       "title": "Inventory Access",

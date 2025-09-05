@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/authContext/AuthContext';
-import { InventoryItem } from '@/interfaces/inventories/InventoryItem';
 import { getInventoryItemsColumns } from './columns';
 import { Button, Empty, Input, message, Popconfirm, Spin, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
@@ -14,32 +13,34 @@ import { canModifyInventory } from '@/helpers/canModifyInventory';
 import { LikesListModal } from './likesListModal/LikesListModal';
 import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
-import { useSocket } from '@/contexts/socketContext/SocketContext';
+import { Inventory } from '@/interfaces/inventories/Inventory';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../../axiosConfig';
 import './inventoryItems.css';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 
 const { Title } = Typography;
 const limit: number = 10;
 
 interface Props {
   currentInventoryUser: InventoryUser | null;
+  inventory: Inventory | null;
+  setInventory: React.Dispatch<React.SetStateAction<Inventory | null>>;
 }
 
-export const InventoryItems = ({ currentInventoryUser }: Props) => {
+export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }: Props) => {
   const { user } = useAuth();
   const { inventoryId } = useParams();
   const { locale } = useLocale();
-  const { socket } = useSocket();
   const t = useTranslations();
 
-  const [items, setItems] = useState<InventoryItem[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const [searchValue, setSearchValue] = useState<string>('');
-  const [offset, setOffset] = useState<number>(0);
+  const [offset, setOffset] = useState<number>(inventory?.items?.length ? inventory.items.length : 0);
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
 
   const [showCreateItemModal, setShowCreateItemModal] = useState<boolean>(false);
@@ -48,15 +49,15 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
-    const fetchInitial = async () => {
+    const fetchItems = async () => {
       setIsLoading(true);
       try {
         const { data } = await api.get(`/inventory_items/inventory/${inventoryId}`, {
           params: { offset: 0, limit, searchValue },
         });
-        setItems(data);
+        setInventory((prev) => (prev ? { ...prev, items: data } : prev));
+        setOffset(data.length);
         setHasMore(data.length === limit);
-        setOffset(0);
       } catch {
         messageApi.open({ type: 'error', content: 'Failed to load data!' });
       } finally {
@@ -64,44 +65,19 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
       }
     };
 
-    fetchInitial();
-  }, [inventoryId, searchValue, messageApi]);
-
-  useEffect(() => {
-    if (!socket || !inventoryId) return;
-
-    const handleItemAdded = (data: { item: InventoryItem; addedBy: string }) => {
-      setItems((prevItems) => {
-        const exists = prevItems.some((i) => i.id === data.item.id);
-        if (exists) return prevItems;
-        return [data.item, ...prevItems];
-      });
-    };
-
-    const handleItemsDeleted = (data: { itemIds: number[]; deletedBy: string }) => {
-      setItems((prevItems) => prevItems.filter((item) => !data.itemIds.includes(item.id)));
-    };
-
-    socket.on('item-added', handleItemAdded);
-    socket.on('items-deleted', handleItemsDeleted);
-
-    return () => {
-      socket.off('item-added', handleItemAdded);
-      socket.off('items-deleted', handleItemsDeleted);
-    };
-  }, [socket, inventoryId]);
+    fetchItems();
+  }, [inventoryId, searchValue, messageApi, setInventory]);
 
   const loadMore = async () => {
     if (isLoading || !hasMore) return;
-
     setIsLoading(true);
+
     try {
       const nextOffset = offset + limit;
       const { data } = await api.get(`/inventory_items/inventory/${inventoryId}`, {
         params: { offset: nextOffset, limit, searchValue },
       });
-
-      setItems((prev) => [...prev, ...data]);
+      setInventory((prev) => (prev ? { ...prev, items: [...(prev.items || []), ...data] } : prev));
       setHasMore(data.length === limit);
       setOffset(nextOffset);
     } catch {
@@ -111,49 +87,49 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
     }
   };
 
-  const handleOpenLikesModal = (likes: InventoryItemLike[]) => {
+  const handleOpenLikesModal = useCallback((likes: InventoryItemLike[]) => {
     setSelectedLikes(likes);
     setShowLikesListModal(true);
-  };
+  }, []);
 
-  const handleToggleLike = async (itemId: number, likeId?: number) => {
-    if (!currentInventoryUser) return;
-    const action: 'like' | 'unlike' = likeId ? 'unlike' : 'like';
+  const handleToggleLike = useCallback(
+    async (itemId: number, likeId?: number) => {
+      if (!currentInventoryUser) return;
+      const action: 'like' | 'unlike' = likeId ? 'unlike' : 'like';
 
-    try {
-      if (likeId) {
-        await api.delete(`/inventory_item_likes/${likeId}`);
-        setItems((prev) =>
-          prev.map((item) => (item.id === itemId ? { ...item, likes: (item.likes ?? []).filter((like) => like.id !== likeId) } : item)),
-        );
-      } else {
-        const { data } = await api.post(`/inventory_item_likes`, { itemId });
-        setItems((prev) =>
-          prev.map((item) =>
-            item.id === itemId
+      try {
+        if (likeId) {
+          await api.delete(`/inventory_item_likes/${likeId}`);
+          setInventory((prev) =>
+            prev
               ? {
-                  ...item,
-                  likes: [...(item.likes ?? []), data],
+                  ...prev,
+                  items: prev.items?.map((item) =>
+                    item.id === itemId ? { ...item, likes: item.likes?.filter((l) => l.id !== likeId) } : item,
+                  ),
                 }
-              : item,
-          ),
-        );
+              : prev,
+          );
+        } else {
+          const { data } = await api.post(`/inventory_item_likes`, { itemId });
+          setInventory((prev) =>
+            prev
+              ? { ...prev, items: prev.items?.map((item) => (item.id === itemId ? { ...item, likes: [...(item.likes || []), data] } : item)) }
+              : prev,
+          );
+        }
+      } catch {
+        messageApi.error({ content: action === 'like' ? t('inventory.items.like_failed') : t('inventory.items.unlike_failed') });
       }
-    } catch {
-      messageApi.error({
-        content: action === 'like' ? t('inventory.items.like_failed') : t('inventory.items.unlike_failed'),
-      });
-    }
-  };
+    },
+    [currentInventoryUser, setInventory, messageApi, t],
+  );
 
   const deleteManyItemsHandler = async () => {
     if (!canModifyInventory(currentInventoryUser, user) || !selectedRowKeys.length) return;
-
     try {
-      await api.delete(`/inventory_items`, {
-        data: { itemIds: selectedRowKeys },
-      });
-
+      await api.delete(`/inventory_items`, { data: { itemIds: selectedRowKeys } });
+      setInventory((prev) => (prev ? { ...prev, items: prev.items?.filter((i) => !selectedRowKeys.includes(i.id)) } : prev));
       setSelectedRowKeys([]);
       messageApi.success(t('inventory.items.delete_success'));
     } catch {
@@ -162,9 +138,24 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
   };
 
   const filteredItems = useMemo(() => {
-    if (!searchValue) return items;
-    return items.filter((item) => item.title?.toLowerCase().includes(searchValue.toLowerCase()));
-  }, [items, searchValue]);
+    if (!inventory?.items) return [];
+    if (!searchValue) return inventory.items;
+    return inventory.items.filter((item) => item.title?.toLowerCase().includes(searchValue.toLowerCase()));
+  }, [inventory?.items, searchValue]);
+
+  const columns = useMemo(
+    () => getInventoryItemsColumns(t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal),
+    [t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal],
+  );
+
+  const canSelectRows =
+    currentInventoryUser &&
+    user &&
+    (currentInventoryUser.role === InventoryUserRoles.CREATOR ||
+      currentInventoryUser.role === InventoryUserRoles.EDITOR ||
+      user.role === UserRoles.ADMIN);
+
+  console.log(`selectedRowKeys`, selectedRowKeys);
 
   return (
     <div>
@@ -232,14 +223,19 @@ export const InventoryItems = ({ currentInventoryUser }: Props) => {
           >
             <Table
               className='items_table'
-              columns={getInventoryItemsColumns(t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal)}
+              columns={columns}
               dataSource={filteredItems}
               rowKey='id'
               pagination={false}
-              rowSelection={{
-                type: 'checkbox',
-                onChange: (keys) => setSelectedRowKeys(keys),
-              }}
+              rowSelection={
+                canSelectRows
+                  ? {
+                      selectedRowKeys,
+                      type: 'checkbox',
+                      onChange: (keys) => setSelectedRowKeys(keys),
+                    }
+                  : undefined
+              }
               locale={{
                 emptyText: (
                   <div style={{ textAlign: 'center' }}>

@@ -9,7 +9,7 @@ import Link from 'next/link';
 const { Text, Paragraph } = Typography;
 
 export const getInventoryItemsColumns = (
-  t: ReturnType<typeof import('next-intl').useTranslations>,
+  t: (key: string) => string,
   handleToggleLike: (itemId: number, likeId?: number) => void,
   inventoryUserId?: number,
   handleOpenLikesModal?: (likes: InventoryItemLike[]) => void,

@@ -99,7 +99,7 @@ export const CreateItemModal = ({ open, onClose, currentInventoryUser, inventory
       form.resetFields();
       onClose();
       messageApi.success({
-        content: 'Created Successfully!',
+        content: t('inventory.items.created_successfully'),
       });
     } catch {
       setErrorText('Something went wrong.. Please try again later.');
@@ -113,7 +113,7 @@ export const CreateItemModal = ({ open, onClose, currentInventoryUser, inventory
       {contextHolder}
 
       <Title level={3} style={{ margin: '0px 0px 20px 0px' }}>
-        Create New Item
+        {t('inventory.items.create_item_title')}
       </Title>
       {errorText ? (
         <Title level={5} style={{ margin: '0px 0px 20px 0px', color: 'var(--red-color)' }}>
@@ -156,7 +156,7 @@ export const CreateItemModal = ({ open, onClose, currentInventoryUser, inventory
               { max: 40, message: '' },
             ]}
           >
-            <InputField placeHolder='Title*' maxLength={30} minLength={1} />
+            <InputField placeHolder={t('inventories_new.form_input_title')} maxLength={30} minLength={1} />
           </Form.Item>
 
           <Form.Item name='description' rules={[{ required: false }]}>

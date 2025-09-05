@@ -38,15 +38,6 @@
   transition: background-color 0.2s ease !important;
 }
 
-.items_table .ant-table-row-selected > td {
-  background-color: var(--submit-button-color) !important;
-  color: #fff;
-}
-
-.items_table .ant-table-row-selected:hover > td {
-  background-color: var(--submit-button-color) !important;
-}
-
 .items_table .ant-table-tbody > tr.ant-table-row-error > td {
   background-color: var(--red-color);
   color: #fff;
@@ -87,11 +78,25 @@
   background-color: var(--background-color) !important;
 }
 
-.item_like_button:hover  {
+.item_like_button:hover {
   background-color: var(--hover-color) !important;
 }
 
 .inventory_items_delete_button:disabled {
   background-color: gray !important;
   border-color: gray !important;
+}
+
+.items_table .ant-table-tbody > tr:not(.ant-table-row-selected) > td {
+  background-color: var(--background-color);
+}
+
+.items_table .ant-table-row-selected > td {
+  background-color: var(--submit-button-color) !important;
+  color: #fff !important;
+}
+
+.items_table .ant-table-row-selected:hover > td {
+  background-color: var(--submit-button-color) !important;
+  color: #fff !important;
 }

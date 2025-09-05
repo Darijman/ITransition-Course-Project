@@ -214,7 +214,6 @@ export class InventoriesService {
       .leftJoinAndSelect('inventory.comments', 'comments')
       .leftJoinAndSelect('comments.author', 'author')
       .leftJoinAndSelect('author.user', 'authorUser')
-      .leftJoinAndSelect('inventory.items', 'items')
       .leftJoinAndSelect('inventory.category', 'category')
       .leftJoinAndSelect('inventory.creator', 'creator')
       .where('inventory.id = :inventoryId', { inventoryId })
