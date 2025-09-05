@@ -56,7 +56,12 @@
       "users": "Users",
       "table_title": "Inventory Users",
       "table_search_placeholder": "Search users..",
-      "no_users": "No users"
+      "no_users": "No users",
+      "delete_users": "Delete users",
+      "failed_to_delete_users": "Failed to delete users! Try again later..",
+      "users_deleted_successfully": "Selected users deleted succesfully!",
+      "removed_private": "You were removed from the private inventory \"{inventory}\" by {name}. You have been redirected to the home page.",
+      "removed_public": "You were removed from the public inventory \"{inventory}\" by {name}."
     },
     "access": {
       "title": "Inventory Access",

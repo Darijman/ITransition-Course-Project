@@ -223,6 +223,7 @@ export class InventoryInvitesService {
       const savedInvite = await this.inventoryInvitesRepository.save(invite);
 
       this.inventoriesGateway.server.to(`${invite.inventoryId}`).emit('inventory-invite-updated', savedInvite);
+      this.inventoriesGateway.server.to(reqUser.email).emit('inventory-invite-updated', savedInvite);
 
       acceptedInvites.push(savedInvite);
 
@@ -237,7 +238,11 @@ export class InventoryInvitesService {
           joinedAt: inventoryUser.createdAt,
         };
 
-        this.inventoriesGateway.server.to(reqUser.email).emit('inventory-invite-accepted', extendedInventory);
+        this.inventoriesGateway.server.to(reqUser.email).emit('inventory-joined', extendedInventory);
+        this.inventoriesGateway.server.to(`${invite.inventoryId}`).emit('inventory-user-joined', {
+          inventoryId: invite.inventoryId,
+          inventoryUser,
+        });
       }
     }
 
@@ -262,10 +267,11 @@ export class InventoryInvitesService {
       }
 
       invite.status = InventoryInviteStatuses.REJECTED;
-      const saved = await this.inventoryInvitesRepository.save(invite);
+      const savedInvite = await this.inventoryInvitesRepository.save(invite);
 
-      this.inventoriesGateway.server.to(`${invite.inventoryId}`).emit('inventory-invite-updated', saved);
-      rejectedInvites.push(saved);
+      this.inventoriesGateway.server.to(`${invite.inventoryId}`).emit('inventory-invite-updated', savedInvite);
+      this.inventoriesGateway.server.to(reqUser.email).emit('inventory-invite-updated', savedInvite);
+      rejectedInvites.push(savedInvite);
     }
 
     return rejectedInvites;

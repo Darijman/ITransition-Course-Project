@@ -50,7 +50,7 @@ export const getTabs = (
           {t('inventory.tabs.info')}
         </span>
       ),
-      children: <InventoryInfo inventory={inventory} />,
+      children: <InventoryInfo inventory={inventory} setInventory={setInventory} currentInventoryUser={currentInventoryUser} />,
     },
   ];
 

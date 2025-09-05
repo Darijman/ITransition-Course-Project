@@ -9,10 +9,11 @@ import { User } from 'src/users/user.entity';
 import { InventoryUsersModule } from 'src/inventoryUsers/inventoryUsers.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { Inventory } from 'src/inventories/inventory.entity';
+import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([InventoryInvite, User, Inventory]),
+    TypeOrmModule.forFeature([InventoryInvite, User, Inventory, InventoryUser]),
     forwardRef(() => InventoriesModule),
     UsersModule,
     InventoryUsersModule,

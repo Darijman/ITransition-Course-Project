@@ -46,11 +46,15 @@ export const UserInventories = () => {
 
   useEffect(() => {
     if (!socket || !user?.email) return;
-    const handleNewInventory = (inventory: ExtendedInventory) => setInventories((prev) => [inventory, ...prev]);
-    socket.on('inventory-invite-accepted', handleNewInventory);
+
+    const handleInventoryJoined = (inventory: ExtendedInventory) => {
+      setInventories((prev) => [inventory, ...prev]);
+    };
+
+    socket.on('inventory-joined', handleInventoryJoined);
 
     return () => {
-      socket.off('inventory-invite-accepted', handleNewInventory);
+      socket.off('inventory-joined', handleInventoryJoined);
     };
   }, [socket, user?.email]);
 

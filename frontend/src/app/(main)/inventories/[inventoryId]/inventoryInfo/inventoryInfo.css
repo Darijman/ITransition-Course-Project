@@ -36,7 +36,7 @@
   border-radius: 10px;
 }
 
-.inventory_users_table  .ant-table-thead > tr > th {
+.inventory_users_table .ant-table-thead > tr > th {
   background-color: var(--hover-color);
   color: var(--secondary-text-color);
   font-weight: 600;
@@ -44,28 +44,28 @@
   padding: 12px;
 }
 
-.inventory_users_table  .ant-table-tbody > tr > td {
+.inventory_users_table .ant-table-tbody > tr > td {
   background-color: var(--background-color);
   color: var(--primary-text-color);
   border-bottom: 1px solid var(--foreground-color);
   padding: 12px;
 }
 
-.inventory_users_table  .ant-table-tbody > tr:not(.ant-table-row-selected):hover > td {
+.inventory_users_table .ant-table-tbody > tr:not(.ant-table-row-selected):hover > td {
   background-color: var(--foreground-color) !important;
   transition: background-color 0.2s ease !important;
 }
 
-.inventory_users_table  .ant-table-row-selected > td {
+.inventory_users_table .ant-table-row-selected > td {
   background-color: var(--submit-button-color) !important;
   color: #fff;
 }
 
-.inventory_users_table  .ant-table-row-selected:hover > td {
+.inventory_users_table .ant-table-row-selected:hover > td {
   background-color: var(--submit-button-color) !important;
 }
 
-.inventory_users_table  .ant-table-tbody > tr.ant-table-row-error > td {
+.inventory_users_table .ant-table-tbody > tr.ant-table-row-error > td {
   background-color: var(--red-color);
   color: #fff;
 }
@@ -91,6 +91,12 @@
   color: var(--secondary-text-color) !important;
 }
 
-.inventory_users_table  td.ant-table-cell {
-  background-color: var(--background-color) !important;
+.inventory_info_delete_users_button:disabled {
+  background-color: gray !important;
+  border: 1px solid gray !important;
+}
+
+.inventory_users_table .ant-checkbox-disabled .ant-checkbox-inner {
+  border: 1px solid gray !important;
+  background-color: gray !important;
 }

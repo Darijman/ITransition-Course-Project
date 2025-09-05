@@ -42,10 +42,12 @@ export class InventoryUsersController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':inventoryUserId')
-  async deleteInventoryUserById(
-    @Param('inventoryUserId', new CustomParseIntPipe('Inventory User ID')) inventoryUserId: number,
+  @Delete(':inventoryId')
+  async deleteInventoryUsers(
+    @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Body('inventoryUserIds') inventoryUserIds: number[],
+    @Req() req: Request,
   ): Promise<{ success: boolean }> {
-    return await this.inventoryUsersService.deleteInventoryUserById(inventoryUserId);
+    return await this.inventoryUsersService.deleteInventoryUsersByIds(inventoryId, inventoryUserIds, req.user);
   }
 }

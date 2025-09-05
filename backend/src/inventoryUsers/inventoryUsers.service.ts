@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { InventoryUser } from './inventoryUser.entity';
@@ -7,6 +7,9 @@ import { InventoriesService } from 'src/inventories/inventories.service';
 import { UsersService } from 'src/users/users.service';
 import { Inventory } from 'src/inventories/inventory.entity';
 import { ReqUser } from 'src/interfaces/ReqUser';
+import { InventoryUserRoles } from './inventoryUserRoles.enum';
+import { UserRoles } from 'src/users/userRoles.enum';
+import { InventoriesGateway } from 'src/inventories/inventories.gateway';
 
 @Injectable()
 export class InventoryUsersService {
@@ -19,6 +22,7 @@ export class InventoryUsersService {
     private readonly inventoriesRepository: Repository<Inventory>,
 
     private readonly usersService: UsersService,
+    private readonly inventoriesGateway: InventoriesGateway,
   ) {}
 
   async getAllInventoriesUsers(): Promise<InventoryUser[]> {
@@ -65,27 +69,76 @@ export class InventoryUsersService {
     return inventoryUser;
   }
 
-  async deleteInventoryUserById(itemId: number): Promise<{ success: boolean }> {
-    if (!itemId || isNaN(itemId)) {
-      throw new BadRequestException({ error: 'Invalid Inventory User ID!' });
+  async deleteInventoryUsersByIds(inventoryId: number, inventoryUserIds: number[], reqUser: ReqUser): Promise<{ success: boolean }> {
+    if (!Array.isArray(inventoryUserIds) || inventoryUserIds.length === 0) {
+      throw new BadRequestException({ error: 'Invalid Inventory User IDs!' });
     }
 
-    const inventoryUser = await this.inventoryUsersRepository.findOne({ where: { id: itemId } });
-    if (!inventoryUser) {
-      throw new NotFoundException({ error: 'Inventory User not found!' });
+    const invalidIds = inventoryUserIds.filter((id) => !id || isNaN(id));
+    if (invalidIds.length) {
+      throw new BadRequestException({ error: `Invalid Inventory User IDs: ${invalidIds.join(', ')}` });
     }
 
-    await this.inventoryUsersRepository.delete(itemId);
+    const inventory = await this.inventoriesRepository.findOne({ where: { id: inventoryId } });
+    if (!inventory) {
+      throw new NotFoundException({ error: 'Inventory not found!' });
+    }
+
+    const existingUsers = await this.inventoryUsersRepository.find({
+      where: { id: In(inventoryUserIds), inventoryId },
+      relations: ['user'],
+    });
+    if (!existingUsers.length) {
+      throw new NotFoundException({ error: 'No Inventory Users found for the given IDs in this inventory!' });
+    }
+
+    if (reqUser.role !== UserRoles.ADMIN) {
+      const reqInventoryUser = await this.inventoryUsersRepository.findOne({
+        where: { inventoryId, userId: reqUser.id },
+      });
+
+      if (!reqInventoryUser || ![InventoryUserRoles.CREATOR, InventoryUserRoles.ADMIN].includes(reqInventoryUser.role)) {
+        throw new ForbiddenException({ error: 'You do not have permission to delete users!' });
+      }
+
+      if (existingUsers.some((user) => user.role === InventoryUserRoles.CREATOR)) {
+        throw new ForbiddenException({ error: 'You cannot delete the creator of the inventory!' });
+      }
+    }
+
+    const idsToDelete = existingUsers.map((user) => user.id);
+    await this.inventoryUsersRepository.delete(idsToDelete);
+
+    this.inventoriesGateway.server.to(inventoryId.toString()).emit('inventory-users-deleted', {
+      inventoryId,
+      deletedUserIds: idsToDelete,
+      deletedBy: reqUser.name,
+    });
+
+    for (const deletedUser of existingUsers) {
+      if (deletedUser.user?.email) {
+        this.inventoriesGateway.server.to(deletedUser.user.email).emit('you-were-removed-from-inventory', {
+          inventoryId,
+          inventoryName: inventory.title,
+          inventoryStatus: inventory.status,
+          deletedBy: reqUser.name,
+        });
+      }
+    }
+
     return { success: true };
   }
 
-  async leaveManyInventories(inventoryIds: number[], reqUser: ReqUser): Promise<{ success: boolean }> {
+  async leaveManyInventories(
+    inventoryIds: number[],
+    reqUser: ReqUser,
+  ): Promise<{ success: boolean; updatedInventories: { id: number; inventoryUsers: number[] }[] }> {
     if (!inventoryIds || !inventoryIds.length) {
       throw new BadRequestException({ error: 'No inventory IDs provided!' });
     }
 
-    const validIds = inventoryIds.some((id) => isNaN(id));
-    if (validIds) {
+    const hasInvalidIds = inventoryIds.some((id) => isNaN(id));
+    if (hasInvalidIds) {
       throw new BadRequestException({ error: 'Invalid inventory IDs!' });
     }
 
@@ -114,6 +167,24 @@ export class InventoryUsersService {
       .andWhere('inventoryId IN (:...inventoryIds)', { inventoryIds })
       .execute();
 
-    return { success: true };
+    const updatedInventories = await this.inventoriesRepository.find({
+      where: { id: In(inventoryIds) },
+      relations: ['inventoryUsers'],
+    });
+
+    updatedInventories.forEach((inventory) => {
+      this.inventoriesGateway.server.to(`inventory-${inventory.id}`).emit('user-left-inventory', {
+        inventoryId: inventory.id,
+        userId: reqUser.id,
+      });
+    });
+
+    return {
+      success: true,
+      updatedInventories: updatedInventories.map((inv) => ({
+        id: inv.id,
+        inventoryUsers: inv.inventoryUsers.map((u) => u.userId),
+      })),
+    };
   }
 }

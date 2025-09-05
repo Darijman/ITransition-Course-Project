@@ -82,27 +82,34 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
     const handleUpdatedInvite = (updated: InventoryInvite) => {
       setInvites((prev) => prev.map((inv) => (inv.id === updated.id ? { ...inv, status: updated.status } : inv)));
       setInventory((prev) =>
-        prev ? { ...prev, invites: prev.invites?.map((inv) => (inv.id === updated.id ? { ...inv, status: updated.status } : inv)) } : prev,
+        prev
+          ? {
+              ...prev,
+              invites: prev.invites?.map((inv) => (inv.id === updated.id ? { ...inv, status: updated.status } : inv)),
+            }
+          : prev,
       );
     };
 
-    const handleInviteDeleted = (data: { inviteId: number; inventoryId: number }) => {
+    const handleUserJoined = (data: { inventoryId: number; inventoryUser: any }) => {
       if (data.inventoryId !== inventory?.id) return;
 
-      setInvites((prevSlice) => prevSlice.filter((inv) => inv.id !== data.inviteId));
-      setInventory((prev) => {
-        if (!prev) return prev;
-        const newInvites = prev.invites?.filter((inv) => inv.id !== data.inviteId) || [];
-        return { ...prev, invites: newInvites };
-      });
+      setInventory((prev) =>
+        prev
+          ? {
+              ...prev,
+              inventoryUsers: [...(prev.inventoryUsers || []), data.inventoryUser],
+            }
+          : prev,
+      );
     };
 
     socket.on('inventory-invite-updated', handleUpdatedInvite);
-    socket.on('inventory-invite-deleted', handleInviteDeleted);
+    socket.on('inventory-user-joined', handleUserJoined);
 
     return () => {
       socket.off('inventory-invite-updated', handleUpdatedInvite);
-      socket.off('inventory-invite-deleted', handleInviteDeleted);
+      socket.off('inventory-user-joined', handleUserJoined);
     };
   }, [socket, user.id, setInventory, inventory?.id]);
 
