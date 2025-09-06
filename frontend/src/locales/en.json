@@ -50,7 +50,9 @@
       "delete_failed": "Failed to delete items. Try again later!",
       "delete_selected": "Delete selected items",
       "no_items": "No items",
-      "created_successfully": "Item created successfully!"
+      "created_successfully": "Item created successfully!",
+      "no_likes": "No likes yet..",
+      "failed_to_load_items": "Failed to load items! Try again later.."
     },
     "info": {
       "title": "Inventory Info",

@@ -1,7 +1,7 @@
 'use client';
 
 import { Inventory } from '@/interfaces/inventories/Inventory';
-import { Button, Empty, Input, message, Popover, Table, Typography } from 'antd';
+import { Button, Empty, Input, message, Popconfirm, Popover, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { getInventoryUsersColumns } from './columns';
 import { useAuth } from '@/contexts/authContext/AuthContext';
@@ -12,6 +12,7 @@ import { DeleteOutlined, TeamOutlined } from '@ant-design/icons';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import api from '../../../../../../axiosConfig';
 import './inventoryInfo.css';
+import { useLocale } from '@/contexts/localeContext/LocaleContext';
 
 const { Title, Paragraph } = Typography;
 
@@ -30,6 +31,7 @@ interface Props {
 export const InventoryInfo = ({ inventory, currentInventoryUser }: Props) => {
   const { user } = useAuth();
   const t = useTranslations();
+  const { locale } = useLocale();
 
   const [searchValue, setSearchValue] = useState<string>('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -44,20 +46,17 @@ export const InventoryInfo = ({ inventory, currentInventoryUser }: Props) => {
   const deleteInventoryUsersHandler = async () => {
     if (!canModify || !inventory) return;
 
-    setIsDeletingUsers(true);
     try {
       await api.delete(`/inventory_users/${inventory.id}`, { data: { inventoryUserIds: selectedRowKeys } });
       setSelectedRowKeys([]);
 
-      messageApi.info({
+      messageApi.success({
         content: t('inventory.info.users_deleted_successfully'),
       });
     } catch {
       messageApi.error({
         content: t('inventory.info.failed_to_delete_users'),
       });
-    } finally {
-      setIsDeletingUsers(false);
     }
   };
 
@@ -95,6 +94,8 @@ export const InventoryInfo = ({ inventory, currentInventoryUser }: Props) => {
       </Button>
     </div>
   );
+
+  const columns = useMemo(() => getInventoryUsersColumns(t, user), [t, user]);
 
   const filteredUsers = useMemo(() => {
     const users = inventory?.inventoryUsers ?? [];
@@ -138,17 +139,32 @@ export const InventoryInfo = ({ inventory, currentInventoryUser }: Props) => {
 
             {canModify ? (
               <>
-                <Button
-                  className='inventory_info_delete_users_button'
-                  disabled={!selectedRowKeys.length}
-                  type='primary'
-                  onClick={deleteInventoryUsersHandler}
-                  danger
-                  icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
-                  loading={isDeletingUsers}
+                <Popconfirm
+                  title={
+                    locale === 'en'
+                      ? 'This action is irreversible. Are you sure you want to delete?'
+                      : 'Это действие необратимо. Вы уверены, что хотите удалить?'
+                  }
+                  onConfirm={deleteInventoryUsersHandler}
+                  open={isDeletingUsers}
+                  onOpenChange={(visible) => setIsDeletingUsers(visible)}
+                  okText={locale === 'en' ? 'Yes, delete!' : 'Да, удалить!'}
+                  cancelText={locale === 'en' ? 'Cancel' : 'Отмена'}
+                  placement='topRight'
+                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                  okButtonProps={{ danger: true, style: { backgroundColor: 'red', borderColor: 'red' } }}
+                  cancelButtonProps={{ style: { backgroundColor: 'var(--secondary-text-color)', color: '#FFFFFF' } }}
                 >
-                  {t('inventory.info.delete_users')}
-                </Button>
+                  <Button
+                    className='inventory_info_delete_users_button'
+                    disabled={!selectedRowKeys.length}
+                    type='primary'
+                    danger
+                    icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
+                  >
+                    {t('inventory.info.delete_users')}
+                  </Button>
+                </Popconfirm>
 
                 <Popover
                   content={popoverContent}
@@ -170,9 +186,10 @@ export const InventoryInfo = ({ inventory, currentInventoryUser }: Props) => {
               </>
             ) : null}
           </div>
+
           <Table
             className='inventory_users_table'
-            columns={getInventoryUsersColumns(t, user)}
+            columns={columns}
             dataSource={filteredUsers}
             rowKey='id'
             pagination={false}

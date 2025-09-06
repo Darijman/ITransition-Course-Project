@@ -6,19 +6,18 @@ import { getInventoryItemsColumns } from './columns';
 import { Button, Empty, Input, message, Popconfirm, Spin, Table, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
 import { IoIosAddCircle } from 'react-icons/io';
-import { useParams } from 'next/navigation';
+import { DeleteOutlined } from '@ant-design/icons';
 import { CreateItemModal } from './createItemModal/CreateItemModal';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import { canModifyInventory } from '@/helpers/canModifyInventory';
 import { LikesListModal } from './likesListModal/LikesListModal';
-import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import { Inventory } from '@/interfaces/inventories/Inventory';
+import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
+import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../../axiosConfig';
 import './inventoryItems.css';
-import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
-import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 
 const { Title } = Typography;
 const limit: number = 10;
@@ -31,7 +30,6 @@ interface Props {
 
 export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }: Props) => {
   const { user } = useAuth();
-  const { inventoryId } = useParams();
   const { locale } = useLocale();
   const t = useTranslations();
 
@@ -45,36 +43,39 @@ export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }
 
   const [showCreateItemModal, setShowCreateItemModal] = useState<boolean>(false);
   const [showLikesListModal, setShowLikesListModal] = useState<boolean>(false);
-  const [selectedLikes, setSelectedLikes] = useState<InventoryItemLike[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
+    if (!inventory?.id) return;
+
     const fetchItems = async () => {
       setIsLoading(true);
       try {
-        const { data } = await api.get(`/inventory_items/inventory/${inventoryId}`, {
+        const { data } = await api.get(`/inventory_items/inventory/${inventory.id}`, {
           params: { offset: 0, limit, searchValue },
         });
+
         setInventory((prev) => (prev ? { ...prev, items: data } : prev));
         setOffset(data.length);
         setHasMore(data.length === limit);
       } catch {
-        messageApi.open({ type: 'error', content: 'Failed to load data!' });
+        messageApi.open({ type: 'error', content: t('inventory.items.failed_to_load_items') });
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchItems();
-  }, [inventoryId, searchValue, messageApi, setInventory]);
+  }, [inventory?.id, searchValue, messageApi, setInventory, t]);
 
   const loadMore = async () => {
-    if (isLoading || !hasMore) return;
+    if (isLoading || !hasMore || !inventory?.id) return;
     setIsLoading(true);
 
     try {
       const nextOffset = offset + limit;
-      const { data } = await api.get(`/inventory_items/inventory/${inventoryId}`, {
+      const { data } = await api.get(`/inventory_items/inventory/${inventory.id}`, {
         params: { offset: nextOffset, limit, searchValue },
       });
       setInventory((prev) => (prev ? { ...prev, items: [...(prev.items || []), ...data] } : prev));
@@ -87,8 +88,8 @@ export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }
     }
   };
 
-  const handleOpenLikesModal = useCallback((likes: InventoryItemLike[]) => {
-    setSelectedLikes(likes);
+  const handleOpenLikesModal = useCallback((itemId: number) => {
+    setSelectedItemId(itemId);
     setShowLikesListModal(true);
   }, []);
 
@@ -100,33 +101,19 @@ export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }
       try {
         if (likeId) {
           await api.delete(`/inventory_item_likes/${likeId}`);
-          setInventory((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  items: prev.items?.map((item) =>
-                    item.id === itemId ? { ...item, likes: item.likes?.filter((l) => l.id !== likeId) } : item,
-                  ),
-                }
-              : prev,
-          );
         } else {
-          const { data } = await api.post(`/inventory_item_likes`, { itemId });
-          setInventory((prev) =>
-            prev
-              ? { ...prev, items: prev.items?.map((item) => (item.id === itemId ? { ...item, likes: [...(item.likes || []), data] } : item)) }
-              : prev,
-          );
+          await api.post(`/inventory_item_likes`, { itemId });
         }
       } catch {
         messageApi.error({ content: action === 'like' ? t('inventory.items.like_failed') : t('inventory.items.unlike_failed') });
       }
     },
-    [currentInventoryUser, setInventory, messageApi, t],
+    [currentInventoryUser, messageApi, t],
   );
 
   const deleteManyItemsHandler = async () => {
     if (!canModifyInventory(currentInventoryUser, user) || !selectedRowKeys.length) return;
+
     try {
       await api.delete(`/inventory_items`, { data: { itemIds: selectedRowKeys } });
       setInventory((prev) => (prev ? { ...prev, items: prev.items?.filter((i) => !selectedRowKeys.includes(i.id)) } : prev));
@@ -137,16 +124,16 @@ export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }
     }
   };
 
+  const columns = useMemo(
+    () => getInventoryItemsColumns(t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal),
+    [t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal],
+  );
+
   const filteredItems = useMemo(() => {
     if (!inventory?.items) return [];
     if (!searchValue) return inventory.items;
     return inventory.items.filter((item) => item.title?.toLowerCase().includes(searchValue.toLowerCase()));
   }, [inventory?.items, searchValue]);
-
-  const columns = useMemo(
-    () => getInventoryItemsColumns(t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal),
-    [t, handleToggleLike, currentInventoryUser?.id, handleOpenLikesModal],
-  );
 
   const canSelectRows =
     currentInventoryUser &&
@@ -154,8 +141,6 @@ export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }
     (currentInventoryUser.role === InventoryUserRoles.CREATOR ||
       currentInventoryUser.role === InventoryUserRoles.EDITOR ||
       user.role === UserRoles.ADMIN);
-
-  console.log(`selectedRowKeys`, selectedRowKeys);
 
   return (
     <div>
@@ -200,7 +185,13 @@ export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }
                 okButtonProps={{ danger: true, style: { backgroundColor: 'red', borderColor: 'red' } }}
                 cancelButtonProps={{ style: { backgroundColor: 'var(--secondary-text-color)', color: '#FFFFFF' } }}
               >
-                <Button className='inventory_items_delete_button' type='primary' danger disabled={!selectedRowKeys.length}>
+                <Button
+                  icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
+                  className='inventory_items_delete_button'
+                  type='primary'
+                  danger
+                  disabled={!selectedRowKeys.length}
+                >
                   {t('inventory.items.delete_selected')}
                 </Button>
               </Popconfirm>
@@ -252,10 +243,14 @@ export const InventoryItems = ({ currentInventoryUser, inventory, setInventory }
         open={showCreateItemModal}
         onClose={() => setShowCreateItemModal(false)}
         currentInventoryUser={currentInventoryUser}
-        inventoryId={inventoryId}
+        inventoryId={inventory?.id ? inventory.id : 1}
       />
 
-      <LikesListModal open={showLikesListModal} onClose={() => setShowLikesListModal(false)} likes={selectedLikes} />
+      <LikesListModal
+        open={showLikesListModal}
+        onClose={() => setShowLikesListModal(false)}
+        likes={inventory?.items?.find((i) => i.id === selectedItemId)?.likes ?? []}
+      />
     </div>
   );
 };

@@ -60,8 +60,17 @@ export class InventoryInvitesController {
   @Get('/inventory/:inventoryId')
   async getInvitesByInventoryId(
     @Param('inventoryId', new CustomParseIntPipe('Inventory ID')) inventoryId: number,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+    @Query('status') status?: InventoryInviteStatuses | 'ALL',
+    @Query('searchValue') searchValue?: string,
   ): Promise<InventoryInvite[]> {
-    return await this.inventoryInvitesService.getInvitesByInventoryId(inventoryId);
+    return this.inventoryInvitesService.getInvitesByInventoryId(inventoryId, {
+      limit: limit ? Number(limit) : undefined,
+      offset: offset ? Number(offset) : undefined,
+      status,
+      searchValue,
+    });
   }
 
   @Admin()

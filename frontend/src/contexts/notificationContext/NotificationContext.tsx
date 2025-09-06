@@ -44,8 +44,9 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
 
       setNotifications(notificationsRes.data);
       setUnreadCounts(countsRes.data);
-    } catch (err) {
-      console.log(err);
+    } catch {
+      setNotifications([]);
+      setUnreadCounts({ INVITE: 0, TOTAL: 0 });
     }
   }, [user.id]);
 
@@ -102,9 +103,7 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
         newCounts.TOTAL = Math.max(newCounts.TOTAL - 1, 0);
         return newCounts;
       });
-    } catch (err) {
-      console.log(err);
-    }
+    } catch {}
   };
 
   return (

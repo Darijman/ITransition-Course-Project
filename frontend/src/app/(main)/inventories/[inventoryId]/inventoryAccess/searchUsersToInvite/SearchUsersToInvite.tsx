@@ -19,10 +19,9 @@ const { Title } = Typography;
 interface Props {
   currentInventoryUser: InventoryUser | null;
   inventory: Inventory | null;
-  setInventory: React.Dispatch<React.SetStateAction<Inventory | null>>;
 }
 
-export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInventory }: Props) => {
+export const SearchUsersToInvite = ({ currentInventoryUser, inventory }: Props) => {
   const { user } = useAuth();
   const t = useTranslations();
 
@@ -90,7 +89,6 @@ export const SearchUsersToInvite = ({ currentInventoryUser, inventory, setInvent
                 key={`${u.id}-${inventory?.invites?.length}`}
                 currentInventoryUser={currentInventoryUser}
                 inventory={inventory}
-                setInventory={setInventory}
                 user={u}
                 disabled={isParticipantOrInvited}
               />

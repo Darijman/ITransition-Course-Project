@@ -33,8 +33,6 @@ const ProfileSettingsPage = () => {
   const t = useTranslations();
   const router = useRouter();
 
-  console.log(`user`, user);
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showDeleteAvatarModal, setShowDeleteAvatarModal] = useState<boolean>(false);
@@ -113,9 +111,7 @@ const ProfileSettingsPage = () => {
         formData.append('avatarUrl', '');
       }
 
-      const { data } = await api.put(`/users/${user.id}`, formData);
-      console.log(`data`, data);
-      
+      const { data } = await api.put(`/users/${user.id}`, formData);      
       const { id, name, role, email, avatarUrl, hasPassword } = data;
 
       setUser({

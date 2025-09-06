@@ -26,9 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const response = await api.get<BasicUser>('/auth/profile');
       setUser(response.data);
-    } catch (error: any) {
-      console.log(`error`, error);
-
+    } catch {
       setUser({ id: 0, name: '', email: '', role: UserRoles.USER, avatarUrl: '', hasPassword: false });
     }
   };

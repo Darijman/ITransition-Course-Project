@@ -51,7 +51,9 @@
       "delete_failed": "Не удалось удалить предметы. Попробуйте позже!",
       "delete_selected": "Удалить выбранные предметы",
       "no_items": "Нет предметов",
-      "created_successfully": "Предмет успешно создан!"
+      "created_successfully": "Предмет успешно создан!",
+      "no_likes": "Лайков еще нет..",
+      "failed_to_load_items": "Не удалось загрузить предметы! Попробуйте позже.."
     },
     "info": {
       "title": "Информация об инвентаре",
@@ -84,8 +86,8 @@
       "select_role": "Выберите роль пользователя",
       "user": "Пользователь",
       "cancel_invitations": "Отменить Приглашения",
-      "invitations_deleted": "Приглашения успешно удалены",
-      "failed_to_delete_invitations": "Не удалось удалить приглашения",
+      "invitations_deleted": "Приглашения успешно удалены!",
+      "failed_to_delete_invitations": "Не удалось удалить приглашения!",
       "no_invitations": "Нет приглашений"
     },
     "discussion": {

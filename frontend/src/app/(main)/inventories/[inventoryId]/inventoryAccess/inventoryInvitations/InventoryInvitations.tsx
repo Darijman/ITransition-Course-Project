@@ -1,24 +1,24 @@
 'use client';
 
-import { Button, Empty, Input, message, Spin, Table, Typography } from 'antd';
+import { Button, Empty, Input, message, Popconfirm, Spin, Table, Typography } from 'antd';
 import { Select } from '@/components/select/Select';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { getInventoryInvitationColumns } from './columns';
-import { InventoryInvite, InventoryInviteStatuses } from '@/interfaces/inventories/InventoryInvite';
-import { useSocket } from '@/contexts/socketContext/SocketContext';
+import { InventoryInviteStatuses } from '@/interfaces/inventories/InventoryInvite';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import { Inventory } from '@/interfaces/inventories/Inventory';
 import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
+import { useLocale } from '@/contexts/localeContext/LocaleContext';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import api from '../../../../../../../axiosConfig';
 import './inventoryInvitations.css';
 
 const { Title } = Typography;
-const LIMIT: number = 10;
+const limit: number = 10;
 
 interface Props {
   currentInventoryUser: InventoryUser | null;
@@ -29,89 +29,39 @@ interface Props {
 export const InventoryInvitations = ({ currentInventoryUser, inventory, setInventory }: Props) => {
   const t = useTranslations();
   const { user } = useAuth();
-  const { socket } = useSocket();
+  const { locale } = useLocale();
 
-  const [invites, setInvites] = useState<InventoryInvite[]>([]);
   const [filters, setFilters] = useState({ status: 'ALL', searchValue: '' });
   const [offset, setOffset] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDeletingInvitations, setIsDeletingInvitations] = useState<boolean>(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
 
   useEffect(() => {
-    if (!inventory?.invites) return;
+    if (!inventory?.id) return;
 
-    const sortedInvites = [...inventory.invites].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const fetchInvitations = async () => {
+      setIsLoading(true);
+      try {
+        const { data } = await api.get(`/inventory_invites/inventory/${inventory.id}`, {
+          params: { offset: 0, limit, ...filters },
+        });
 
-    const initial = sortedInvites.slice(0, LIMIT);
-    setInvites(initial);
-    setOffset(initial.length);
-    setHasMore(sortedInvites.length > LIMIT);
-  }, [inventory]);
-
-  useEffect(() => {
-    if (!inventory?.invites) return;
-
-    let filtered = [...inventory.invites];
-
-    if (filters.status !== 'ALL') {
-      filtered = filtered.filter((inv) => inv.status === filters.status);
-    }
-
-    if (filters.searchValue) {
-      const search = filters.searchValue.toLowerCase();
-      filtered = filtered.filter(
-        (inv) =>
-          inv.inviteeEmail?.toLowerCase().includes(search) ||
-          inv.inviteeUser?.name?.toLowerCase().includes(search) ||
-          inv.inviteeUser?.email?.toLowerCase().includes(search),
-      );
-    }
-
-    const initial = filtered.slice(0, LIMIT);
-    setInvites(initial);
-    setOffset(initial.length);
-    setHasMore(filtered.length > LIMIT);
-  }, [filters, inventory]);
-
-  useEffect(() => {
-    if (!socket || !user.id || !inventory?.id) return;
-
-    const handleUpdatedInvite = (updated: InventoryInvite) => {
-      setInvites((prev) => prev.map((inv) => (inv.id === updated.id ? { ...inv, status: updated.status } : inv)));
-      setInventory((prev) =>
-        prev
-          ? {
-              ...prev,
-              invites: prev.invites?.map((inv) => (inv.id === updated.id ? { ...inv, status: updated.status } : inv)),
-            }
-          : prev,
-      );
+        setInventory((prev) => (prev ? { ...prev, invites: data } : prev));
+        setOffset(data.length);
+        setHasMore(data.length === limit);
+      } catch {
+        messageApi.error(t('inventory.items.failed_to_load_items'));
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const handleUserJoined = (data: { inventoryId: number; inventoryUser: any }) => {
-      if (data.inventoryId !== inventory?.id) return;
-
-      setInventory((prev) =>
-        prev
-          ? {
-              ...prev,
-              inventoryUsers: [...(prev.inventoryUsers || []), data.inventoryUser],
-            }
-          : prev,
-      );
-    };
-
-    socket.on('inventory-invite-updated', handleUpdatedInvite);
-    socket.on('inventory-user-joined', handleUserJoined);
-
-    return () => {
-      socket.off('inventory-invite-updated', handleUpdatedInvite);
-      socket.off('inventory-user-joined', handleUserJoined);
-    };
-  }, [socket, user.id, setInventory, inventory?.id]);
+    fetchInvitations();
+  }, [inventory?.id, filters, t, messageApi, setInventory]);
 
   const loadMore = async () => {
     if (isLoading || !hasMore || !inventory?.id) return;
@@ -119,12 +69,20 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
     setIsLoading(true);
     try {
       const { data } = await api.get(`/inventory_invites/inventory/${inventory.id}`, {
-        params: { offset, limit: LIMIT, ...filters },
+        params: { offset, limit, ...filters },
       });
 
-      setInvites((prev) => [...prev, ...data]);
+      setInventory((prev) =>
+        prev
+          ? {
+              ...prev,
+              invites: [...(prev.invites ?? []), ...data],
+            }
+          : prev,
+      );
+
       setOffset((prev) => prev + data.length);
-      setHasMore(data.length === LIMIT);
+      setHasMore(data.length === limit);
     } catch {
       messageApi.error(t('profile.user_invitations.failed_to_load_more'));
     } finally {
@@ -149,6 +107,27 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
   const handleSearchChange = (val: string) => setFilters((prev) => ({ ...prev, searchValue: val }));
   const handleStatusChange = (val: 'ALL' | InventoryInviteStatuses) => setFilters((prev) => ({ ...prev, status: val }));
 
+  const columns = useMemo(() => getInventoryInvitationColumns(t), [t]);
+
+  const filteredInvitations = useMemo(() => {
+    if (!inventory?.invites) return [];
+    if (!filters.searchValue) return inventory.invites;
+
+    return inventory.invites.filter((invite) => {
+      const search = filters.searchValue.toLowerCase();
+
+      return (
+        invite.inviteeEmail?.toLowerCase().includes(search) ||
+        invite.inviter?.user?.name?.toLowerCase().includes(search) ||
+        invite.inviter?.user?.email?.toLowerCase().includes(search) ||
+        invite.invitee?.user?.name?.toLowerCase().includes(search) ||
+        invite.invitee?.user?.email?.toLowerCase().includes(search) ||
+        invite.inviteeUser?.name?.toLowerCase().includes(search) ||
+        invite.inviteeUser?.email?.toLowerCase().includes(search)
+      );
+    });
+  }, [inventory?.invites, filters.searchValue]);
+
   return (
     <div className='inventory_invites_table'>
       {contextHolder}
@@ -166,16 +145,32 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
           onChange={(e) => handleSearchChange(e.target.value)}
         />
 
-        <Button
-          className='inventory_invitations_delete_button'
-          disabled={!selectedRowKeys.length}
-          onClick={deleteManyInvitesHandler}
-          type='primary'
-          danger
-          icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
+        <Popconfirm
+          title={
+            locale === 'en'
+              ? 'This action is irreversible. Are you sure you want to delete?'
+              : 'Это действие необратимо. Вы уверены, что хотите удалить?'
+          }
+          onConfirm={deleteManyInvitesHandler}
+          open={isDeletingInvitations}
+          onOpenChange={(prev) => setIsDeletingInvitations(prev)}
+          okText={locale === 'en' ? 'Yes, delete!' : 'Да, удалить!'}
+          cancelText={locale === 'en' ? 'Cancel' : 'Отмена'}
+          placement='topRight'
+          getPopupContainer={(trigger) => trigger.parentElement || document.body}
+          okButtonProps={{ danger: true, style: { backgroundColor: 'red', borderColor: 'red' } }}
+          cancelButtonProps={{ style: { backgroundColor: 'var(--secondary-text-color)', color: '#FFFFFF' } }}
         >
-          {t('inventory.access.cancel_invitations')}
-        </Button>
+          <Button
+            className='inventory_invitations_delete_button'
+            disabled={!selectedRowKeys.length}
+            type='primary'
+            danger
+            icon={<DeleteOutlined style={{ fontSize: '20px' }} />}
+          >
+            {t('inventory.access.cancel_invitations')}
+          </Button>
+        </Popconfirm>
 
         <Select
           options={[
@@ -193,7 +188,7 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
 
       <div id='inventory_invitations_table' style={{ height: 500, overflow: 'auto' }}>
         <InfiniteScroll
-          dataLength={invites.length}
+          dataLength={filteredInvitations.length}
           next={loadMore}
           hasMore={hasMore}
           loader={
@@ -213,8 +208,8 @@ export const InventoryInvitations = ({ currentInventoryUser, inventory, setInven
               onChange: setSelectedRowKeys,
               getCheckboxProps: (record) => ({ disabled: record.status !== InventoryInviteStatuses.PENDING }),
             }}
-            columns={getInventoryInvitationColumns(t)}
-            dataSource={invites}
+            columns={columns}
+            dataSource={filteredInvitations}
             rowKey='id'
             pagination={false}
             locale={{

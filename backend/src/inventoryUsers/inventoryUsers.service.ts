@@ -129,24 +129,17 @@ export class InventoryUsersService {
     return { success: true };
   }
 
-  async leaveManyInventories(
-    inventoryIds: number[],
-    reqUser: ReqUser,
-  ): Promise<{ success: boolean; updatedInventories: { id: number; inventoryUsers: number[] }[] }> {
-    if (!inventoryIds || !inventoryIds.length) {
+  async leaveManyInventories(inventoryIds: number[], reqUser: ReqUser): Promise<{ success: boolean }> {
+    if (!inventoryIds?.length) {
       throw new BadRequestException({ error: 'No inventory IDs provided!' });
     }
 
-    const hasInvalidIds = inventoryIds.some((id) => isNaN(id));
-    if (hasInvalidIds) {
+    if (inventoryIds.some((id) => isNaN(id))) {
       throw new BadRequestException({ error: 'Invalid inventory IDs!' });
     }
 
     const inventoryUsers = await this.inventoryUsersRepository.find({
-      where: {
-        userId: reqUser.id,
-        inventoryId: In(inventoryIds),
-      },
+      where: { userId: reqUser.id, inventoryId: In(inventoryIds) },
       relations: ['inventory', 'inventory.creator'],
     });
 
@@ -154,38 +147,32 @@ export class InventoryUsersService {
       throw new BadRequestException({ error: 'No matching inventories to leave!' });
     }
 
-    const creatorInventories = inventoryUsers.filter((e) => e.inventory.creatorId === reqUser.id);
+    // Проверка на creator
+    const creatorInventories = inventoryUsers.filter((iu) => iu.inventory.creatorId === reqUser.id);
     if (creatorInventories.length) {
-      throw new BadRequestException({ error: 'Creators cannot leave their own inventories!' });
+      throw new BadRequestException({
+        error: 'Creators cannot leave their own inventories!',
+      });
     }
+
+    const inventoryUserIds = inventoryUsers.map((iu) => iu.id);
 
     await this.inventoryUsersRepository
       .createQueryBuilder()
       .delete()
       .from('inventory_users')
-      .where('userId = :userId', { userId: reqUser.id })
-      .andWhere('inventoryId IN (:...inventoryIds)', { inventoryIds })
+      .where('id IN (:...ids)', { ids: inventoryUserIds })
       .execute();
 
-    const updatedInventories = await this.inventoriesRepository.find({
-      where: { id: In(inventoryIds) },
-      relations: ['inventoryUsers'],
-    });
-
-    updatedInventories.forEach((inventory) => {
-      this.inventoriesGateway.server.to(`inventory-${inventory.id}`).emit('user-left-inventory', {
-        inventoryId: inventory.id,
-        userId: reqUser.id,
+    for (const invUser of inventoryUsers) {
+      this.inventoriesGateway.server.to(`${invUser.inventoryId}`).emit('inventory-users-deleted', {
+        inventoryId: invUser.inventoryId,
+        inventoryUserIds: [invUser.id],
+        deletedBy: reqUser.name ?? 'system',
       });
-    });
+    }
 
-    return {
-      success: true,
-      updatedInventories: updatedInventories.map((inv) => ({
-        id: inv.id,
-        inventoryUsers: inv.inventoryUsers.map((u) => u.userId),
-      })),
-    };
+    return { success: true };
   }
 
   async updateInventoryUsersRole(
@@ -194,8 +181,6 @@ export class InventoryUsersService {
     newRole: InventoryUserRoles,
     reqUser: ReqUser,
   ): Promise<{ success: boolean }> {
-    console.log(`inventoryUserIds`, inventoryUserIds);
-
     if (!Array.isArray(inventoryUserIds) || !inventoryUserIds.length) {
       throw new BadRequestException({ error: 'Invalid Inventory User IDs!' });
     }

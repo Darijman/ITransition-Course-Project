@@ -8,6 +8,7 @@ import { InventoryItem } from 'src/inventoryItems/inventoryItem.entity';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { UserRoles } from 'src/users/userRoles.enum';
 import { InventoryUserRoles } from 'src/inventoryUsers/inventoryUserRoles.enum';
+import { InventoriesGateway } from 'src/inventories/inventories.gateway';
 
 @Injectable()
 export class InventoryItemLikesService {
@@ -20,6 +21,8 @@ export class InventoryItemLikesService {
 
     @InjectRepository(InventoryUser)
     private readonly inventoryUsersRepository: Repository<InventoryUser>,
+
+    private readonly inventoriesGateway: InventoriesGateway,
   ) {}
 
   async getAllLikes(): Promise<InventoryItemLike[]> {
@@ -65,10 +68,13 @@ export class InventoryItemLikesService {
     const like = this.inventoryItemLikesRepository.create({ itemId, inventoryUserId: inventoryUser.id });
     await this.inventoryItemLikesRepository.save(like);
 
-    return this.inventoryItemLikesRepository.findOne({
+    const fullLike = await this.inventoryItemLikesRepository.findOne({
       where: { id: like.id },
       relations: ['inventoryUser', 'inventoryUser.user'],
     });
+
+    this.inventoriesGateway.server.emit('item-like-created', fullLike);
+    return fullLike;
   }
 
   async getLikeById(likeId: number): Promise<InventoryItemLike> {
@@ -91,10 +97,7 @@ export class InventoryItemLikesService {
       throw new BadRequestException({ error: 'Invalid like ID!' });
     }
 
-    const like = await this.inventoryItemLikesRepository.findOne({
-      where: { id: likeId },
-      relations: ['inventoryUser'],
-    });
+    const like = await this.inventoryItemLikesRepository.findOne({ where: { id: likeId }, relations: ['inventoryUser'] });
     if (!like) {
       throw new NotFoundException({ error: 'Like not found!' });
     }
@@ -104,6 +107,8 @@ export class InventoryItemLikesService {
     }
 
     await this.inventoryItemLikesRepository.delete(likeId);
+
+    this.inventoriesGateway.server.emit('item-like-deleted', { id: likeId });
     return { success: true };
   }
 }

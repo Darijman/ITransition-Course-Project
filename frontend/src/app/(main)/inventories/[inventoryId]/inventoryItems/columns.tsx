@@ -3,7 +3,6 @@ import { InventoryItem } from '@/interfaces/inventories/InventoryItem';
 import { Typography, Image, Button, Popover } from 'antd';
 import { formatDate } from '@/helpers/formatDate';
 import { LikeButton } from './likeButton/LikeButton';
-import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import Link from 'next/link';
 
 const { Text, Paragraph } = Typography;
@@ -12,7 +11,7 @@ export const getInventoryItemsColumns = (
   t: (key: string) => string,
   handleToggleLike: (itemId: number, likeId?: number) => void,
   inventoryUserId?: number,
-  handleOpenLikesModal?: (likes: InventoryItemLike[]) => void,
+  handleOpenLikesModal?: (itemId: number) => void,
 ): ColumnsType<InventoryItem> => [
   {
     title: 'Image',
@@ -41,7 +40,7 @@ export const getInventoryItemsColumns = (
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleOpenLikesModal?.(likes);
+                handleOpenLikesModal?.(record.id);
               }}
             >
               {t('inventory.items.view_all_likes')} ({likes.length})

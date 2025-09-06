@@ -1,18 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Inventory, InventoryStatuses } from '@/interfaces/inventories/Inventory';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
 import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles';
 import { Button, Space, Tooltip, Typography, message } from 'antd';
 import { useTranslations } from 'next-intl';
-import { useSocket } from '@/contexts/socketContext/SocketContext';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import { InventoryInvitations } from './inventoryInvitations/InventoryInvitations';
+import { SearchUsersToInvite } from './searchUsersToInvite/SearchUsersToInvite';
 import api from '../../../../../../axiosConfig';
 import './inventoryAccess.css';
-import { SearchUsersToInvite } from './searchUsersToInvite/SearchUsersToInvite';
 
 const { Title } = Typography;
 
@@ -24,27 +22,9 @@ interface Props {
 
 export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory }: Props) => {
   const { user } = useAuth();
-  const { socket } = useSocket();
   const t = useTranslations();
 
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 2, duration: 5 });
-
-  useEffect(() => {
-    if (!socket || !inventory) return;
-
-    const handleStatusUpdated = (data: { inventoryId: number; status: InventoryStatuses; updatedBy: string }) => {
-      if (data.inventoryId === inventory.id) {
-        setInventory((prev) => (prev ? { ...prev, status: data.status } : prev));
-        messageApi.info(t('inventory.access.status_updated', { status: data.status, updatedBy: data.updatedBy }));
-      }
-    };
-
-    socket.on('inventory-status-updated', handleStatusUpdated);
-
-    return () => {
-      socket.off('inventory-status-updated', handleStatusUpdated);
-    };
-  }, [socket, inventory, setInventory, messageApi, t]);
 
   const updateInventoryStatusHandler = async (newStatus: InventoryStatuses) => {
     if (!inventory) return;
@@ -101,7 +81,7 @@ export const InventoryAccess = ({ currentInventoryUser, inventory, setInventory 
       </div>
 
       <div className='inventory_access_table_and_search'>
-        <SearchUsersToInvite setInventory={setInventory} inventory={inventory} currentInventoryUser={currentInventoryUser} />
+        <SearchUsersToInvite inventory={inventory} currentInventoryUser={currentInventoryUser} />
         <InventoryInvitations setInventory={setInventory} inventory={inventory} currentInventoryUser={currentInventoryUser} />
       </div>
     </div>

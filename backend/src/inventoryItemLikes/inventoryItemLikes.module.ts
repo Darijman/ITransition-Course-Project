@@ -6,9 +6,10 @@ import { InventoryItemLikesController } from './inventoryItemLikes.controller';
 import { InventoryItemLikesService } from './inventoryItemLikes.service';
 import { InventoryUser } from 'src/inventoryUsers/inventoryUser.entity';
 import { InventoryItem } from 'src/inventoryItems/inventoryItem.entity';
+import { InventoriesModule } from 'src/inventories/inventories.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InventoryItemLike, InventoryUser, InventoryItem]), UsersModule],
+  imports: [TypeOrmModule.forFeature([InventoryItemLike, InventoryUser, InventoryItem]), UsersModule, InventoriesModule],
   controllers: [InventoryItemLikesController],
   providers: [InventoryItemLikesService],
 })

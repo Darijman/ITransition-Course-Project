@@ -27,7 +27,7 @@ export const LikesListModal = ({ open, onClose, likes }: Props) => {
     >
       <List
         dataSource={likes}
-        locale={{ emptyText: 'No likes yet' }}
+        locale={{ emptyText: <Text type='danger'>{t('inventory.items.no_likes')}</Text> }}
         renderItem={(like) => {
           const iu = like.inventoryUser;
           const user = iu?.user;

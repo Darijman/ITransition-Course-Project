@@ -9,7 +9,6 @@ import { RcFile } from 'antd/es/upload';
 import { useTranslations } from 'next-intl';
 import { TextField } from '@/components/textField/TextField';
 import { InventoryUser } from '@/interfaces/inventories/InventoryUser';
-import { ParamValue } from 'next/dist/server/request/params';
 import { canModifyInventory } from '@/helpers/canModifyInventory';
 import type { UploadFile, UploadProps } from 'antd';
 import api from '../../../../../../../axiosConfig';
@@ -28,7 +27,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   currentInventoryUser: InventoryUser | null;
-  inventoryId: ParamValue;
+  inventoryId: number;
 }
 
 export const CreateItemModal = ({ open, onClose, currentInventoryUser, inventoryId }: Props) => {

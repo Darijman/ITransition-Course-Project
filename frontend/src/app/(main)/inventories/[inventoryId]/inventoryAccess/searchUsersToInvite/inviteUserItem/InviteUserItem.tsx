@@ -9,8 +9,8 @@ import { InventoryUserRoles } from '@/interfaces/inventories/InventoryUserRoles'
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { UserRoles } from '@/interfaces/users/UserRoles.enum';
 import Link from 'next/link';
-import './inviteUserItem.css';
 import api from '../../../../../../../../axiosConfig';
+import './inviteUserItem.css';
 
 const { Text } = Typography;
 
@@ -19,10 +19,9 @@ interface Props {
   disabled?: boolean;
   currentInventoryUser: InventoryUser | null;
   inventory: Inventory | null;
-  setInventory: React.Dispatch<React.SetStateAction<Inventory | null>>;
 }
 
-export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory, setInventory }: Props) => {
+export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory }: Props) => {
   const { user: authUser } = useAuth();
   const { id, avatarUrl, name, email } = user;
   const t = useTranslations();
@@ -48,17 +47,7 @@ export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory
     };
 
     try {
-      const { data } = await api.post(`/inventory_invites/`, newInvite);
-
-      setInventory((prev) =>
-        prev
-          ? {
-              ...prev,
-              invites: [data, ...(prev.invites || [])],
-            }
-          : prev,
-      );
-
+      await api.post(`/inventory_invites/`, newInvite);
     } catch {
       messageApi.error({ content: t('inventory.access.invite_error') });
     }
@@ -98,12 +87,7 @@ export const InviteUserItem = ({ user, disabled, currentInventoryUser, inventory
           open={popoverVisible}
           onOpenChange={(visible) => setPopoverVisible(visible)}
         >
-          <Button
-            className='invite_user_item_button'
-            disabled={disabled}
-            icon={<TeamOutlined style={{ fontSize: '15px' }} />}
-            type='primary'
-          >
+          <Button className='invite_user_item_button' disabled={disabled} icon={<TeamOutlined style={{ fontSize: '15px' }} />} type='primary'>
             {disabled ? t('inventory.access.invited') : t('inventory.access.invite')}
           </Button>
         </Popover>

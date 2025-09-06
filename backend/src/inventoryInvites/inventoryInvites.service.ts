@@ -75,7 +75,7 @@ export class InventoryInvitesService {
     options: {
       limit?: number;
       offset?: number;
-      status?: string;
+      status?: InventoryInviteStatuses | 'ALL';
       searchValue?: string;
     } = {},
   ): Promise<InventoryInvite[]> {
@@ -83,6 +83,10 @@ export class InventoryInvitesService {
 
     if (!inventoryId || isNaN(inventoryId)) {
       throw new BadRequestException({ error: 'Invalid Inventory ID!' });
+    }
+
+    if (limit > 100) {
+      throw new BadRequestException({ error: 'Limit is too high!' });
     }
 
     const inventory = await this.inventoriesRepository.findOneBy({ id: inventoryId });
@@ -184,6 +188,7 @@ export class InventoryInvitesService {
 
     this.inventoriesGateway.server.to(inviteeEmail).emit('invite-notification-created', notification);
     this.inventoriesGateway.server.to(inviteeEmail).emit('inventory-invite-created', inviteWithRelations);
+    this.inventoriesGateway.server.to(`${inventoryId}`).emit('inventory-invite-created', inviteWithRelations);
     return inviteWithRelations;
   }
 
