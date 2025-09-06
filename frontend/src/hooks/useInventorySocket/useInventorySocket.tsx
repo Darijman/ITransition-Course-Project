@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useEffect, useRef } from 'react';
+import { Dispatch, RefObject, SetStateAction, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { MessageInstance } from 'antd/es/message/interface';
@@ -13,6 +13,7 @@ import { InventoryComment } from '@/interfaces/inventories/InventoryComment';
 import { InventoryItemLike } from '@/interfaces/inventories/InventoryItemLike';
 import { InventoryInvite } from '@/interfaces/inventories/InventoryInvite';
 import { ServerToClientEvents, ClientToServerEvents } from './events';
+import { Spin } from 'antd';
 
 interface Props {
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
@@ -21,9 +22,11 @@ interface Props {
   currentInventoryUser: InventoryUser | null;
   accessDenied: boolean;
   setInventory: Dispatch<SetStateAction<Inventory | null>>;
+  setAccessDenied: Dispatch<SetStateAction<boolean>>;
   messageApi: MessageInstance;
   router: AppRouterInstance;
   t: (key: string, params?: Record<string, any>) => string;
+  lastCommentIdRef: RefObject<number | null>;
 }
 
 export const useInventorySocket = ({
@@ -33,12 +36,12 @@ export const useInventorySocket = ({
   currentInventoryUser,
   accessDenied,
   setInventory,
+  setAccessDenied,
   messageApi,
   router,
   t,
+  lastCommentIdRef,
 }: Props) => {
-  const lastCommentIdRef = useRef<number | null>(null);
-
   useEffect(() => {
     if (!inventoryId || !socket || accessDenied) return;
 
@@ -82,10 +85,13 @@ export const useInventorySocket = ({
       deletedBy: string;
     }) => {
       if (data.inventoryStatus === InventoryStatuses.PRIVATE) {
+        setAccessDenied(true);
+
         messageApi.info({
           content: (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {t('inventory.info.removed_private', { name: data.deletedBy, inventory: data.inventoryName })}
+              <Spin size='default' />
             </div>
           ),
           onClose: () => router.push('/'),
@@ -240,5 +246,17 @@ export const useInventorySocket = ({
       socket.off('inventory-invite-created', handleInviteCreated);
       socket.off('inventory-invite-deleted', handleInviteDeleted);
     };
-  }, [inventoryId, socket, accessDenied, currentInventoryUser, inventory?.id, messageApi, router, t, setInventory]);
+  }, [
+    inventoryId,
+    socket,
+    accessDenied,
+    currentInventoryUser,
+    inventory?.id,
+    messageApi,
+    router,
+    t,
+    setInventory,
+    setAccessDenied,
+    lastCommentIdRef,
+  ]);
 };
