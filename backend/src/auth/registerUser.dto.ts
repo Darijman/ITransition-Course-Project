@@ -7,7 +7,7 @@ export class RegisterUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(1, { message: 'Name must contain at least 1 letter!' })
-  @MaxLength(100, { message: 'Name must contain no more than 100 letters!' })
+  @MaxLength(40, { message: 'Name must contain no more than 40 letters!' })
   @Matches(/\S/, { message: 'Name should not be empty or contain only spaces!' })
   name: string;
 
@@ -22,7 +22,7 @@ export class RegisterUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(6, { message: 'Password must contain at least 6 letters!' })
-  @MaxLength(100, { message: 'Password must contain no more than 100 letters!' })
+  @MaxLength(40, { message: 'Password must contain no more than 40 letters!' })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @Matches(/\S/, { message: 'Password should not be empty or contain only spaces!' })
   password: string;

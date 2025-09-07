@@ -67,7 +67,7 @@ export const LoginForm = () => {
             <InputField placeHolder='Email*' />
           </Form.Item>
           <Form.Item name='password' rules={[{ required: true, message: '' }]}>
-            <InputField placeHolder='Password*' type='password' minLength={1} maxLength={40} />
+            <InputField placeHolder='Password*' type='password' minLength={6} maxLength={40} />
           </Form.Item>
           <Form.Item>
             <Button
