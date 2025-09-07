@@ -27,7 +27,9 @@
     "select_status_private": "Приватные",
     "notification_password_message": "Рекомендуем установить пароль!",
     "notification_password_description": "Сейчас вы можете войти только через социальную сеть. Для удобства входа установите пароль в настройках профиля.",
-    "go_to_profile_settings": "Перейти в настройки профиля"
+    "go_to_profile_settings": "Перейти в настройки профиля",
+    "inventories_table_failed_to_load": "Не удалось загрузить инвентари!",
+    "inventories_table_failed_to_load_more": "Не удалось загрузить остальные инвентари! Попробуйте позже.."
   },
   "inventory": {
     "tabs": {
@@ -214,6 +216,7 @@
     "tags": "Теги",
     "items": "Элементы",
     "created": "Создано",
-    "you": "Вы"
+    "you": "Вы",
+    "likes": "Лайки"
   }
 }

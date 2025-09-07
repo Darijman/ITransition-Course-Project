@@ -26,7 +26,9 @@
     "select_status_private": "Private",
     "notification_password_message": "We recommend setting a password!",
     "notification_password_description": "Currently you can log in only via a social network. For convenience, set a password in your profile settings.",
-    "go_to_profile_settings": "Go to profile settings"
+    "go_to_profile_settings": "Go to profile settings",
+    "inventories_table_failed_to_load": "Failed to load inventories!",
+    "inventories_table_failed_to_load_more": "Failed to load more inventories! Try again later.."
   },
   "inventory": {
     "tabs": {
@@ -212,6 +214,7 @@
     "tags": "Tags",
     "items": "Items",
     "created": "Created",
-    "you": "You"
+    "you": "You",
+    "likes": "Likes"
   }
 }

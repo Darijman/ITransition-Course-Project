@@ -2,7 +2,7 @@
 
 import { Button, notification, Typography } from 'antd';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Inventory } from '@/interfaces/inventories/Inventory';
 import { useAuth } from '@/contexts/authContext/AuthContext';
 import { InventoriesTable } from '@/components/inventoriesTable/InventoriesTable';
@@ -66,6 +66,8 @@ export default function Home() {
     }
   }, [user, notificationApi, t, router]);
 
+  const columns = useMemo(() => getInventoryColumns(t, user), [t, user]);
+
   return (
     <div>
       {contextHolder}
@@ -94,7 +96,7 @@ export default function Home() {
 
       <div>
         <InventoriesTable<Inventory>
-          columns={getInventoryColumns(t, user)}
+          columns={columns}
           rowKey='id'
           title={t('home.inventories_table_title')}
           searchKeys={['title', 'creator.name', 'tags.title', 'category.title']}

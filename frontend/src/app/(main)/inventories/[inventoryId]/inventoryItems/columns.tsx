@@ -14,13 +14,13 @@ export const getInventoryItemsColumns = (
   handleOpenLikesModal?: (itemId: number) => void,
 ): ColumnsType<InventoryItem> => [
   {
-    title: 'Image',
+    title: t('tables.image'),
     dataIndex: 'imageUrl',
     key: 'image',
     render: (url: string, record: InventoryItem) => <Image src={url || '/image-placeholder.svg'} alt={record.title} width={50} height={50} />,
   },
   {
-    title: 'Likes',
+    title: t('tables.likes'),
     key: 'likes',
     render: (_, record: InventoryItem) => {
       const likes = record.likes ?? [];
@@ -55,15 +55,14 @@ export const getInventoryItemsColumns = (
       );
     },
   },
-
   {
-    title: 'Title',
+    title: t('tables.title'),
     dataIndex: 'title',
     key: 'title',
     render: (text: string) => <Text ellipsis={{ tooltip: text }}>{text}</Text>,
   },
   {
-    title: 'Description',
+    title: t('tables.description'),
     dataIndex: 'description',
     key: 'description',
     width: 400,
@@ -74,7 +73,7 @@ export const getInventoryItemsColumns = (
     ),
   },
   {
-    title: 'Creator',
+    title: t('tables.creator'),
     dataIndex: ['creator', 'name'],
     key: 'creator',
     render: (_: any, record: InventoryItem) => (
@@ -84,7 +83,7 @@ export const getInventoryItemsColumns = (
     ),
   },
   {
-    title: 'Created',
+    title: t('tables.created'),
     key: 'created',
     dataIndex: 'createdAt',
     render: (_, record) => formatDate(record.createdAt),
