@@ -5,6 +5,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as cors from 'cors';
 import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
+import { seed } from './common/fixtures';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -33,6 +34,8 @@ async function bootstrap() {
   app.use(express.static('public'));
   app.use(express.json());
   app.use(cookieParser());
+
+  await seed();
   await app.listen(9000, '0.0.0.0');
 }
 bootstrap();

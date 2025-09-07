@@ -55,8 +55,6 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('profile')
   async getProfile(@Req() req: Request) {
-    console.log(`req.user`, req.user);
-
     const user = await this.usersService.getUserById(req.user.id);
     return {
       id: user.id,
@@ -84,9 +82,7 @@ export class AuthController {
   @Public()
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  async googleAuth() {
-    console.log(`сработал /auth/google`);
-  }
+  async googleAuth() {}
 
   @Public()
   @Get('google/callback')
@@ -121,9 +117,7 @@ export class AuthController {
   @Public()
   @Get('github')
   @UseGuards(GithubAuthGuard)
-  async githubAuth() {
-    console.log(`сработал /auth/github`);
-  }
+  async githubAuth() {}
 
   @Public()
   @Get('github/callback')

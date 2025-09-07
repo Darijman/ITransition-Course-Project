@@ -49,7 +49,7 @@ import { Notification } from './notifications/notification.entity';
           InventoryInvite,
           Notification,
         ],
-        synchronize: false,
+        synchronize: true,
         timezone: 'Z',
       }),
     }),

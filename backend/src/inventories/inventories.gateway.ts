@@ -18,7 +18,7 @@ interface InventoryUserLocale {
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: true,
     credentials: true,
   },
   path: '/api/socket.io',

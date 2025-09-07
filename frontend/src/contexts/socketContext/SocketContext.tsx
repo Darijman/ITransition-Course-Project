@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }: Props) => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:9000', {
+    const newSocket = io(process.env.NEXT_PUBLIC_API_BASE_URL!, {
       path: '/api/socket.io',
       withCredentials: true,
       transports: ['polling', 'websocket'],
