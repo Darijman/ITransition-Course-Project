@@ -178,7 +178,7 @@ export class InventoriesService {
     return filtered;
   }
 
-  async createNewInventory(createInventoryDto: CreateInventoryDto, user: { id: number; name: string; role: UserRoles }): Promise<Inventory> {
+  async createNewInventory(createInventoryDto: CreateInventoryDto, user: ReqUser): Promise<Inventory> {
     const tags = await this.tagsRepository.findBy({ id: In(createInventoryDto.tagIds) });
     const inventory = this.inventoriesRepository.create({ ...createInventoryDto, tags });
     const savedInventory = await this.inventoriesRepository.save(inventory);

@@ -1,4 +1,18 @@
-import { Controller, Get, Param, UseInterceptors, Delete, UseGuards, Post, UploadedFile, Req, Body, Patch, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  UseInterceptors,
+  Delete,
+  UseGuards,
+  Post,
+  UploadedFile,
+  Req,
+  Body,
+  Patch,
+  Query,
+  BadRequestException,
+} from '@nestjs/common';
 import { InventoriesService } from './inventories.service';
 import { Inventory } from './inventory.entity';
 import { ClassSerializerInterceptor } from '@nestjs/common';
@@ -75,7 +89,20 @@ export class InventoriesController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      fileFilter: (req, file, callback) => {
+        const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg'];
+        if (!allowedMimes.includes(file.mimetype)) {
+          return callback(new BadRequestException({ error: 'Only .png, .jpg, .jpeg files are allowed!' }), false);
+        }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5 MB
+      },
+    }),
+  )
   @Post()
   async createNewInventory(
     @Body() createInventoryDto: CreateInventoryDto,

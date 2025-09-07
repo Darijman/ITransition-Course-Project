@@ -84,7 +84,11 @@ export const CreateItemModal = ({ open, onClose, currentInventoryUser, inventory
           formData.append('description', values.description.trim());
         }
 
-        await api.post('/inventory_items', formData);
+        await api.post('/inventory_items', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       } else {
         const body = {
           title: values.title.trim(),
