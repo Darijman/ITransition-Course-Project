@@ -117,11 +117,11 @@ export const InventoriesTable = <T extends object>({ columns, rowKey, title = 'I
           onChange={handleStatusChange}
         />
 
-        {user.id && (
+        {user?.id ? (
           <Button type='primary' icon={<MdBackpack />} onClick={onCreate}>
             {t('home.create_inventory_text')}
           </Button>
-        )}
+        ) : null}
       </div>
 
       {errorText ? (
