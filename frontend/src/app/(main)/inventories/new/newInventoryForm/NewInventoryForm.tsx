@@ -82,8 +82,15 @@ export const NewInventoryForm = () => {
   }, [getCategoriesAndTags]);
 
   const onFinishFailedHandler = async () => {
-    setTagsError(true);
-    setImageError(true);
+    const image = form.getFieldValue('image');
+    const tags = form.getFieldValue('tagIds');
+
+    if (!image || image.length === 0) {
+      setImageError(true);
+    }
+    if (!tags || tags.length === 0) {
+      setTagsError(true);
+    }
   };
 
   const onFinishHandler = async (values: NewInventoryForm) => {
@@ -143,9 +150,10 @@ export const NewInventoryForm = () => {
           style={{ width: '100%' }}
           onFinish={onFinishHandler}
           onFinishFailed={onFinishFailedHandler}
-          onValuesChange={() => {
-            if ((form.getFieldValue('tagIds') || []).length > 0) {
-              setTagsError(false);
+          onValuesChange={(changedValues) => {
+            if ('tagIds' in changedValues) {
+              const tags = changedValues.tagIds || [];
+              setTagsError(tags.length === 0);
             }
           }}
           initialValues={{
