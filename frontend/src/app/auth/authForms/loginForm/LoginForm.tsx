@@ -63,12 +63,26 @@ export const LoginForm = () => {
             }
           }}
         >
-          <Form.Item name='email' rules={[{ required: true, message: '', type: 'email' }]}>
+          <Form.Item
+            name='email'
+            rules={[
+              { required: true, message: '', type: 'email' },
+              { max: 255, message: '' },
+            ]}
+          >
             <InputField placeHolder='Email*' />
           </Form.Item>
-          <Form.Item name='password' rules={[{ required: true, message: '' }]}>
+
+          <Form.Item
+            name='password'
+            rules={[
+              { required: true, message: '' },
+              { min: 6, max: 40, message: '' },
+            ]}
+          >
             <InputField placeHolder='Password*' type='password' minLength={6} maxLength={40} />
           </Form.Item>
+
           <Form.Item>
             <Button
               className='login_form_submit_button'
